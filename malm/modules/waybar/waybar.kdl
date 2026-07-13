@@ -32,18 +32,18 @@ module "waybar" {
             @compose "style"
         }
         render "waybar/style.css" format="css" {
-            at-rule "import" "\"theme.css\""
+            at-rule "import" "url(theme.css)"
             "*" {
-                "font-family" "\"" (ref)"global.font-family" "\", \"" (ref)"global.font-symbols" "\", sans-serif" join=""
+                "font-family" (f)"'{{global.font-family}}', '{{global.font-symbols}}', sans-serif"
             }
             "window#waybar.rail, window#waybar.rail *" {
-                "font-family" "\"" (ref)"global.font-mono" "\", \"" (ref)"global.font-symbols" "\", monospace" join=""
+                "font-family" (f)"'{{global.font-mono}}', '{{global.font-symbols}}', monospace"
             }
             "#clock" {
-                "font-family" "\"" (ref)"global.font-mono" "\", monospace" join=""
+                "font-family" (f)"'{{global.font-mono}}', monospace"
             }
             "#custom-astral, #custom-mpris, #cpu, #network, #pulseaudio, #battery, #custom-power" {
-                "font-family" "\"" (ref)"global.font-symbols" "\"" join=""
+                "font-family" (f)"'{{global.font-symbols}}'"
             }
         }
         // Profile-dependent configuration requires Waybar to restart on activation.
