@@ -32,7 +32,7 @@ module "waybar" {
             @compose "style"
         }
         render "waybar/style.css" format="css" {
-            at-rule "import" "url(theme.css)"
+            at-rule "import" #""theme.css""#
             "*" {
                 "font-family" (f)"'{{global.font-family}}', '{{global.font-symbols}}', sans-serif"
             }
