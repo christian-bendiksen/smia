@@ -11,6 +11,9 @@ Aeryn Green
 <img width="3840" height="2400" alt="AerynOS-green" src="https://github.com/user-attachments/assets/809ec86c-41f5-4bff-b88e-79095cd560bd" />
 Aeryn Gold
 <img width="3840" height="2400" alt="AerynOS-gold" src="https://github.com/user-attachments/assets/bdbfab56-be22-49d2-97fb-d577ade727a7" /> 
+Astral
+<img width="3840" height="2400" alt="Screenshot-2026-07-13_182001" src="https://github.com/user-attachments/assets/720549f1-3138-49a1-b24a-02be23b43b9e" />
+
 
 ## Install
 
