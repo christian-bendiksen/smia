@@ -7,6 +7,11 @@ The available compositor setups are Mango, Niri, and Hyprland. This repository
 is still a work in progress and is mainly intended for the system it was built
 on.
 
+Aeryn Green
+<img width="3840" height="2400" alt="AerynOS-green" src="https://github.com/user-attachments/assets/809ec86c-41f5-4bff-b88e-79095cd560bd" />
+Aeryn Gold
+<img width="3840" height="2400" alt="AerynOS-gold" src="https://github.com/user-attachments/assets/bdbfab56-be22-49d2-97fb-d577ade727a7" /> 
+
 ## Install
 
 Choose the package set for the compositor you want:
