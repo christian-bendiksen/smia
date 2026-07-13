@@ -7,4 +7,3 @@
 
 include "profiles/desktop/desktop.kdl" // shared base and stock compositor profiles
 include "profiles/astral/astral.kdl"  // Astral compositor profiles
-include "profiles/ember/ember.kdl"   // Ember compositor profiles

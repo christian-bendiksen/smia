@@ -1,13 +1,18 @@
-// Provides the commands and systemd user target shared by every desktop
-// profile. It also creates GTK configuration directories required by theme
-// links; application-specific configuration remains in provider modules.
+// Provides the commands, session target, and Awww daemon shared by every
+// desktop profile. It also creates GTK configuration directories required by
+// theme links; application-specific configuration remains in provider modules.
 module "base" {
-    description "Session foundation: Smia commands and the smia-session systemd user target"
+    description "Session foundation: Smia commands, systemd user target, and Awww lifecycle"
 
     requires {
+        command "awww"
+        command "awww-daemon"
         command "bash"
         command "gio"
         command "gnist"
+        command "pgrep"
+        command "pkill"
+        command "setsid"
         command "systemctl"
         command "walker"
     }
@@ -15,6 +20,13 @@ module "base" {
     outputs {
         dir  "./bin" to="~/.local/bin"
         file "./smia-session.target" to="systemd/user/smia-session.target"
+        render "gnist/session.d/awww" format="line-list" {
+            @comment "Awww restores the last wallpaper for each output from its cache."
+            @line "stop swaybg"
+            @line "stop swww-daemon"
+            @line "stop hyprpaper"
+            @line "prepare awww-daemon"
+        }
 
         // These directories provide parents for gnist-core's gtk.css links.
         dir "./gtk-3.0" to="gtk-3.0"

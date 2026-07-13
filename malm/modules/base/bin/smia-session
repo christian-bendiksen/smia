@@ -8,6 +8,25 @@ FRAGMENT_DIR="$XDG_CONFIG_HOME/gnist/session.d"
 
 log() { printf 'smia-session: %s\n' "$*" >&2; }
 
+apply_theme=0
+case "${1:-}" in
+    "") ;;
+    --apply-theme) apply_theme=1 ;;
+    -h|--help)
+        printf 'usage: smia-session [--apply-theme]\n'
+        exit 0
+        ;;
+    *)
+        printf 'usage: smia-session [--apply-theme]\n' >&2
+        exit 2
+        ;;
+esac
+
+if (($# > 1)); then
+    printf 'usage: smia-session [--apply-theme]\n' >&2
+    exit 2
+fi
+
 start_graphical_session() {
     command -v systemctl >/dev/null 2>&1 || return 0
     local env_vars="WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE"
@@ -55,21 +74,15 @@ restart_service() {
     ensure_running "$proc" "$cmd"
 }
 
-restore_wallpaper() {
-    command -v gnist-wallpaper-apply.sh >/dev/null 2>&1 || return 0
-    local bg="$XDG_CONFIG_HOME/gnist/themes/background"
-    [[ -e "$bg" ]] || return 0
-    gnist-wallpaper-apply.sh >/dev/null 2>&1 || true
-}
-
 theme_mode=""
-declare -a stops=() runs=() restarts=()
+declare -a stops=() prepares=() runs=() restarts=()
 
 while IFS= read -r line || [[ -n "$line" ]]; do
     [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
     read -r directive rest <<<"$line"
     case "$directive" in
         theme)   theme_mode="$rest" ;;
+        prepare) prepares+=("$rest") ;;
         run)     runs+=("$rest") ;;
         restart) restarts+=("$rest") ;;
         stop)    stops+=("$rest") ;;
@@ -77,24 +90,31 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     esac
 done < <(collect_manifest)
 
-gnist_set_wallpaper=0
-if [[ -n "$theme_mode" ]] && command -v gnist >/dev/null 2>&1; then
-    read -r mode _ <<<"$theme_mode"
-    if [[ "$mode" == "keep" ]]; then
-        gnist reload >/dev/null 2>&1 || true
-    else
-        # Restart Waybar after changing themes so it reloads the new style.
-        pkill -x waybar 2>/dev/null || true
-        gnist set "$mode" >/dev/null 2>&1 || true
-        gnist_set_wallpaper=1
-    fi
-fi
-
 if ((${#stops[@]})); then
     for entry in "${stops[@]}"; do
         read -r proc _ <<<"$entry"
         ensure_stopped "$proc"
     done
+fi
+
+if ((${#prepares[@]})); then
+    for entry in "${prepares[@]}"; do
+        read -r proc cmd <<<"$entry"
+        ensure_running "$proc" "$cmd"
+    done
+fi
+
+if [[ -n "$theme_mode" ]] && command -v gnist >/dev/null 2>&1; then
+    read -r mode _ <<<"$theme_mode"
+    if [[ "$mode" == "keep" ]]; then
+        if ((apply_theme)); then
+            gnist reload >/dev/null 2>&1 || true
+        fi
+    elif ((apply_theme)) || ! gnist current >/dev/null 2>&1; then
+        # Restart Waybar after changing themes so it reloads the new style.
+        pkill -x waybar 2>/dev/null || true
+        gnist set "$mode" >/dev/null 2>&1 || true
+    fi
 fi
 
 if ((${#runs[@]})); then
@@ -110,5 +130,3 @@ if ((${#restarts[@]})); then
         restart_service "$proc" "$cmd"
     done
 fi
-
-((gnist_set_wallpaper)) || restore_wallpaper

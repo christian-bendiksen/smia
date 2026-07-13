@@ -16,4 +16,4 @@ fi
 
 malm apply --profile "$profile" -y
 
-exec smia-session
+exec smia-session --apply-theme

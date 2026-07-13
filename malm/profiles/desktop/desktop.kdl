@@ -23,7 +23,6 @@ profile "desktop" abstract=#true {
     use "swayosd-style"
     use "waybar"
     use "kanshi"
-    use "wallpaper"
     use "screenshot"
     use "appearance"
     use "default-apps"

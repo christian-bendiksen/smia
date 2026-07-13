@@ -42,7 +42,7 @@ module "waybar" {
             "#clock" {
                 "font-family" "\"" (ref)"global.font-mono" "\", monospace" join=""
             }
-            "#custom-astral, #custom-ember, #custom-mpris, #cpu, #network, #pulseaudio, #battery, #custom-power" {
+            "#custom-astral, #custom-mpris, #cpu, #network, #pulseaudio, #battery, #custom-power" {
                 "font-family" "\"" (ref)"global.font-symbols" "\"" join=""
             }
         }

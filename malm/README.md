@@ -30,9 +30,8 @@ malm/
   profiles/<family>/   ONE self-contained package per profile family, symmetric
                        with modules — its <family>.kdl composition plus that
                        family's NATIVE fragment assets. Examples:
-                         desktop/ { desktop.kdl }   (module defaults ARE this look)
-                         astral/  { astral.kdl, waybar/ swayosd/ hypr/ niri/ }
-                         ember/   { ember.kdl,  waybar/ swayosd/ niri/ }
+                          desktop/ { desktop.kdl }   (module defaults ARE this look)
+                          astral/  { astral.kdl, waybar/ swayosd/ hypr/ niri/ }
 install/               bootstrap / installer (not a malm source)
 gnist/themes/        gnist ENGINE palette blob (data/ + templates/); the
                        gnist-core module deploys it, and its `{{ }}` are engine
@@ -98,8 +97,6 @@ malm apply  --profile mango-astral  # deploy
 #   mango-astral     premium mango + astral ✦-banner lock
 #   niri-astral      premium niri + astral effects
 #   hypr-astral      premium Hyprland + astral rules/binds
-#   mango-ember      fireside warmth on mango + ❖ lock
-#   niri-ember       fireside warmth on niri + ember effects
 ```
 
 ## Model
@@ -181,19 +178,15 @@ slot replacement is explicit.
 `desktop` is the shared base (extended, never selected). `default`, `niri`,
 `hypr` take module defaults; the compositor variants use
 `replace slot="compositor" module="…"`. `astral` holds shared premium
-styling and is extended by `mango-astral` / `niri-astral` / `hypr-astral`;
-`ember` is the warm-aesthetic family, extended by `mango-ember` /
-`niri-ember`. `with` values merge along the `extends` chain — later
-profiles state only what differs.
+styling and is extended by `mango-astral` / `niri-astral` / `hypr-astral`.
+`with` values merge along the `extends` chain — later profiles state only
+what differs.
 
 ### Aesthetic register (per family)
 
 - **default** — hairline edge-to-edge bar; radius 0; line-work selection.
 - **astral** — vertical translucent rail; neon glow on accent; `✦` mark;
   zoom-into-place entrances; cool blue-tinted shadows.
-- **ember** — floating horizontal bar with margin on all sides; warm amber
-  glow; `❖` mark; slide-in / fade-out motion; warm-tinted shadows;
-  gruvbox default palette.
 
 ## Local overrides
 

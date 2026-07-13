@@ -20,5 +20,4 @@ slots {
     slot "portal"           max=1 description="xdg-desktop-portal configuration"
     slot "shell"            max=1 description="interactive shell environment"
     slot "outputs"          max=1 description="output / monitor layout manager"
-    slot "wallpaper-daemon" max=1 description="background image renderer"
 }

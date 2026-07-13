@@ -261,8 +261,10 @@ wallpaper_menu() {
     local path="${label_to_path[$choice]}"
     [[ -z "$path" ]] && return 1
 
-    ln -sf "$path" "$XDG_CONFIG_HOME/gnist/themes/background"
-    gnist-wallpaper-apply.sh 2>/dev/null || true
+    if ! gnist wallpaper "$path" >/dev/null 2>&1; then
+        notify "Wallpaper" "Failed to apply $choice"
+        return 1
+    fi
     notify "Wallpaper" "$choice"
 }
 
@@ -300,8 +302,6 @@ services_menu() {
                     swayosd-server)     label="󰸉  Restart OSD" ;;
                     walker)             label="󰍉  Restart Walker" ;;
                     elephant)           label="󰈞  Restart Elephant" ;;
-                    swaybg|swww-daemon|hyprpaper|awww-daemon)
-                        label="󰸉  Restart Wallpaper (${proc})" ;;
                     *)                  label="󰝘  Restart ${proc}" ;;
                 esac
                 # Keep one entry when multiple fragments name the same process.

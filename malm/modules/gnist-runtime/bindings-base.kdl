@@ -1,10 +1,10 @@
-bind "xdg-desktop-portal-gtk" {
-    reload {
-        command {
-            argv "systemctl" "--user" "restart" "xdg-desktop-portal-gtk"
-        }
-    }
-}
+// bind "xdg-desktop-portal-gtk" {
+//     reload {
+//         command {
+//             argv "systemctl" "--user" "restart" "xdg-desktop-portal-gtk"
+//         }
+//     }
+// }
 
 bind "waybar" {
     reload {
