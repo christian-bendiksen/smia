@@ -1,0 +1,398 @@
+// Provides Mango for the "compositor" slot. Keyed collections let profiles
+// patch individual binds and rules without replacing each list. Keyboard and
+// pointer binds remain separate because Mango uses different directives:
+//
+//   use "mango" {
+//       patch {
+//           collection "binds" {
+//               set is also available per field:  set "settings.borderpx" 3
+//               replace "focus-left" mods="SUPER" keysym="Left" command="focusdir,left"
+//               append "my-launcher" mods="SUPER" keysym="P" command="spawn,walker"
+//           }
+//           collection "window-rules" {
+//               append "pavucontrol-float" {
+//                   windowrule "isfloating:1,appid:pavucontrol"
+//               }
+//           }
+//       }
+//   }
+//
+// conf.d/input.conf reads output geometry directly from global.display-*.
+module "mango" {
+    description "Mango Wayland compositor (dwm-flavored wlroots)"
+    slot "compositor"
+
+    requires {
+        command "mango"
+        command "mmsg"
+    }
+
+    inputs {
+        // rules.conf applies this layout to all nine tags.
+        input "tag-layout" type="enum" default="dwindle" {
+            values "tile" "scroller" "monocle" "grid" "deck" \
+                   "center_tile" "vertical_tile" "right_tile" \
+                   "vertical_scroller" "vertical_grid" "vertical_deck" \
+                   "dwindle" "fair" "vertical_fair"
+        }
+
+        // Profile rules are rendered directives and remain keyed for patches.
+        input "window-rules" type="collection" item-type="kdl-document"
+        input "layer-rules"  type="collection" item-type="kdl-document"
+
+        input "input-tuning" type="record" {
+            fields {
+                field "repeat-rate" type="int"
+                field "repeat-delay" type="int"
+                field "numlockon" type="int"
+                field "xkb-rules-layout" type="string"
+                field "xkb-rules-variant" type="string"
+                field "disable-trackpad" type="int"
+                field "tap-to-click" type="int"
+                field "tap-and-drag" type="int"
+                field "drag-lock" type="int"
+                field "trackpad-natural-scrolling" type="int"
+                field "disable-while-typing" type="int"
+                field "left-handed" type="int"
+                field "middle-button-emulation" type="int"
+                field "swipe-min-threshold" type="int"
+                field "mouse-natural-scrolling" type="int"
+            }
+            default {
+                repeat-rate 25
+                repeat-delay 250
+                numlockon 0
+                xkb-rules-layout "no"
+                xkb-rules-variant "nodeadkeys"
+                disable-trackpad 0
+                tap-to-click 1
+                tap-and-drag 1
+                drag-lock 1
+                trackpad-natural-scrolling 1
+                disable-while-typing 1
+                left-handed 0
+                middle-button-emulation 0
+                swipe-min-threshold 1
+                mouse-natural-scrolling 0
+            }
+        }
+
+        input "settings" type="record" {
+            fields {
+                field "gappih" type="int"
+                field "gappiv" type="int"
+                field "gappoh" type="int"
+                field "gappov" type="int"
+                field "scratchpad-width-ratio" type="float"
+                field "scratchpad-height-ratio" type="float"
+                field "borderpx" type="int"
+                field "no-border-when-single" type="int"
+                field "axis-bind-apply-timeout" type="int"
+                field "focus-on-activate" type="int"
+                field "sloppyfocus" type="int"
+                field "warpcursor" type="int"
+                field "focus-cross-monitor" type="int"
+                field "focus-cross-tag" type="int"
+                field "enable-floating-snap" type="int"
+                field "snap-distance" type="int"
+                field "cursor-size" type="int"
+                field "drag-tile-to-tile" type="int"
+            }
+            default {
+                gappih 5
+                gappiv 5
+                gappoh 10
+                gappov 10
+                scratchpad-width-ratio 0.8
+                scratchpad-height-ratio 0.9
+                borderpx 2
+                no-border-when-single 0
+                axis-bind-apply-timeout 100
+                focus-on-activate 1
+                sloppyfocus 1
+                warpcursor 1
+                focus-cross-monitor 0
+                focus-cross-tag 0
+                enable-floating-snap 0
+                snap-distance 30
+                cursor-size 24
+                drag-tile-to-tile 1
+            }
+        }
+
+        input "windows" type="record" {
+            fields {
+                field "blur" type="int"
+                field "blur-layer" type="int"
+                field "blur-optimized" type="int"
+                field "shadows" type="int"
+                field "layer-shadows" type="int"
+                field "shadow-only-floating" type="int"
+                field "shadows-size" type="int"
+                field "shadows-blur" type="int"
+                field "shadows-position-x" type="int"
+                field "shadows-position-y" type="int"
+                field "border-radius" type="int"
+                field "no-radius-when-single" type="int"
+                field "focused-opacity" type="float"
+                field "unfocused-opacity" type="float"
+                field "animations" type="int"
+                field "layer-animations" type="int"
+                field "animation-type-open" type="string"
+                field "animation-type-close" type="string"
+                field "animation-fade-in" type="int"
+                field "animation-fade-out" type="int"
+                field "tag-animation-direction" type="int"
+                field "zoom-initial-ratio" type="float"
+                field "zoom-end-ratio" type="float"
+                field "fadein-begin-opacity" type="float"
+                field "fadeout-begin-opacity" type="float"
+                field "animation-duration-move" type="int"
+                field "animation-duration-open" type="int"
+                field "animation-duration-tag" type="int"
+                field "animation-duration-close" type="int"
+                field "animation-duration-focus" type="int"
+                field "animation-curve-open" type="string"
+                field "animation-curve-move" type="string"
+                field "animation-curve-tag" type="string"
+                field "animation-curve-close" type="string"
+                field "animation-curve-focus" type="string"
+                field "animation-curve-opafadeout" type="string"
+                field "animation-curve-opafadein" type="string"
+                field "new-is-master" type="int"
+                field "default-mfact" type="float"
+                field "default-nmaster" type="int"
+                field "smartgaps" type="int"
+                field "hotarea-size" type="int"
+                field "enable-hotarea" type="int"
+                field "ov-tab-mode" type="int"
+                field "overviewgappi" type="int"
+                field "overviewgappo" type="int"
+                field "scroller-structs" type="int"
+                field "scroller-default-proportion" type="float"
+                field "scroller-focus-center" type="int"
+                field "scroller-prefer-center" type="int"
+                field "edge-scroller-pointer-focus" type="int"
+                field "scroller-default-proportion-single" type="float"
+                field "scroller-proportion-preset" type="string"
+                field "blur-params-num-passes" type="int"
+                field "blur-params-radius" type="int"
+                field "blur-params-noise" type="float"
+                field "blur-params-brightness" type="float"
+                field "blur-params-contrast" type="float"
+                field "blur-params-saturation" type="float"
+                field "shadowscolor" type="string"
+            }
+            default {
+                blur 0
+                blur-layer 0
+                blur-optimized 1
+                shadows 0
+                layer-shadows 0
+                shadow-only-floating 1
+                shadows-size 10
+                shadows-blur 15
+                shadows-position-x 0
+                shadows-position-y 0
+                border-radius 0
+                no-radius-when-single 0
+                focused-opacity 1.0
+                unfocused-opacity 1.0
+                animations 1
+                layer-animations 1
+                animation-type-open "slide"
+                animation-type-close "fade"
+                animation-fade-in 1
+                animation-fade-out 1
+                tag-animation-direction 1
+                zoom-initial-ratio 0.3
+                zoom-end-ratio 0.8
+                fadein-begin-opacity 0.5
+                fadeout-begin-opacity 0.8
+                animation-duration-move 500
+                animation-duration-open 400
+                animation-duration-tag 350
+                animation-duration-close 400
+                animation-duration-focus 0
+                animation-curve-open "0.46,1.0,0.29,1"
+                animation-curve-move "0.46,1.0,0.29,1"
+                animation-curve-tag "0.46,1.0,0.29,1"
+                animation-curve-close "0.08,0.92,0,1"
+                animation-curve-focus "0.46,1.0,0.29,1"
+                animation-curve-opafadeout "0.5,0.5,0.5,0.5"
+                animation-curve-opafadein "0.46,1.0,0.29,1"
+                new-is-master 1
+                default-mfact 0.50
+                default-nmaster 1
+                smartgaps 0
+                hotarea-size 10
+                enable-hotarea 1
+                ov-tab-mode 0
+                overviewgappi 5
+                overviewgappo 30
+                scroller-structs 20
+                scroller-default-proportion 0.8
+                scroller-focus-center 1
+                scroller-prefer-center 0
+                edge-scroller-pointer-focus 1
+                scroller-default-proportion-single 1.0
+                scroller-proportion-preset "0.5,0.8,1.0"
+                blur-params-num-passes 2
+                blur-params-radius 5
+                blur-params-noise 0.02
+                blur-params-brightness 0.9
+                blur-params-contrast 0.9
+                blur-params-saturation 1.2
+                shadowscolor "0x000000ff"
+            }
+        }
+
+
+        input "binds" type="collection" item-type="record" {
+            fields {
+                field "mods" type="string" required=#true
+                field "keysym" type="string" required=#true
+                field "command" type="string" required=#true
+            }
+            defaults {
+                item "terminal" mods="SUPER" keysym="Return" command="spawn,xdg-terminal-exec"
+                item "launcher" mods="SUPER" keysym="A" command="spawn,walker"
+                item "menu" mods="SUPER" keysym="SPACE" command="spawn,smia-menu"
+                item "wallpaper" mods="SUPER" keysym="W" command="spawn,gnist wallpaper"
+                item "lock" mods="SUPER" keysym="ESCAPE" command="spawn,hyprlock"
+                item "screenshot-region" mods="NONE" keysym="Print" command="spawn_shell,gnist-screenshot region"
+                item "screenshot-screen" mods="CTRL" keysym="Print" command="spawn_shell,gnist-screenshot screen"
+                item "screenshot-window" mods="ALT" keysym="Print" command="spawn_shell,gnist-screenshot window"
+                item "reload" mods="SUPER" keysym="r" command="reload_config"
+                item "quit" mods="SUPER+SHIFT" keysym="q" command="quit"
+                item "kill" mods="SUPER" keysym="q" command="killclient"
+                item "focus-next" mods="SUPER" keysym="Tab" command="focusstack,next"
+                item "focus-left" mods="SUPER" keysym="H" command="focusdir,left"
+                item "focus-right" mods="SUPER" keysym="L" command="focusdir,right"
+                item "focus-up" mods="SUPER" keysym="K" command="focusdir,up"
+                item "focus-down" mods="SUPER" keysym="J" command="focusdir,down"
+                item "exchange-left" mods="SUPER+SHIFT" keysym="H" command="exchange_client,left"
+                item "exchange-down" mods="SUPER+SHIFT" keysym="J" command="exchange_client,down"
+                item "exchange-up" mods="SUPER+SHIFT" keysym="K" command="exchange_client,up"
+                item "exchange-right" mods="SUPER+SHIFT" keysym="L" command="exchange_client,right"
+                item "toggle-global" mods="SUPER" keysym="g" command="toggleglobal"
+                item "overview" mods="ALT" keysym="Tab" command="toggleoverview"
+                item "toggle-floating" mods="SUPER+SHIFT" keysym="f" command="togglefloating"
+                item "maximize" mods="SUPER" keysym="m" command="togglemaximizescreen"
+                item "maximize-alt" mods="SUPER" keysym="f" command="togglemaximizescreen"
+                item "fullscreen" mods="ALT+SHIFT" keysym="f" command="togglefullscreen"
+                item "minimize" mods="SUPER" keysym="i" command="minimized"
+                item "restore-minimized" mods="SUPER+SHIFT" keysym="I" command="restore_minimized"
+                item "scratchpad" mods="ALT" keysym="z" command="toggle_scratchpad"
+                item "scroller-stack-right" mods="SUPER" keysym="comma" command="scroller_stack,right"
+                item "scroller-stack-left" mods="SUPER" keysym="period" command="scroller_stack,left"
+                item "layout-tile" mods="SUPER" keysym="t" command="setlayout,tile"
+                item "layout-scroller" mods="SUPER" keysym="s" command="setlayout,scroller"
+                item "switch-layout" mods="SUPER" keysym="n" command="switch_layout"
+                item "proportion-reset" mods="ALT" keysym="e" command="set_proportion,1.0"
+                item "proportion-preset" mods="ALT" keysym="x" command="switch_proportion_preset"
+                item "view-shift-left" mods="SUPER+CTRL" keysym="h" command="viewtoleft,0"
+                item "view-shift-right" mods="SUPER+CTRL" keysym="l" command="viewtoright,0"
+                item "tag-shift-left" mods="CTRL+SUPER" keysym="Left" command="tagtoleft,0"
+                item "tag-shift-right" mods="CTRL+SUPER" keysym="Right" command="tagtoright,0"
+                item "view-1" mods="SUPER" keysym="1" command="view,1,0"
+                item "view-2" mods="SUPER" keysym="2" command="view,2,0"
+                item "view-3" mods="SUPER" keysym="3" command="view,3,0"
+                item "view-4" mods="SUPER" keysym="4" command="view,4,0"
+                item "view-5" mods="SUPER" keysym="5" command="view,5,0"
+                item "view-6" mods="SUPER" keysym="6" command="view,6,0"
+                item "view-7" mods="SUPER" keysym="7" command="view,7,0"
+                item "view-8" mods="SUPER" keysym="8" command="view,8,0"
+                item "view-9" mods="SUPER" keysym="9" command="view,9,0"
+                item "tag-1" mods="SUPER+SHIFT" keysym="1" command="tag,1,0"
+                item "tag-2" mods="SUPER+SHIFT" keysym="2" command="tag,2,0"
+                item "tag-3" mods="SUPER+SHIFT" keysym="3" command="tag,3,0"
+                item "tag-4" mods="SUPER+SHIFT" keysym="4" command="tag,4,0"
+                item "tag-5" mods="SUPER+SHIFT" keysym="5" command="tag,5,0"
+                item "tag-6" mods="SUPER+SHIFT" keysym="6" command="tag,6,0"
+                item "tag-7" mods="SUPER+SHIFT" keysym="7" command="tag,7,0"
+                item "tag-8" mods="SUPER+SHIFT" keysym="8" command="tag,8,0"
+                item "tag-9" mods="SUPER+SHIFT" keysym="9" command="tag,9,0"
+                item "incgaps" mods="ALT+SHIFT" keysym="X" command="incgaps,1"
+                item "decgaps" mods="ALT+SHIFT" keysym="Z" command="incgaps,-1"
+                item "toggle-gaps" mods="ALT+SHIFT" keysym="R" command="togglegaps"
+                item "move-up" mods="CTRL+SHIFT" keysym="Up" command="movewin,0,-50"
+                item "move-down" mods="CTRL+SHIFT" keysym="Down" command="movewin,0,50"
+                item "move-left" mods="CTRL+SHIFT" keysym="Left" command="movewin,-50,0"
+                item "move-right" mods="CTRL+SHIFT" keysym="Right" command="movewin,50,0"
+                item "resize-up" mods="CTRL+ALT" keysym="Up" command="resizewin,0,-50"
+                item "resize-down" mods="CTRL+ALT" keysym="Down" command="resizewin,0,50"
+                item "resize-left" mods="CTRL+ALT" keysym="Left" command="resizewin,-50,0"
+                item "resize-right" mods="CTRL+ALT" keysym="Right" command="resizewin,50,0"
+                item "volume-raise" mods="NONE" keysym="XF86AudioRaiseVolume" command="spawn,swayosd-client --output-volume raise"
+                item "volume-lower" mods="NONE" keysym="XF86AudioLowerVolume" command="spawn,swayosd-client --output-volume lower"
+                item "volume-mute" mods="NONE" keysym="XF86AudioMute" command="spawn,swayosd-client --output-volume mute-toggle"
+                item "mic-mute" mods="NONE" keysym="XF86AudioMicMute" command="spawn,swayosd-client --input-volume mute-toggle"
+                item "media-play" mods="NONE" keysym="XF86AudioPlay" command="spawn,swayosd-client --playerctl play-pause"
+                item "media-next" mods="NONE" keysym="XF86AudioNext" command="spawn,swayosd-client --playerctl next"
+                item "media-prev" mods="NONE" keysym="XF86AudioPrev" command="spawn,swayosd-client --playerctl prev"
+                item "brightness-up" mods="NONE" keysym="XF86MonBrightnessUp" command="spawn,swayosd-client --brightness raise"
+                item "brightness-down" mods="NONE" keysym="XF86MonBrightnessDown" command="spawn,swayosd-client --brightness lower"
+            }
+        }
+
+        input "mousebinds" type="collection" item-type="record" {
+            fields {
+                field "mods" type="string" required=#true
+                field "keysym" type="string" required=#true
+                field "command" type="string" required=#true
+            }
+            defaults {
+                item "mouse-move" mods="SUPER" keysym="btn_left" command="moveresize,curmove"
+                item "mouse-maximize" mods="NONE" keysym="btn_middle" command="togglemaximizescreen,0"
+                item "mouse-resize" mods="SUPER" keysym="btn_right" command="moveresize,curresize"
+            }
+        }
+    }
+
+    outputs {
+        render "mango/config.conf" format="key-value" separator="=" quote="none" validate="mango" {
+            @comment "Mango entry point."
+            source "~/.config/mango/conf.d/windows.conf"
+            source "~/.config/mango/conf.d/settings.conf"
+            source "~/.config/mango/conf.d/input.conf"
+            source "~/.config/mango/conf.d/binds.conf"
+            source "~/.config/mango/conf.d/rules.conf"
+            source "~/.config/gnist/themes/current/mango.conf"
+            "exec-once" "smia-session"
+        }
+
+        render "mango/conf.d/input.conf" format="key-value" separator="=" quote="none" validate="mango" {
+            "monitorrule" (f)"name:{{global.display-internal-name}},width:{{global.display-internal-width}},height:{{global.display-internal-height}},refresh:{{global.display-internal-refresh}},x:{{global.display-internal-x}},y:{{global.display-internal-y}},scale:{{global.display-internal-scale}},rr:0,vrr:0"
+            @spread "input-tuning" case="snake_case"
+            gesturebind "none,left,3,viewtoright_have_client"
+            gesturebind "none,right,3,viewtoleft_have_client"
+            gesturebind "none,up,3,toggleoverview"
+            gesturebind "none,down,3,toggleoverview"
+        }
+
+        render "mango/conf.d/settings.conf" format="key-value" separator="=" quote="none" validate="mango" {
+            @spread "settings" case="snake_case"
+        }
+
+        render "mango/conf.d/windows.conf" format="key-value" separator="=" quote="none" validate="mango" {
+            @comment "Mango window appearance, animation, and layout settings."
+            @spread "windows" case="snake_case"
+        }
+
+        render "mango/conf.d/rules.conf" format="key-value" separator="=" quote="none" validate="mango" {
+            @comment "Generated tag and profile rules."
+            @range "tag" from=1 through=9 {
+                tagrule (f)"id:{{tag}},layout_name:{{tag-layout}}"
+            }
+            @splice "window-rules"
+            @splice "layer-rules"
+        }
+
+        render "mango/conf.d/binds.conf" format="key-value" separator="=" quote="none" validate="mango" {
+            @comment "Generated keyed Mango bindings."
+            @each "b" in="binds" { bind (f)"{{b.mods}},{{b.keysym}},{{b.command}}" }
+            @each "b" in="mousebinds" { mousebind (f)"{{b.mods}},{{b.keysym}},{{b.command}}" }
+        }
+    }
+}

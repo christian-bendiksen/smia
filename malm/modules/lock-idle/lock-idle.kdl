@@ -1,0 +1,195 @@
+// Configures hypridle escalation and hyprlock appearance. Lock-screen colors
+// come from the current gnist theme. Optional values are omitted from rendered
+// output, and #null disables hardware-specific timers.
+module "lock-idle" {
+    description "Screen locking (hyprlock) and idle escalation (hypridle)"
+
+    requires {
+        command "hyprlock"
+        command "hypridle"
+        command "brightnessctl"
+        command "notify-send"
+    }
+
+    inputs {
+        // The idle daemon and manual binds share this lock command.
+        input "lock-command" type="string" default="hyprlock"
+
+        // Timers are seconds since activity. Set hardware-dependent listeners
+        // to #null on machines that do not support or need them.
+        input "keyboard-dim-seconds" type="int" optional=#true default=300
+        input "lock-warning-seconds" type="int" default=540
+        input "lock-seconds"         type="int" default=600
+        input "display-dim-seconds"  type="int" optional=#true default=660
+        input "suspend-seconds"      type="int" optional=#true default=1200
+
+        input "blur-passes" type="int"  default=3
+        input "hide-cursor" type="bool" default=#false
+
+        // Unset background values are omitted so hyprlock defaults apply.
+        input "blur-size"     type="int"   optional=#true
+        input "bg-noise"      type="float" optional=#true
+        input "bg-contrast"   type="float" optional=#true
+        input "bg-brightness" type="float" optional=#true
+        input "bg-vibrancy"   type="float" optional=#true
+
+        // Hyprlock's fade-in and fade-out animations are disabled by default.
+        input "animations"   type="bool"   default=#false
+        input "anim-curve"   type="string" default="0.16, 1.0, 0.3, 1.0"
+        input "anim-fadein"  type="int"    default=7
+        input "anim-fadeout" type="int"    default=6
+
+        // An unset profile mark omits the glyph above the clock.
+        input "mark"               type="string" optional=#true
+        input "mark-size"          type="int"    default=32
+        input "mark-shadow-passes" type="int"    optional=#true
+        input "mark-shadow-size"   type="int"    default=0
+        input "show-clock"         type="bool"   default=#false
+        input "clock-size"         type="int"    default=68
+
+        input "input-width"             type="int"    default=650
+        input "input-height"            type="int"    default=100
+        input "input-y"                 type="int"    default=0
+        input "input-outline-thickness" type="int"    default=4
+        input "input-outer-color"       type="string" default="$outer_color"
+        input "input-rounding"          type="int"    default=0
+        input "input-shadow-passes"     type="int"    default=0
+        input "input-shadow-size"       type="int"    optional=#true
+        input "placeholder"             type="string" default="Enter Password"
+        input "fingerprint"             type="bool"   default=#false
+    }
+
+    outputs {
+        render "hypr/hypridle.conf" format="key-value" separator=" = " quote="none" validate="hypridle" {
+            "general" {
+                "lock_cmd" (ref)"lock-command"
+                "before_sleep_cmd" "loginctl lock-session"
+                "inhibit_sleep" 3
+            }
+            @when-set "keyboard-dim-seconds" {
+                listener {
+                    "timeout" (ref)"keyboard-dim-seconds"
+                    "on-timeout" "brightnessctl -sd '*::kbd_backlight' set 0"
+                    "on-resume" "brightnessctl -rd '*::kbd_backlight'"
+                }
+            }
+            listener {
+                "timeout" (ref)"lock-warning-seconds"
+                "on-timeout" "notify-send \"Lockscreen\" \"Locking in 1 minute\""
+            }
+            listener {
+                "timeout" (ref)"lock-seconds"
+                "on-timeout" "loginctl lock-session"
+            }
+            @when-set "display-dim-seconds" {
+                listener {
+                    "timeout" (ref)"display-dim-seconds"
+                    "on-timeout" "brightnessctl -sd '*::backlight' set 1"
+                    "on-resume" "brightnessctl -rd '*::backlight'"
+                }
+            }
+            @when-set "suspend-seconds" {
+                listener {
+                    "timeout" (ref)"suspend-seconds"
+                    "on-timeout" "systemctl suspend"
+                }
+            }
+        }
+
+        render "hypr/hyprlock.conf" format="key-value" separator=" = " quote="none" validate="hyprlock" {
+            "source" "~/.config/gnist/themes/current/hyprlock.conf"
+            "general" {
+                "ignore_empty_input" #true
+                @when "hide-cursor" { "hide_cursor" #true }
+            }
+            "background" {
+                monitor ""
+                "color" "$color"
+                "path" "~/.config/gnist/themes/background"
+                "blur_passes" (ref)"blur-passes"
+                "blur_size" (ref?)"blur-size"
+                "noise" (ref?)"bg-noise"
+                "contrast" (ref?)"bg-contrast"
+                "brightness" (ref?)"bg-brightness"
+                "vibrancy" (ref?)"bg-vibrancy"
+            }
+            @when "animations" {
+                "animations" {
+                    "enabled" #true
+                    "bezier" (f)"ease, {{anim-curve}}"
+                    animation (f)"fadeIn, 1, {{anim-fadein}}, ease"
+                    animation (f)"fadeOut, 1, {{anim-fadeout}}, ease"
+                }
+            }
+            @else { "animations" { "enabled" #false } }
+            @when-set "mark" {
+                label {
+                    monitor ""
+                    "text" (ref)"mark"
+                    "font_family" (ref)"global.font-family"
+                    "font_size" (ref)"mark-size"
+                    "color" "$accent_color"
+                    "position" "0, 340"
+                    "halign" "center"
+                    "valign" "center"
+                    @when-set "mark-shadow-passes" {
+                        "shadow_passes" (ref)"mark-shadow-passes"
+                        "shadow_size" (ref)"mark-shadow-size"
+                    }
+                }
+            }
+            @when "show-clock" {
+                label {
+                    monitor ""
+                    "text" "$TIME"
+                    "font_family" (ref)"global.font-family"
+                    "font_size" (ref)"clock-size"
+                    "color" "$font_color"
+                    "position" "0, 255"
+                    "halign" "center"
+                    "valign" "center"
+                }
+                label {
+                    monitor ""
+                    "text" "cmd[update:60000] date +\"%A, %d %B\""
+                    "font_family" (ref)"global.font-family"
+                    "font_size" 15
+                    "color" "$font_color_soft"
+                    "position" "0, 162"
+                    "halign" "center"
+                    "valign" "center"
+                }
+            }
+            "input-field" {
+                monitor ""
+                "size" (f)"{{input-width}}, {{input-height}}"
+                "position" (f)"0, {{input-y}}"
+                "halign" "center"
+                "valign" "center"
+                "inner_color" "$inner_color"
+                "outer_color" (ref)"input-outer-color"
+                "outline_thickness" (ref)"input-outline-thickness"
+                "font_family" (ref)"global.font-family"
+                "font_color" "$font_color"
+                "placeholder_text" (ref)"placeholder"
+                "check_color" "$check_color"
+                "fail_text" "<i>$FAIL ($ATTEMPTS)</i>"
+                "rounding" (ref)"input-rounding"
+                "shadow_passes" (ref)"input-shadow-passes"
+                "shadow_size" (ref?)"input-shadow-size"
+                "fade_on_empty" #false
+            }
+            "auth" {
+                "fingerprint" {
+                    "enabled" (ref)"fingerprint"
+                }
+            }
+        }
+
+        // This module owns the hypridle session process.
+        render "gnist/session.d/lock-idle" format="line-list" {
+            @comment "Generated by the `lock-idle` module; edits will be replaced."
+            @line "run hypridle"
+        }
+    }
+}

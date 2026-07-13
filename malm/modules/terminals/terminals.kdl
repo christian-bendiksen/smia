@@ -1,0 +1,116 @@
+// Shared appearance inputs keep Kitty, Alacritty, and Ghostty consistent.
+// Font family remains a global token so machine overrides apply everywhere.
+module "terminals" {
+    description "Typed terminal appearance rendered into kitty, alacritty and ghostty"
+    slot "terminal"
+
+    inputs {
+        input "font-size" type="float" default=9.0
+        input "padding" type="int" default=14
+        input "opacity" type="float" default=1.0
+        input "background-blur" type="int" default=0
+        input "decorations" type="enum" default="None" {
+            values "None" "Full" "Transparent" "Buttonless"
+        }
+        input "cursor-shape" type="enum" default="block" {
+            values "block" "beam" "underline"
+        }
+        input "cursor-blink" type="float" default=0.0
+        input "cursor-trail" type="int" default=1
+        input "scrollback-lines" type="int" default=10000
+        input "confirm-close" type="int" default=0
+        input "shell-integration" type="enum" default="disabled" {
+            values "disabled" "enabled" "no-cursor"
+        }
+        // Color files remain mutable gnist outputs, allowing theme changes
+        // without another Malm apply.
+        input "theme-kitty" type="path" default="~/.config/gnist/themes/current/kitty.conf"
+        input "theme-alacritty" type="path" default="~/.config/gnist/themes/current/alacritty.toml"
+        input "theme-ghostty" type="path" default="~/.config/gnist/themes/current/ghostty.conf"
+    }
+
+    outputs {
+        render "kitty/kitty.conf" format="key-value" separator=" " quote="none" {
+            "shell_integration" (ref)"shell-integration"
+            "allow_remote_control" "yes"
+            "listen_on" "unix:~/.cache/kitty/kitty"
+            "font_family" (ref)"global.font-family"
+            "bold_italic_font" "auto"
+            "font_size" (ref)"font-size"
+            "window_padding_width" (ref)"padding"
+            "hide_window_decorations" "yes"
+            "confirm_os_window_close" (ref)"confirm-close"
+            "scrollback_lines" (ref)"scrollback-lines"
+            "background_opacity" (ref)"opacity"
+            "background_blur" (ref)"background-blur"
+            map "ctrl+insert copy_to_clipboard"
+            map "shift+insert paste_from_clipboard"
+            "cursor_shape" (ref)"cursor-shape"
+            "cursor_trail" (ref)"cursor-trail"
+            "cursor_blink_interval" (ref)"cursor-blink"
+            "include" (ref)"theme-kitty"
+        }
+        render "alacritty/alacritty.toml" format="toml" {
+            "general" {
+                import { - (ref)"theme-alacritty" }
+            }
+            "env" {
+                "TERM" "xterm-256color"
+            }
+            "terminal" {
+                "osc52" "CopyPaste"
+            }
+            "font" {
+                normal family=(ref)global.font-family style=Regular
+                bold family=(ref)global.font-family style=Bold
+                italic family=(ref)global.font-family style=Italic
+                "size" (ref)"font-size"
+            }
+            "window" {
+                "decorations" (ref)"decorations"
+                "opacity" (ref)"opacity"
+                "padding" {
+                    "x" (ref)"padding"
+                    "y" (ref)"padding"
+                }
+            }
+            "scrolling" {
+                "history" (ref)"scrollback-lines"
+            }
+            "keyboard" {
+                bindings {
+                    - {
+                        "key" "Insert"
+                        "mods" "Shift"
+                        "action" "Paste"
+                    }
+                    - {
+                        "key" "Insert"
+                        "mods" "Control"
+                        "action" "Copy"
+                    }
+                    - {
+                        "key" "Return"
+                        "mods" "Shift"
+                        "chars" "\u{1b}\r"
+                    }
+                }
+            }
+        }
+        render "ghostty/config.ghostty" format="key-value" separator=" = " quote="none" {
+            "shell-integration" "none"
+            @comment "Use the shared font family with a terminal-specific size."
+            "font-family" (ref)"global.font-family"
+            "font-size" (ref)"font-size"
+            @comment "Keep window appearance aligned with the other terminal backends."
+            "background-opacity" (ref)"opacity"
+            "background-blur-radius" (ref)"background-blur"
+            "window-padding-x" (ref)"padding"
+            "window-padding-y" (ref)"padding"
+            @comment "Hide the pointer while keyboard input is active."
+            "mouse-hide-while-typing" #true
+            @comment "Load colors from the mutable gnist theme output."
+            "config-file" (ref)"theme-ghostty"
+        }
+    }
+}

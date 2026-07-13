@@ -1,0 +1,187 @@
+@import "../gnist/themes/current/waybar.css";
+
+* {
+  background: transparent;
+  border: none;
+  min-height: 0;
+  color: @foreground;
+  font-size: 15px;
+}
+
+window#waybar,
+window#waybar.rail {
+  background-color: alpha(@background, 0.68);
+  background-image: linear-gradient(
+    to bottom,
+    alpha(@foreground, 0.04) 0%,
+    transparent 15%
+  );
+  border-right: 1px solid alpha(@accent, 0.20);
+}
+
+#custom-astral,
+#clock,
+#custom-mpris,
+#cpu,
+#network,
+#pulseaudio,
+#battery,
+#tray,
+#custom-power {
+  min-width: 48px;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#custom-astral {
+  color: @accent;
+  font-size: 18px;
+  padding: 12px 0 8px 0;
+  margin: 0;
+  text-shadow: 0 0 12px alpha(@accent, 0.75);
+  transition: text-shadow 200ms ease;
+}
+
+#custom-astral:hover {
+  text-shadow: 0 0 22px @accent, 0 0 40px alpha(@accent, 0.40);
+}
+
+#workspaces {
+  padding: 8px 0;
+}
+
+#workspaces button {
+  all: initial;
+  font-size: 0;
+  color: transparent;
+  min-width: 6px;
+  min-height: 6px;
+  background: alpha(@foreground, 0.20);
+  border-radius: 9999px;
+  margin: 4px 21px;
+  padding: 0;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#workspaces button:hover {
+  background: alpha(@accent, 0.50);
+}
+
+#workspaces button.active {
+  min-height: 24px;
+  background: @accent;
+  box-shadow: 0 0 10px alpha(@accent, 0.65);
+}
+
+#workspaces button.empty {
+  background: alpha(@foreground, 0.08);
+}
+
+#workspaces button.urgent {
+  background: @color5;
+  box-shadow: 0 0 10px alpha(@color5, 0.65);
+}
+
+#clock {
+  color: @foreground;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 8px 0;
+  margin: 0;
+  text-shadow: 0 0 10px alpha(@accent, 0.55);
+}
+
+#custom-mpris,
+#cpu {
+  margin-right: 0px;
+  padding: 8px 0;
+}
+#network {
+  margin-right: 2px;
+  padding: 8px 0;
+}
+#pulseaudio,
+#battery,
+#tray,
+#custom-power {
+  padding: 8px 0;
+  margin: 0;
+  transition: color 160ms ease, text-shadow 160ms ease;
+}
+
+#cpu,
+#network,
+#pulseaudio,
+#battery,
+#custom-power {
+  font-size: 15px;
+}
+
+#custom-mpris {
+  color: alpha(@foreground, 0.55);
+  font-size: 9px;
+}
+
+#custom-mpris.Playing {
+  color: @accent;
+  text-shadow: 0 0 7px alpha(@accent, 0.8);
+}
+
+#custom-mpris.Paused {
+  color: alpha(@foreground, 0.4);
+}
+
+#cpu:hover,
+#network:hover,
+#pulseaudio:hover,
+#battery:hover,
+#custom-power:hover {
+  color: @accent;
+  text-shadow: 0 0 8px alpha(@accent, 0.7);
+}
+
+#battery.warning {
+  color: @color3;
+}
+
+#battery.critical,
+#network.disconnected,
+#pulseaudio.muted {
+  color: @color1;
+}
+
+#custom-power {
+  color: alpha(@foreground, 0.55);
+  font-size: 15px;
+  padding-bottom: 12px;
+}
+
+#custom-power:hover {
+  color: @color1;
+  text-shadow: 0 0 9px alpha(@color1, 0.8);
+}
+
+#tray {
+  padding: 8px 0;
+}
+
+#tray menu {
+  background-color: alpha(@background, 0.96);
+  border: 1px solid alpha(@accent, 0.25);
+  border-radius: 12px;
+}
+
+tooltip {
+  background-color: alpha(@background, 0.95);
+  color: @foreground;
+  border: 1px solid alpha(@accent, 0.35);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+tooltip label {
+  color: @foreground;
+}

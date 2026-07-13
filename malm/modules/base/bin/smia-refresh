@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if ! command -v malm >/dev/null 2>&1; then
+    printf 'smia-refresh: malm not found in PATH\n' >&2
+    exit 1
+fi
+
+malm apply
+exec smia-session

@@ -1,0 +1,89 @@
+# Main background color (Base); leave empty for the terminal default or transparency.
+theme[main_bg]="#faf4ed"
+
+# Default text color (Text)
+theme[main_fg]="#575279"
+
+# Box title color (Subtle)
+theme[title]="#908caa"
+
+# Keyboard shortcut highlight color (Text)
+theme[hi_fg]="#e0def4"
+
+# Selected process background color (Highlight High)
+theme[selected_bg]="#524f67"
+
+# Selected process text color (Gold)
+theme[selected_fg]="#f6c177"
+
+# Inactive and disabled text color (Highlight Medium)
+theme[inactive_fg]="#403d52"
+
+# Graph overlay text color, including uptime and network scale labels (Foam)
+theme[graph_text]="#9ccfd8"
+
+# Percentage meter background color (Foam)
+theme[meter_bg]="#9ccfd8"
+
+# Color for process details, status text, mini CPU graphs, and the details memory graph
+theme[proc_misc]="#c4a7e7"
+
+# CPU box outline color (Rose)
+theme[cpu_box]="#ebbcba"
+
+# Memory and disk box outline color (Pine)
+theme[mem_box]="#31748f"
+
+# Network box outline color (Iris)
+theme[net_box]="#c4a7e7"
+
+# Process box outline color (Love)
+theme[proc_box]="#eb6f92"
+
+# Box-divider and small-box line color (Muted)
+theme[div_line]="#6e6a86"
+
+# Temperature graph gradient: Rose, Gold, Love
+theme[temp_start]="#ebbcba"
+theme[temp_mid]="#f6c177"
+theme[temp_end]="#eb6f92"
+
+# CPU graph gradient: Gold, Rose, Love
+theme[cpu_start]="#f6c177"
+theme[cpu_mid]="#ebbcba"
+theme[cpu_end]="#eb6f92"
+
+# Free memory and disk meter gradient (Love)
+theme[free_start]="#eb6f92"
+theme[free_mid]="#eb6f92"
+theme[free_end]="#eb6f92"
+
+# Cached memory and disk meter gradient (Iris)
+theme[cached_start]="#c4a7e7"
+theme[cached_mid]="#c4a7e7"
+theme[cached_end]="#c4a7e7"
+
+# Available memory and disk meter gradient (Pine)
+theme[available_start]="#31748f"
+theme[available_mid]="#31748f"
+theme[available_end]="#31748f"
+
+# Used memory and disk meter gradient (Rose)
+theme[used_start]="#ebbcba"
+theme[used_mid]="#ebbcba"
+theme[used_end]="#ebbcba"
+
+# Download graph gradient: Pine, Foam, Foam
+theme[download_start]="#31748f"
+theme[download_mid]="#9ccfd8"
+theme[download_end]="#9ccfd8"
+
+# Upload graph gradient: Rose, Love, Love
+theme[upload_start]="#ebbcba"
+theme[upload_mid]="#eb6f92"
+theme[upload_end]="#eb6f92"
+
+# Process-box gradient for thread, memory, and CPU usage: Pine, Foam, Foam
+theme[process_start]="#31748f"
+theme[process_mid]="#9ccfd8"
+theme[process_end]="#9ccfd8"

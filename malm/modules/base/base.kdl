@@ -1,0 +1,23 @@
+// Provides the commands and systemd user target shared by every desktop
+// profile. It also creates GTK configuration directories required by theme
+// links; application-specific configuration remains in provider modules.
+module "base" {
+    description "Session foundation: Smia commands and the smia-session systemd user target"
+
+    requires {
+        command "bash"
+        command "gio"
+        command "gnist"
+        command "systemctl"
+        command "walker"
+    }
+
+    outputs {
+        dir  "./bin" to="~/.local/bin"
+        file "./smia-session.target" to="systemd/user/smia-session.target"
+
+        // These directories provide parents for gnist-core's gtk.css links.
+        dir "./gtk-3.0" to="gtk-3.0"
+        dir "./gtk-4.0" to="gtk-4.0"
+    }
+}

@@ -1,0 +1,124 @@
+@import "../../../gnist/themes/current/walker.css";
+
+/* Compact command layout using the Walker tokens documented in
+   gnist/themes/DESIGN.md. Selection is indicated by a tinted background and
+   a two-pixel left border; item subtext is hidden. */
+
+* {
+  all: unset;
+}
+
+* {
+  font-family: monospace;
+  font-size: 15px;
+  color: @text;
+}
+
+scrollbar {
+  opacity: 0;
+}
+
+.normal-icons {
+  -gtk-icon-size: 16px;
+}
+
+.large-icons {
+  -gtk-icon-size: 32px;
+}
+
+.box-wrapper {
+  background: @base;
+  padding: 0;
+  border: 1px solid @border;
+}
+
+.search-container {
+  background: transparent;
+  padding: 8px 12px;
+  border-bottom: 1px solid @border;
+}
+
+.prompt {
+  color: @selected-text;
+  margin-right: 8px;
+}
+
+.input placeholder {
+  opacity: 0.5;
+}
+
+.input {
+  color: @foreground;
+  caret-color: @selected-text;
+}
+
+.input:focus,
+.input:active {
+  box-shadow: none;
+  outline: none;
+}
+
+.list {
+  padding: 4px 0;
+}
+
+.item-box {
+  padding: 4px 12px 4px 10px;
+  border-left: 2px solid transparent;
+}
+
+child:hover .item-box {
+  background: alpha(@text, 0.05);
+}
+
+child:selected .item-box {
+  background: alpha(@selected-text, 0.1);
+  border-left: 2px solid @selected-text;
+}
+
+child:selected .item-box * {
+  color: @selected-text;
+}
+
+.item-text-box {
+  all: unset;
+  padding: 4px 0;
+}
+
+.item-subtext {
+  font-size: 0px;
+  min-height: 0px;
+  margin: 0px;
+  padding: 0px;
+}
+
+.item-image {
+  margin-right: 10px;
+  -gtk-icon-transform: scale(0.9);
+}
+
+.current {
+  font-style: italic;
+}
+
+.placeholder,
+.elephant-hint {
+  color: alpha(@text, 0.7);
+  padding: 8px 12px;
+}
+
+.keybinds {
+  border-top: 1px solid @border;
+  padding: 5px 12px;
+}
+
+.global-keybinds,
+.item-keybinds {
+  color: alpha(@text, 0.7);
+  font-size: 11px;
+}
+
+.preview {
+  border-top: 1px solid @border;
+  padding: 8px;
+}

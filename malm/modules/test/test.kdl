@@ -1,0 +1,19 @@
+// test module: <one-line purpose>.
+module "test" {
+    description "<one-line purpose>"
+    // slot "<role>"   // Uncomment this when the module fills an exclusive slot.
+
+    requires {
+        // command "test"
+    }
+
+    inputs {
+        // input "example" type="string" default="value"
+    }
+
+    outputs {
+        // text-file to="test/config" {
+        //     emit-file "./config.tpl"
+        // }
+    }
+}

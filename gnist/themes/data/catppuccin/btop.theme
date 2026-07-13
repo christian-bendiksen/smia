@@ -1,0 +1,83 @@
+# Main background color; leave empty for the terminal default or transparency.
+theme[main_bg]="#1E1E2E"
+
+# Default text color
+theme[main_fg]="#c6d0f5"
+
+# Box title color
+theme[title]="#c6d0f5"
+
+# Keyboard shortcut highlight color
+theme[hi_fg]="#8caaee"
+
+# Selected process background color
+theme[selected_bg]="#51576d"
+
+# Selected process text color
+theme[selected_fg]="#8caaee"
+
+# Inactive and disabled text color
+theme[inactive_fg]="#838ba7"
+
+# Graph overlay text color, including uptime and network scale labels
+theme[graph_text]="#f2d5cf"
+
+# Percentage meter background color
+theme[meter_bg]="#51576d"
+
+# Color for process details, status text, mini CPU graphs, and the details memory graph
+theme[proc_misc]="#f2d5cf"
+
+# CPU, memory, network, and process box outline colors
+theme[cpu_box]="#ca9ee6" # Mauve palette color
+theme[mem_box]="#a6d189" # Green palette color
+theme[net_box]="#ea999c" # Maroon palette color
+theme[proc_box]="#8caaee" # Blue palette color
+
+# Box-divider and small-box line color
+theme[div_line]="#737994"
+
+# Temperature gradient from green through yellow to red
+theme[temp_start]="#a6d189"
+theme[temp_mid]="#e5c890"
+theme[temp_end]="#e78284"
+
+# CPU gradient from teal to lavender
+theme[cpu_start]="#81c8be"
+theme[cpu_mid]="#85c1dc"
+theme[cpu_end]="#babbf1"
+
+# Free memory and disk gradient from mauve through lavender to blue
+theme[free_start]="#ca9ee6"
+theme[free_mid]="#babbf1"
+theme[free_end]="#8caaee"
+
+# Cached memory and disk gradient from sapphire to lavender
+theme[cached_start]="#85c1dc"
+theme[cached_mid]="#8caaee"
+theme[cached_end]="#babbf1"
+
+# Available memory and disk gradient from peach to red
+theme[available_start]="#ef9f76"
+theme[available_mid]="#ea999c"
+theme[available_end]="#e78284"
+
+# Used memory and disk gradient from green to sky
+theme[used_start]="#a6d189"
+theme[used_mid]="#81c8be"
+theme[used_end]="#99d1db"
+
+# Download gradient from peach to red
+theme[download_start]="#ef9f76"
+theme[download_mid]="#ea999c"
+theme[download_end]="#e78284"
+
+# Upload gradient from green to sky
+theme[upload_start]="#a6d189"
+theme[upload_mid]="#81c8be"
+theme[upload_end]="#99d1db"
+
+# Process-box gradient for thread, memory, and CPU usage: sapphire to mauve
+theme[process_start]="#85c1dc"
+theme[process_mid]="#babbf1"
+theme[process_end]="#ca9ee6"

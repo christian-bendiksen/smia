@@ -1,0 +1,260 @@
+// This compositor module builds native KDL documents. Malm validates KDL v1
+// syntax before deployment; it does not validate nodes against Niri's config
+// schema:
+//   config.kdl contains the main document and scalar settings.
+//   binds.kdl contains keyed bind nodes that profiles can patch individually.
+//   effects.kdl contains the profile-replaceable effects fragment.
+//
+//   use "niri" { patch { collection "binds" {
+//       replace "focus-left" { Mod+Left { focus-column-left } }
+//       append "my-launcher" { Mod+P { spawn "walker" } }
+//   } } }
+module "niri" {
+    description "Niri scrollable-tiling Wayland compositor"
+    slot "compositor"
+
+    requires {
+        command "niri"
+    }
+
+    inputs {
+        // Bindings share these commands so profiles can replace them once.
+        input "terminal-cmd"  type="string" default="xdg-terminal-exec"
+        input "launcher-cmd"  type="string" default="walker"
+        input "menu-cmd"      type="string" default="smia-menu"
+        input "lock-cmd"      type="string" default="hyprlock"
+        input "wallpaper-cmd" type="string" default="gnist wallpaper"
+
+        input "keyboard-layout" type="string" default="no"
+        input "numlock"         type="bool"   default=#true
+
+        input "gaps"                 type="int"   default=10
+        input "focus-ring-width"     type="int"   default=2
+        input "default-column-width" type="float" default=0.5
+
+        // Stable item keys allow profiles to patch individual native niri binds.
+        input "binds" type="collection" item-type="kdl-document" {
+            defaults {
+                item "hotkey-overlay" { Mod+Shift+Slash { show-hotkey-overlay; } }
+                item "wallpaper" { Mod+Shift+W hotkey-overlay-title="Change wallpaper" { spawn-sh (ref)"wallpaper-cmd"; } }
+                item "terminal" { Mod+Return hotkey-overlay-title="Open a Terminal" { spawn-sh (ref)"terminal-cmd"; } }
+                item "launcher" { Mod+A hotkey-overlay-title="Run an Application: walker" { spawn (ref)"launcher-cmd"; } }
+                item "menu" { Mod+Space hotkey-overlay-title="Gnist menu" { spawn-sh (ref)"menu-cmd"; } }
+                item "lock" { Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn (ref)"lock-cmd"; } }
+                item "orca" { Super+Alt+S allow-when-locked=#true hotkey-overlay-title=#null { spawn-sh "pkill orca || exec orca"; } }
+                item "volume-raise" { XF86AudioRaiseVolume allow-when-locked=#true { spawn "swayosd-client" "--output-volume" "raise"; } }
+                item "volume-lower" { XF86AudioLowerVolume allow-when-locked=#true { spawn "swayosd-client" "--output-volume" "lower"; } }
+                item "volume-mute" { XF86AudioMute allow-when-locked=#true { spawn "swayosd-client" "--output-volume" "mute-toggle"; } }
+                item "mic-mute" { XF86AudioMicMute allow-when-locked=#true { spawn "swayosd-client" "--input-volume" "mute-toggle"; } }
+                item "media-play" { XF86AudioPlay allow-when-locked=#true { spawn "swayosd-client" "--playerctl" "play-pause"; } }
+                item "media-stop" { XF86AudioStop allow-when-locked=#true { spawn "swayosd-client" "--playerctl" "stop"; } }
+                item "media-prev" { XF86AudioPrev allow-when-locked=#true { spawn "swayosd-client" "--playerctl" "prev"; } }
+                item "media-next" { XF86AudioNext allow-when-locked=#true { spawn "swayosd-client" "--playerctl" "next"; } }
+                item "brightness-up" { XF86MonBrightnessUp allow-when-locked=#true { spawn "swayosd-client" "--brightness" "raise"; } }
+                item "brightness-down" { XF86MonBrightnessDown allow-when-locked=#true { spawn "swayosd-client" "--brightness" "lower"; } }
+                item "overview" { Mod+O repeat=#false { toggle-overview; } }
+                item "close" { Mod+Q repeat=#false { close-window; } }
+                item "focus-left" { Mod+Left { focus-column-left; } }
+                item "focus-down" { Mod+Down { focus-window-down; } }
+                item "focus-up" { Mod+Up { focus-window-up; } }
+                item "focus-right" { Mod+Right { focus-column-right; } }
+                item "focus-left-h" { Mod+H { focus-column-left; } }
+                item "focus-down-j" { Mod+J { focus-window-down; } }
+                item "focus-up-k" { Mod+K { focus-window-up; } }
+                item "focus-right-l" { Mod+L { focus-column-right; } }
+                item "move-left" { Mod+Shift+Left { move-column-left; } }
+                item "move-down" { Mod+Shift+Down { move-window-down; } }
+                item "move-up" { Mod+Shift+Up { move-window-up; } }
+                item "move-right" { Mod+Shift+Right { move-column-right; } }
+                item "move-left-h" { Mod+Shift+H { move-column-left; } }
+                item "move-down-j" { Mod+Shift+J { move-window-down; } }
+                item "move-up-k" { Mod+Shift+K { move-window-up; } }
+                item "move-right-l" { Mod+Shift+L { move-column-right; } }
+                item "col-first" { Mod+Home { focus-column-first; } }
+                item "col-last" { Mod+End { focus-column-last; } }
+                item "move-col-first" { Mod+Ctrl+Home { move-column-to-first; } }
+                item "move-col-last" { Mod+Ctrl+End { move-column-to-last; } }
+                item "ws-down" { Mod+Page_Down { focus-workspace-down; } }
+                item "ws-up" { Mod+Page_Up { focus-workspace-up; } }
+                item "ws-down-u" { Mod+U { focus-workspace-down; } }
+                item "ws-up-i" { Mod+I { focus-workspace-up; } }
+                item "move-ws-down" { Mod+Ctrl+Page_Down { move-column-to-workspace-down; } }
+                item "move-ws-up" { Mod+Ctrl+Page_Up { move-column-to-workspace-up; } }
+                item "move-ws-down-u" { Mod+Ctrl+U { move-column-to-workspace-down; } }
+                item "move-ws-up-i" { Mod+Ctrl+I { move-column-to-workspace-up; } }
+                item "shift-ws-down" { Mod+Shift+Page_Down { move-workspace-down; } }
+                item "shift-ws-up" { Mod+Shift+Page_Up { move-workspace-up; } }
+                item "shift-ws-down-u" { Mod+Shift+U { move-workspace-down; } }
+                item "shift-ws-up-i" { Mod+Shift+I { move-workspace-up; } }
+                item "scroll-ws-down" { Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; } }
+                item "scroll-ws-up" { Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; } }
+                item "scroll-move-ws-down" { Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; } }
+                item "scroll-move-ws-up" { Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-column-to-workspace-up; } }
+                item "scroll-col-right" { Mod+WheelScrollRight { focus-column-right; } }
+                item "scroll-col-left" { Mod+WheelScrollLeft { focus-column-left; } }
+                item "scroll-move-col-right" { Mod+Ctrl+WheelScrollRight { move-column-right; } }
+                item "scroll-move-col-left" { Mod+Ctrl+WheelScrollLeft { move-column-left; } }
+                item "shift-scroll-col-right" { Mod+Shift+WheelScrollDown { focus-column-right; } }
+                item "shift-scroll-col-left" { Mod+Shift+WheelScrollUp { focus-column-left; } }
+                item "shift-scroll-move-col-right" { Mod+Ctrl+Shift+WheelScrollDown { move-column-right; } }
+                item "shift-scroll-move-col-left" { Mod+Ctrl+Shift+WheelScrollUp { move-column-left; } }
+                item "ws-1" { Mod+1 { focus-workspace 1; } }
+                item "ws-2" { Mod+2 { focus-workspace 2; } }
+                item "ws-3" { Mod+3 { focus-workspace 3; } }
+                item "ws-4" { Mod+4 { focus-workspace 4; } }
+                item "ws-5" { Mod+5 { focus-workspace 5; } }
+                item "ws-6" { Mod+6 { focus-workspace 6; } }
+                item "ws-7" { Mod+7 { focus-workspace 7; } }
+                item "ws-8" { Mod+8 { focus-workspace 8; } }
+                item "ws-9" { Mod+9 { focus-workspace 9; } }
+                item "move-ws-1" { Mod+Shift+1 { move-column-to-workspace 1; } }
+                item "move-ws-2" { Mod+Shift+2 { move-column-to-workspace 2; } }
+                item "move-ws-3" { Mod+Shift+3 { move-column-to-workspace 3; } }
+                item "move-ws-4" { Mod+Shift+4 { move-column-to-workspace 4; } }
+                item "move-ws-5" { Mod+Shift+5 { move-column-to-workspace 5; } }
+                item "move-ws-6" { Mod+Shift+6 { move-column-to-workspace 6; } }
+                item "move-ws-7" { Mod+Shift+7 { move-column-to-workspace 7; } }
+                item "move-ws-8" { Mod+Shift+8 { move-column-to-workspace 8; } }
+                item "move-ws-9" { Mod+Shift+9 { move-column-to-workspace 9; } }
+                item "consume-left" { Mod+BracketLeft { consume-or-expel-window-left; } }
+                item "consume-right" { Mod+BracketRight { consume-or-expel-window-right; } }
+                item "consume" { Mod+Comma { consume-window-into-column; } }
+                item "expel" { Mod+Period { expel-window-from-column; } }
+                item "preset-width" { Mod+R { switch-preset-column-width; } }
+                item "preset-height" { Mod+Shift+R { switch-preset-window-height; } }
+                item "reset-height" { Mod+Ctrl+R { reset-window-height; } }
+                item "maximize" { Mod+F { maximize-column; } }
+                item "fullscreen" { Mod+Shift+F { fullscreen-window; } }
+                item "expand-width" { Mod+Ctrl+F { expand-column-to-available-width; } }
+                item "center" { Mod+C { center-column; } }
+                item "center-visible" { Mod+Ctrl+C { center-visible-columns; } }
+                item "width-dec" { Mod+Minus { set-column-width "-10%"; } }
+                item "width-inc" { Mod+Equal { set-column-width "+10%"; } }
+                item "height-dec" { Mod+Shift+Minus { set-window-height "-10%"; } }
+                item "height-inc" { Mod+Shift+Equal { set-window-height "+10%"; } }
+                item "float-toggle" { Mod+V { toggle-window-floating; } }
+                item "float-focus" { Mod+Shift+V { switch-focus-between-floating-and-tiling; } }
+                item "tabbed" { Mod+W { toggle-column-tabbed-display; } }
+                item "screenshot" { Print { screenshot; } }
+                item "screenshot-screen" { Ctrl+Print { screenshot-screen; } }
+                item "screenshot-window" { Alt+Print { screenshot-window; } }
+                item "inhibit" { Mod+Escape allow-inhibiting=#false { toggle-keyboard-shortcuts-inhibit; } }
+                item "quit" { Mod+Shift+E { quit; } }
+                item "quit-alt" { Ctrl+Alt+Delete { quit; } }
+                item "power-off-monitors" { Mod+Shift+P { power-off-monitors; } }
+            }
+        }
+    }
+
+    fragments {
+        // Profiles replace the complete native effects fragment as a unit.
+        fragment "effects" format="kdl-v1" cardinality="one" {
+            default "./effects-default.kdl"
+        }
+    }
+
+    outputs {
+        render "niri/config.kdl" format="kdl" version=1 {
+            input {
+                keyboard {
+                    xkb {
+                        layout (ref)"keyboard-layout"
+                    }
+                    @when "numlock" {
+                        numlock
+                    }
+                }
+                touchpad {
+                    tap
+                    natural-scroll
+                }
+                mouse
+                trackpoint
+                focus-follows-mouse max-scroll-amount="100%"
+            }
+
+            output (ref)"global.display-internal-name" {
+                mode "{{global.display-internal-width:int}}x{{global.display-internal-height:int}}@{{global.display-internal-refresh:float}}"
+                scale (ref)"global.display-internal-scale"
+                transform "normal"
+                position x=(ref)"global.display-internal-x" y=(ref)"global.display-internal-y"
+            }
+
+            layout {
+                gaps (ref)"gaps"
+                center-focused-column "never"
+                preset-column-widths {
+                    proportion 0.33333
+                    proportion 0.5
+                    proportion 0.66667
+                }
+                default-column-width {
+                    proportion (ref)"default-column-width"
+                }
+                focus-ring {
+                    width (ref)"focus-ring-width"
+                    active-color "#7fc8ff"
+                    inactive-color "#505050"
+                }
+                border {
+                    off
+                    width 2
+                    active-color "#ffc87f"
+                    inactive-color "#505050"
+                    urgent-color "#9b0000"
+                }
+                shadow {
+                    softness 30
+                    spread 5
+                    offset x=0 y=5
+                    color "#0007"
+                }
+                struts
+            }
+
+            spawn-sh-at-startup "smia-session"
+            hotkey-overlay
+            prefer-no-csd
+            screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+            animations
+
+            window-rule {
+                match app-id=#"^org\.wezfurlong\.wezterm$"#
+                default-column-width
+            }
+            window-rule {
+                match app-id=#"firefox$"# title="^Picture-in-Picture$"
+                open-floating #true
+            }
+            window-rule {
+                match title="^Impala$"
+                open-floating #true
+            }
+            window-rule {
+                match title="^Bluetui$"
+                open-floating #true
+            }
+            window-rule {
+                geometry-corner-radius 0
+                clip-to-geometry #true
+                draw-border-with-background #false
+            }
+
+            include "niri-colors.kdl"
+            include "effects.kdl"
+            include "binds.kdl"
+        }
+
+        render "niri/binds.kdl" format="kdl" version=1 {
+            binds {
+                @splice "binds"
+            }
+        }
+
+        render "niri/effects.kdl" format="kdl" version=1 {
+            @compose fragment="effects"
+        }
+
+        symlink "~/.config/gnist/themes/current/niri-colors.kdl" to="~/.config/niri/niri-colors.kdl" if-missing="allow"
+    }
+}

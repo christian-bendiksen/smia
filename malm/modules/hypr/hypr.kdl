@@ -1,0 +1,225 @@
+// Provides Hyprland for the "compositor" slot.
+//
+// Split: `hyprland.lua` is hand-written Lua (deployed verbatim — edit
+// behavior there as code); this module renders only DATA into
+// `hypr/config.lua`, in the same shape vocabulary as every other output.
+module "hypr" {
+    description "Hyprland compositor"
+    slot "compositor"
+
+    requires {
+        command "Hyprland"
+        command "hyprctl"
+    }
+
+    inputs {
+        input "mod-key"       type="string" default="SUPER"
+        input "terminal-cmd"  type="string" default="xdg-terminal-exec"
+        input "launcher-cmd"  type="string" default="walker"
+        input "menu-cmd"      type="string" default="smia-menu"
+        input "lock-cmd"      type="string" default="hyprlock"
+        input "wallpaper-cmd" type="string" default="gnist wallpaper"
+        input "file-manager"  type="string" default="nautilus"
+
+        input "xkb-layout" type="string" default="no"
+        input "xkb-variant" type="string" default="nodeadkeys"
+        input "repeat-rate" type="int" default=25
+        input "repeat-delay" type="int" default=250
+        input "numlock" type="bool" default=#false
+        input "touchpad-tap" type="bool" default=#true
+        input "touchpad-natural-scroll" type="bool" default=#true
+        input "touchpad-disable-while-typing" type="bool" default=#true
+        input "gaps-in" type="int" default=5
+        input "gaps-out" type="int" default=12
+        input "border-size" type="int" default=2
+        input "cursor-size" type="int" default=24
+        input "rounding" type="int" default=0
+        input "active-opacity" type="float" default=1.0
+        input "inactive-opacity" type="float" default=1.0
+        input "shadow-enabled" type="bool" default=#true
+        input "shadow-range" type="int" default=4
+        input "shadow-render-power" type="int" default=3
+        input "blur" type="bool" default=#true
+        input "blur-size" type="int" default=3
+        input "blur-passes" type="int" default=1
+        input "blur-vibrancy" type="float" default=0.1696
+        input "animations" type="bool" default=#true
+    }
+
+    outputs {
+        // Behavior: plain Lua, edited as Lua.
+        file "./hyprland.lua" to="hypr/hyprland.lua"
+
+        // Values: idiomatic data, themable by profiles and the machine layer.
+        render "hypr/config.lua" format="lua" {
+            monitor {
+                output (ref)"global.display-internal-name"
+                mode (f)"{{global.display-internal-width}}x{{global.display-internal-height}}@{{global.display-internal-refresh}}"
+                position (f)"{{global.display-internal-x}}x{{global.display-internal-y}}"
+                scale (f)"{{global.display-internal-scale}}"
+            }
+
+            config {
+                general {
+                    gaps_in (ref)"gaps-in"
+                    gaps_out (ref)"gaps-out"
+                    border_size (ref)"border-size"
+                    col {
+                        active_border {
+                            colors "rgba(33ccffee)" "rgba(00ff99ee)"
+                            angle 45
+                        }
+                        inactive_border "rgba(595959aa)"
+                    }
+                    resize_on_border #false
+                    allow_tearing #false
+                    layout "dwindle"
+                }
+                decoration {
+                    rounding (ref)"rounding"
+                    rounding_power 2
+                    active_opacity (ref)"active-opacity"
+                    inactive_opacity (ref)"inactive-opacity"
+                    shadow {
+                        enabled (ref)"shadow-enabled"
+                        range (ref)"shadow-range"
+                        render_power (ref)"shadow-render-power"
+                        color "rgba(1a1a1aee)"
+                    }
+                    blur {
+                        enabled (ref)"blur"
+                        size (ref)"blur-size"
+                        passes (ref)"blur-passes"
+                        vibrancy (ref)"blur-vibrancy"
+                    }
+                }
+                animations { enabled (ref)"animations" }
+                dwindle { preserve_split #true }
+                master { new_status "master" }
+                misc {
+                    force_default_wallpaper 0
+                    disable_hyprland_logo #true
+                }
+                input {
+                    kb_layout (ref)"xkb-layout"
+                    kb_variant (ref)"xkb-variant"
+                    kb_model ""
+                    kb_options ""
+                    kb_rules ""
+                    repeat_rate (ref)"repeat-rate"
+                    repeat_delay (ref)"repeat-delay"
+                    follow_mouse 1
+                    sensitivity 0
+                    numlock_by_default (ref)"numlock"
+                    touchpad {
+                        natural_scroll (ref)"touchpad-natural-scroll"
+                        tap_to_click (ref)"touchpad-tap"
+                        disable_while_typing (ref)"touchpad-disable-while-typing"
+                    }
+                }
+            }
+
+            env {
+                XCURSOR_SIZE (f)"{{cursor-size}}"
+                HYPRCURSOR_SIZE (f)"{{cursor-size}}"
+            }
+            startup_cmd "smia-session"
+
+            curves {
+                easeOutQuint { - { - 0.23; - 1.0 }; - { - 0.32; - 1.0 } }
+                easeInOutCubic { - { - 0.65; - 0.05 }; - { - 0.36; - 1.0 } }
+                linear { - { - 0.0; - 0.0 }; - { - 1.0; - 1.0 } }
+                almostLinear { - { - 0.5; - 0.5 }; - { - 0.75; - 1.0 } }
+                quick { - { - 0.15; - 0.0 }; - { - 0.1; - 1.0 } }
+            }
+
+            animations {
+                - leaf="global" enabled=#true speed=10.0 bezier="default"
+                - leaf="border" enabled=#true speed=5.39 bezier="easeOutQuint"
+                - leaf="windows" enabled=#true speed=4.79 bezier="easeOutQuint"
+                - leaf="windowsIn" enabled=#true speed=4.1 bezier="easeOutQuint" style="popin 87%"
+                - leaf="windowsOut" enabled=#true speed=1.49 bezier="linear" style="popin 87%"
+                - leaf="fadeIn" enabled=#true speed=1.73 bezier="almostLinear"
+                - leaf="fadeOut" enabled=#true speed=1.46 bezier="almostLinear"
+                - leaf="fade" enabled=#true speed=3.03 bezier="quick"
+                - leaf="layers" enabled=#true speed=3.81 bezier="easeOutQuint"
+                - leaf="layersIn" enabled=#true speed=4.0 bezier="easeOutQuint" style="fade"
+                - leaf="layersOut" enabled=#true speed=1.5 bezier="linear" style="fade"
+                - leaf="fadeLayersIn" enabled=#true speed=1.79 bezier="almostLinear"
+                - leaf="fadeLayersOut" enabled=#true speed=1.39 bezier="almostLinear"
+                - leaf="workspaces" enabled=#true speed=1.94 bezier="almostLinear" style="fade"
+                - leaf="workspacesIn" enabled=#true speed=1.21 bezier="almostLinear" style="fade"
+                - leaf="workspacesOut" enabled=#true speed=1.94 bezier="almostLinear" style="fade"
+                - leaf="zoomFactor" enabled=#true speed=7.0 bezier="quick"
+            }
+
+            gestures {
+                - fingers=3 direction="horizontal" action="workspace"
+            }
+            devices {
+                - name="epic-mouse-v1" sensitivity=-0.5
+            }
+            window_rules {
+                - name="suppress-maximize-events" suppress_event="maximize" {
+                    match { class ".*" }
+                }
+                - name="fix-xwayland-drags" no_focus=#true {
+                    match {
+                        class "^$"
+                        title "^$"
+                        xwayland #true
+                        float #true
+                        fullscreen #false
+                        pin #false
+                    }
+                }
+                - name="move-hyprland-run" move="20 monitor_h-120" float=#true {
+                    match { class "hyprland-run" }
+                }
+            }
+
+            binds {
+                - chord=(f)"{{mod-key}} + Return" action="exec_cmd" arg=(ref)"terminal-cmd"
+                - chord=(f)"{{mod-key}} + Q" action="window.close"
+                - chord=(f)"{{mod-key}} + M" action="exec_cmd" arg="command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"
+                - chord=(f)"{{mod-key}} + E" action="exec_cmd" arg=(ref)"file-manager"
+                - chord=(f)"{{mod-key}} + V" action="window.float" { arg { action "toggle" } }
+                - chord=(f)"{{mod-key}} + A" action="exec_cmd" arg=(ref)"launcher-cmd"
+                - chord=(f)"{{mod-key}} + P" action="window.pseudo"
+                - chord=(f)"{{mod-key}} + W" action="exec_cmd" arg=(ref)"wallpaper-cmd"
+                - chord=(f)"{{mod-key}} + Space" action="exec_cmd" arg=(ref)"menu-cmd"
+                - chord=(f)"{{mod-key}} + Escape" action="exec_cmd" arg=(ref)"lock-cmd"
+                - chord="Print" action="exec_cmd" arg="gnist-screenshot region"
+                - chord="CTRL + Print" action="exec_cmd" arg="gnist-screenshot screen"
+                - chord="ALT + Print" action="exec_cmd" arg="gnist-screenshot window"
+                - chord=(f)"{{mod-key}} + SHIFT + J" action="layout" arg="togglesplit"
+                - chord=(f)"{{mod-key}} + F" action="window.fullscreen" { arg { mode "maximized"; action "toggle" } }
+                - chord=(f)"{{mod-key}} + h" action="focus" { arg { direction "left" } }
+                - chord=(f)"{{mod-key}} + l" action="focus" { arg { direction "right" } }
+                - chord=(f)"{{mod-key}} + k" action="focus" { arg { direction "up" } }
+                - chord=(f)"{{mod-key}} + j" action="focus" { arg { direction "down" } }
+                - chord=(f)"{{mod-key}} + S" action="workspace.toggle_special" arg="magic"
+                - chord=(f)"{{mod-key}} + SHIFT + S" action="window.move" { arg { workspace "special:magic" } }
+                - chord=(f)"{{mod-key}} + mouse_down" action="focus" { arg { workspace "e+1" } }
+                - chord=(f)"{{mod-key}} + mouse_up" action="focus" { arg { workspace "e-1" } }
+                - chord=(f)"{{mod-key}} + mouse:272" action="window.drag" { opts { mouse #true } }
+                - chord=(f)"{{mod-key}} + mouse:273" action="window.resize" { opts { mouse #true } }
+                - chord="XF86AudioRaiseVolume" action="exec_cmd" arg="swayosd-client --output-volume raise" { opts { repeating #true; locked #true } }
+                - chord="XF86AudioLowerVolume" action="exec_cmd" arg="swayosd-client --output-volume lower" { opts { repeating #true; locked #true } }
+                - chord="XF86AudioMute" action="exec_cmd" arg="swayosd-client --output-volume mute-toggle" { opts { repeating #true; locked #true } }
+                - chord="XF86AudioMicMute" action="exec_cmd" arg="swayosd-client --input-volume mute-toggle" { opts { repeating #true; locked #true } }
+                - chord="XF86MonBrightnessUp" action="exec_cmd" arg="swayosd-client --brightness raise" { opts { repeating #true; locked #true } }
+                - chord="XF86MonBrightnessDown" action="exec_cmd" arg="swayosd-client --brightness lower" { opts { repeating #true; locked #true } }
+                - chord="XF86AudioNext" action="exec_cmd" arg="swayosd-client --playerctl next" { opts { locked #true } }
+                - chord="XF86AudioPause" action="exec_cmd" arg="swayosd-client --playerctl play-pause" { opts { locked #true } }
+                - chord="XF86AudioPlay" action="exec_cmd" arg="swayosd-client --playerctl play-pause" { opts { locked #true } }
+                - chord="XF86AudioPrev" action="exec_cmd" arg="swayosd-client --playerctl prev" { opts { locked #true } }
+            }
+
+            workspaces {
+                mod (f)"{{mod-key}}"
+                count 10
+            }
+        }
+    }
+}

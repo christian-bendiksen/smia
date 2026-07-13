@@ -1,0 +1,10 @@
+// Profile index, with one file per family.
+//
+// Profiles compose modules with `use`, configure them with `with`, and swap
+// providers with `replace`. Extension chains merge in declaration order, so
+// children only specify differences. `./` fragment paths are relative to their
+// declarations; other relative paths start at the repository root.
+
+include "profiles/desktop/desktop.kdl" // shared base and stock compositor profiles
+include "profiles/astral/astral.kdl"  // Astral compositor profiles
+include "profiles/ember/ember.kdl"   // Ember compositor profiles

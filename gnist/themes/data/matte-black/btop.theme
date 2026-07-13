@@ -1,0 +1,90 @@
+# btop theme: Omarchy Matte Black
+# Author: tahayvr
+# Author profile: https://github.com/tahayvr
+
+# Use six-digit hexadecimal (#RRGGBB), two-character monochrome (#BW), or space-separated decimal RGB (0-255 0-255 0-255).
+# White can be written as "#ffffff", "#ff", or "255 255 255".
+
+# Graphs and meters support gradients.
+# For a solid color, leave the "mid" and "end" values empty.
+# For a two-color gradient, set the "start" and "end" values.
+# For a three-color gradient, set the "start", "mid", and "end" values.
+
+# Main background color; leave empty for the terminal default or transparency.
+theme[main_bg]=""
+
+# Default text color
+theme[main_fg]="#EAEAEA"
+
+# Box title color
+theme[title]="#8a8a8d"
+
+# Keyboard shortcut highlight color
+theme[hi_fg]="#f59e0b"
+
+# Selected process background color
+theme[selected_bg]="#f59e0b"
+
+# Selected process text color
+theme[selected_fg]="#EAEAEA"
+
+# Inactive and disabled text color
+theme[inactive_fg]="#333333"
+
+# Color for process details, status text, mini CPU graphs, and the details memory graph
+theme[proc_misc]="#8a8a8d"
+
+# CPU box outline color
+theme[cpu_box]="#8a8a8d"
+
+# Memory and disk box outline color
+theme[mem_box]="#8a8a8d"
+
+# Network box outline color
+theme[net_box]="#8a8a8d"
+
+# Process box outline color
+theme[proc_box]="#8a8a8d"
+
+# Box-divider and small-box line color
+theme[div_line]="#8a8a8d"
+
+# Temperature graph gradient
+theme[temp_start]="#8a8a8d"
+theme[temp_mid]="#f59e0b"
+theme[temp_end]="#b91c1c"
+
+# CPU graph gradient
+theme[cpu_start]="#8a8a8d"
+theme[cpu_mid]="#f59e0b"
+theme[cpu_end]="#b91c1c"
+
+# Free memory and disk meter gradient
+theme[free_start]="#8a8a8d"
+theme[free_mid]="#f59e0b"
+theme[free_end]="#b91c1c"
+
+# Cached memory and disk meter gradient
+theme[cached_start]="#8a8a8d"
+theme[cached_mid]="#f59e0b"
+theme[cached_end]="#b91c1c"
+
+# Available memory and disk meter gradient
+theme[available_start]="#8a8a8d"
+theme[available_mid]="#f59e0b"
+theme[available_end]="#b91c1c"
+
+# Used memory and disk meter gradient
+theme[used_start]="#8a8a8d"
+theme[used_mid]="#f59e0b"
+theme[used_end]="#b91c1c"
+
+# Download graph gradient
+theme[download_start]="#8a8a8d"
+theme[download_mid]="#f59e0b"
+theme[download_end]="#b91c1c"
+
+# Upload graph gradient
+theme[upload_start]="#8a8a8d"
+theme[upload_mid]="#f59e0b"
+theme[upload_end]="#b91c1c"

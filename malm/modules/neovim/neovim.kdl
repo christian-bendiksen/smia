@@ -1,0 +1,19 @@
+// This module exposes each gnist theme to Neovim without managing init.lua.
+// Add the loader once in the user's init.lua:
+//   local gnist = require("gnist")   -- Theme table, or {} on load failure.
+module "neovim" {
+    description "Neovim gnist theme bridge: loader module plus current-theme symlink"
+
+    requires {
+        command "nvim"
+    }
+
+    inputs {
+        input "theme-ref" type="path" default="~/.config/gnist/themes/current/neovim.lua"
+    }
+
+    outputs {
+        file "./init.lua" to="nvim/lua/gnist/init.lua"
+        symlink source=(ref)"theme-ref" to="~/.config/nvim/lua/gnist/theme.lua" if-missing="allow"
+    }
+}

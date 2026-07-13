@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Set MALM_REF to a published full SHA for Malm 0.3 with the v2
+# check/render language. The published development release is still 0.2.0.
+env:
+  MALM_REF: REPLACE_WITH_PUBLISHED_MALM_V0_3_SHA
+
+jobs:
+  workspace:
+    name: workspace and shell checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: reject whitespace errors
+        run: |
+          git diff --check
+          git show --check --format= HEAD
+      - name: install shellcheck
+        run: sudo apt-get update -q && sudo apt-get install -qy shellcheck
+      - name: validate shell
+        run: |
+          bash -n install/*.sh install/tests/*.sh scripts/*.sh malm/modules/base/bin/*
+          shellcheck -S warning install/*.sh install/tests/*.sh scripts/*.sh malm/modules/base/bin/*
+      - name: module contract and installer tests
+        run: |
+          scripts/lint-contract.sh
+          install/tests/run.sh
+
+  discover:
+    name: discover selectable profiles
+    runs-on: ubuntu-latest
+    outputs:
+      profiles: ${{ steps.profiles.outputs.profiles }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - id: profiles
+        run: printf 'profiles=%s\n' "$(scripts/profiles.sh --json)" >>"$GITHUB_OUTPUT"
+
+  render:
+    name: render ${{ matrix.profile }}
+    needs: [workspace, discover]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: ${{ fromJSON(needs.discover.outputs.profiles) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: dotfiles
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: christian-bendiksen/malm
+          ref: ${{ env.MALM_REF }}
+          path: malm-src
+      - uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
+        with:
+          toolchain: 1.95.0
+      - uses: Swatinem/rust-cache@8cbdedb5103daa674dcf46d3590fe06a76645684 # v2.8.0
+        with:
+          workspaces: malm-src
+      - name: check sibling workspace layout
+        run: |
+          test -f dotfiles/malm.kdl
+          test -f malm-src/Cargo.toml
+          test ! -e dotfiles/malm-src
+      - run: cargo build --locked --release --manifest-path malm-src/Cargo.toml
+      - name: check and render without apply
+        run: |
+          export PATH="$GITHUB_WORKSPACE/malm-src/target/release:$PATH"
+          dotfiles/scripts/verify.sh --profile "${{ matrix.profile }}"

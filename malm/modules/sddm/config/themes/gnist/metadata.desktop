@@ -1,0 +1,7 @@
+[SddmGreeterTheme]
+Name=Gnist
+Description=Minimal SDDM theme matching gnist/hyprlock
+Type=sddm-theme
+Version=1.0
+License=MIT
+MainScript=Main.qml

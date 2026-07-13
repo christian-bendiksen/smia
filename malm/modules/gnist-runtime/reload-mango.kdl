@@ -1,0 +1,8 @@
+// Compositor reload binding selected by Mango profiles.
+bind "mango" {
+    reload {
+        command {
+            argv "mmsg" "dispatch" "reload_config"
+        }
+    }
+}

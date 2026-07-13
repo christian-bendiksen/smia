@@ -1,0 +1,22 @@
+// VS Code requires themes to live in extensions, so this module provides a
+// local extension whose theme file links to gnist output. Select "Gnist"
+// once and reload the window after theme changes because VS Code caches files.
+// The fixed vs-dark uiTheme may misclassify light themes. VSCodium requires an
+// equivalent bridge under ~/.vscode-oss.
+module "vscode" {
+    description "VSCode gnist theme bridge: local extension skeleton plus current-theme symlink"
+
+    requires {
+        command "code"
+    }
+
+    inputs {
+        input "theme-ref" type="path" default="~/.config/gnist/themes/current/vscode.json"
+    }
+
+    outputs {
+        // Installing the extension also creates the theme symlink's parent.
+        dir "./extension" to="~/.vscode/extensions/gnist-theme"
+        symlink source=(ref)"theme-ref" to="~/.vscode/extensions/gnist-theme/themes/gnist.json" if-missing="allow"
+    }
+}

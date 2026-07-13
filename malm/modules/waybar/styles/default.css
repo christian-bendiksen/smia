@@ -1,0 +1,161 @@
+@import "../gnist/themes/current/waybar.css";
+
+/* The default bar uses a bottom window border, underline workspace states, and
+   square corners. Warning, critical, disconnected, muted, and active indicator
+   states map to the shared palette tokens defined by the imported theme. */
+
+* {
+  background-color: transparent;
+  color: @foreground;
+
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  font-size: 12px;
+}
+
+window#waybar {
+  background-color: @background;
+  border-bottom: 1px solid alpha(@color13, 0.25);
+}
+
+.modules-left {
+  margin-left: 12px;
+}
+
+.modules-right {
+  margin-right: 12px;
+  border-left: 1px solid alpha(@color13, 0.18);
+  padding-left: 10px;
+}
+
+#custom-gnist {
+  background-image: url("/usr/share/icons/aerynos-logo-dark.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-width: 20px;
+  min-height: 20px;
+  margin-right: 10px;
+}
+
+#workspaces button {
+  all: initial;
+  padding: 0 7px;
+  margin: 0 2px;
+  min-width: 9px;
+  color: @color13;
+  border-bottom: 2px solid transparent;
+}
+
+#workspaces button:hover {
+  color: @foreground;
+}
+
+#workspaces button.active {
+  color: @foreground;
+  border-bottom: 2px solid @accent;
+}
+
+#workspaces button.urgent {
+  color: @color1;
+  border-bottom: 2px solid @color1;
+}
+
+#workspaces button.empty {
+  opacity: 0.7;
+}
+
+#clock {
+  margin: 0 4px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+}
+
+#cpu,
+#battery,
+#pulseaudio,
+#network,
+#bluetooth,
+#custom-update {
+  min-width: 12px;
+  margin: 0 8px;
+}
+
+#cpu:hover,
+#battery:hover,
+#pulseaudio:hover,
+#network:hover,
+#bluetooth:hover {
+  color: @accent;
+}
+
+#tray {
+  margin-right: 12px;
+}
+
+#custom-expand-icon {
+  margin-right: 12px;
+  color: @color13;
+}
+
+#custom-update {
+  font-size: 10px;
+}
+
+#battery.warning {
+  color: @color3;
+}
+
+#battery.critical,
+#network.disconnected {
+  color: @color1;
+}
+
+#pulseaudio.muted,
+#bluetooth.off,
+#bluetooth.disabled {
+  color: @color13;
+}
+
+#custom-screenrecording-indicator,
+#custom-idle-indicator,
+#custom-notification-silencing-indicator {
+  min-width: 12px;
+  margin-left: 6px;
+  margin-right: 0;
+  font-size: 10px;
+  padding-bottom: 1px;
+  color: @color13;
+}
+
+#custom-screenrecording-indicator.active,
+#custom-idle-indicator.active,
+#custom-notification-silencing-indicator.active {
+  color: @color1;
+}
+
+#custom-voxtype {
+  min-width: 12px;
+  margin: 0 0 0 8px;
+}
+
+#custom-voxtype.recording {
+  color: @color1;
+}
+
+tooltip {
+  background-color: @color8;
+  color: @foreground;
+  border: 1px solid alpha(@color13, 0.3);
+  border-radius: 0;
+  padding: 6px 10px;
+}
+
+tooltip label {
+  color: @foreground;
+}
+
+.hidden {
+  opacity: 0;
+}

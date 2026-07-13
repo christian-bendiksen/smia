@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ $# -lt 1 || "$1" == "-h" || "$1" == "--help" ]]; then
+    printf 'usage: smia-profile <profile-name>\n' >&2
+    exit 2
+fi
+
+profile="$1"
+
+if ! command -v malm >/dev/null 2>&1; then
+    printf 'smia-profile: malm not found in PATH\n' >&2
+    exit 1
+fi
+
+malm apply --profile "$profile" -y
+
+exec smia-session

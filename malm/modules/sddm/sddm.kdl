@@ -1,0 +1,10 @@
+// SDDM cannot depend on files in a user's home directory. The installer copies
+// the resolved theme and background into static, root-owned system paths.
+module "sddm" {
+    description "SDDM system payload deployed by the privileged installer"
+
+    requires {
+        command "sddm"
+    }
+
+}

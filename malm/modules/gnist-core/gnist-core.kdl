@@ -1,0 +1,21 @@
+// This module owns profile-independent theme data and application bridges.
+// Mutable theme output remains behind symlinks so `gnist set` does not need
+// a subsequent `malm apply`. Per-profile state belongs to gnist-runtime.
+module "gnist-core" {
+    description "Gnist theme engine data/templates plus the passive gtk.css bridge symlinks"
+
+    requires {
+        command "gnist"
+    }
+
+    outputs {
+        // Theme sources are repository-root paths rather than module-local paths.
+        dir "gnist/themes/data" to="gnist/themes/data"
+        dir "gnist/themes/templates" to="gnist/themes/templates"
+
+        // Targets appear after the first `gnist set`, so initial dangling links
+        // are allowed.
+        symlink "~/.config/gnist/themes/current/gtk.css" to="~/.config/gtk-3.0/gtk.css" if-missing="allow"
+        symlink "~/.config/gnist/themes/current/gtk.css" to="~/.config/gtk-4.0/gtk.css" if-missing="allow"
+    }
+}

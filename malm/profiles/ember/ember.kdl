@@ -1,0 +1,213 @@
+// Shared Ember appearance and runtime settings for compositor-specific profiles.
+
+profile "ember" abstract=#true {
+    extends "desktop"
+
+    // Lock screen appearance and idle timings.
+    use "lock-idle" {
+        with {
+            hide-cursor #true
+            blur-passes 5
+            blur-size 11
+            bg-noise 0.03
+            bg-contrast 0.92
+            bg-brightness 0.68
+            bg-vibrancy 0.25
+            animations #true
+            anim-curve "0.22, 1.0, 0.36, 1.0"
+            anim-fadein 9
+            anim-fadeout 8
+            mark "❖"
+            mark-size 30
+            mark-shadow-passes 2
+            mark-shadow-size 9
+            show-clock #true
+            clock-size 64
+            input-width 380
+            input-height 56
+            input-y -48
+            input-outer-color "$accent_color"
+            input-outline-thickness 2
+            input-rounding 20
+            input-shadow-passes 3
+            input-shadow-size 10
+            placeholder "<i>❖ enter password…</i>"
+            keyboard-dim-seconds 240
+            lock-warning-seconds 420
+            lock-seconds 480
+            display-dim-seconds 540
+            suspend-seconds 1500
+        }
+    }
+
+    // Terminal appearance.
+    use "terminals" {
+        with {
+            padding 20
+            opacity 0.84
+            background-blur 1
+            cursor-shape "beam"
+        }
+    }
+
+    // Notification appearance.
+    use "mako" {
+        with {
+            anchor "bottom-right"
+            width 420
+            outer-margin 22
+            margin 14
+            padding "18,22"
+            border-size 1
+            border-radius 20
+            icon-border-radius 16
+            font-size 12
+            timeout 6000
+            critical-layer "overlay"
+        }
+    }
+
+    // Launcher appearance and theme recovery.
+    use "walker" {
+        with {
+            // Reuse Astral's translucent Walker CSS with Gruvbox runtime colors.
+            theme "gnist-astral"
+            extra-emergency {
+                text "Reapply Ember theme"
+                command "gnist set gruvbox --transition-ms 320"
+            }
+            placeholder-input "❖ embers…"
+            placeholder-list "no sparks"
+        }
+    }
+
+    // OSD appearance.
+    use "swayosd-style" {
+        fragments { replace "style" source="./swayosd/style.css" }
+    }
+
+    // Floating top bar.
+    use "waybar" {
+        fragments {
+            replace "config" source="./waybar/config.jsonc"
+            replace "style" source="./waybar/style.css"
+        }
+    }
+
+    // Fit wallpapers without cropping.
+    use "wallpaper" {
+        with {
+            fill-mode "fit"
+        }
+    }
+
+    // Shared Gruvbox runtime theme.
+    use "gnist-runtime" {
+        with {
+            theme "gruvbox"
+            // Match the reused Astral Walker styling.
+            menu-theme "gnist-astral-menu"
+        }
+    }
+}
+
+profile "mango-ember" {
+    extends "ember"
+    // Mango layout and effects. The runtime module retains its default reload fragment.
+    use "mango" {
+        patch {
+            // Gaps.
+            set "settings.gappih" 10
+            set "settings.gappiv" 10
+            set "settings.gappoh" 22
+            set "settings.gappov" 22
+            set "windows.smartgaps" 1
+            set "settings.enable-floating-snap" 1
+            set "settings.snap-distance" 36
+
+            // Blur.
+            set "windows.blur" 1
+            set "windows.blur-layer" 1
+            set "windows.blur-params-num-passes" 5
+            set "windows.blur-params-radius" 12
+            set "windows.blur-params-noise" 0.03
+            set "windows.blur-params-brightness" 0.86
+            set "windows.blur-params-contrast" 0.94
+            set "windows.blur-params-saturation" 1.18
+
+            // Shadows apply to tiled and floating surfaces.
+            set "windows.shadows" 1
+            set "windows.layer-shadows" 1
+            set "windows.shadow-only-floating" 0
+            set "windows.shadows-size" 14
+            set "windows.shadows-blur" 24
+            set "windows.shadows-position-x" 0
+            set "windows.shadows-position-y" 5
+            set "windows.shadowscolor" "0x140a0233"
+
+            // Preserve rounding with a single window.
+            set "windows.border-radius" 16
+            set "windows.no-radius-when-single" 0
+
+            // Window opacity.
+            set "windows.focused-opacity" 0.94
+            set "windows.unfocused-opacity" 0.82
+
+            // Slide on open and fade on close.
+            set "windows.animation-type-open" "slide"
+            set "windows.animation-type-close" "fade"
+            set "windows.animation-fade-in" 1
+            set "windows.animation-fade-out" 1
+            set "windows.fadein-begin-opacity" 0.40
+            set "windows.fadeout-begin-opacity" 1.0
+            set "windows.animation-duration-move" 460
+            set "windows.animation-duration-open" 380
+            set "windows.animation-duration-tag" 420
+            set "windows.animation-duration-close" 320
+            set "windows.animation-duration-focus" 130
+            set "windows.animation-curve-open"       "0.22,1.0,0.36,1"
+            set "windows.animation-curve-move"       "0.22,1.0,0.36,1"
+            set "windows.animation-curve-tag"        "0.22,1.0,0.36,1"
+            set "windows.animation-curve-close"      "0.36,0,0.66,1"
+            set "windows.animation-curve-focus"      "0.22,1.0,0.36,1"
+            set "windows.animation-curve-opafadein"  "0.22,1.0,0.36,1"
+            set "windows.animation-curve-opafadeout" "0.4,0,0.2,1"
+
+            // Layout proportions.
+            set "windows.default-mfact" 0.55
+            set "windows.scroller-default-proportion" 0.62
+            set "windows.scroller-prefer-center" 1
+            set "windows.scroller-proportion-preset" "0.5,0.62,0.84,1.0"
+            set "windows.overviewgappi" 10
+            set "windows.overviewgappo" 38
+        }
+    }
+}
+
+profile "niri-ember" {
+    extends "ember"
+    use "portals" {
+        with {
+            needs-wlr-backend #false
+            needs-gnome-backend #true
+            default "gnome;gtk;"
+            screenshot "gnome"
+            screen-cast "gnome"
+        }
+    }
+    use "gnist-runtime" {
+        fragments {
+            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-niri.kdl"
+        }
+    }
+    replace slot="compositor" module="niri" {
+        with {
+            gaps 12
+            focus-ring-width 2
+            default-column-width 0.62
+        }
+        fragments {
+            replace "effects" source="./niri/effects.kdl"
+        }
+    }
+}

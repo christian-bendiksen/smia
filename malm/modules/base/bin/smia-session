@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+MANIFEST="$XDG_CONFIG_HOME/gnist/session.services"
+FRAGMENT_DIR="$XDG_CONFIG_HOME/gnist/session.d"
+
+log() { printf 'smia-session: %s\n' "$*" >&2; }
+
+start_graphical_session() {
+    command -v systemctl >/dev/null 2>&1 || return 0
+    local env_vars="WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE"
+    systemctl --user import-environment $env_vars 2>/dev/null || true
+    command -v dbus-update-activation-environment >/dev/null 2>&1 \
+        && dbus-update-activation-environment --systemd $env_vars 2>/dev/null || true
+    systemctl --user start smia-session.target 2>/dev/null || true
+}
+
+start_graphical_session
+
+# Combine the main manifest with module-owned session.d fragments.
+collect_manifest() {
+    [[ -r "$MANIFEST" ]] && cat "$MANIFEST"
+    if [[ -d "$FRAGMENT_DIR" ]]; then
+        for frag in "$FRAGMENT_DIR"/*; do
+            [[ -r "$frag" ]] && cat "$frag"
+        done
+    fi
+}
+
+ensure_running() {
+    local proc="$1" cmd="$2"
+    [[ -z "$cmd" ]] && cmd="$proc"
+    pgrep -x "$proc" >/dev/null 2>&1 && return 0
+    if ! command -v "${cmd%% *}" >/dev/null 2>&1; then
+        log "missing command for '$proc': ${cmd%% *}"
+        return 0
+    fi
+    setsid sh -c "$cmd" >"/tmp/smia-${proc}.log" 2>&1 </dev/null &
+    disown 2>/dev/null || true
+}
+
+ensure_stopped() {
+    pkill -x "$1" >/dev/null 2>&1 || true
+}
+
+restart_service() {
+    local proc="$1" cmd="$2"
+    pkill -x "$proc" >/dev/null 2>&1 || true
+    for _ in $(seq 1 40); do
+        pgrep -x "$proc" >/dev/null 2>&1 || break
+        sleep 0.05
+    done
+    ensure_running "$proc" "$cmd"
+}
+
+restore_wallpaper() {
+    command -v gnist-wallpaper-apply.sh >/dev/null 2>&1 || return 0
+    local bg="$XDG_CONFIG_HOME/gnist/themes/background"
+    [[ -e "$bg" ]] || return 0
+    gnist-wallpaper-apply.sh >/dev/null 2>&1 || true
+}
+
+theme_mode=""
+declare -a stops=() runs=() restarts=()
+
+while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
+    read -r directive rest <<<"$line"
+    case "$directive" in
+        theme)   theme_mode="$rest" ;;
+        run)     runs+=("$rest") ;;
+        restart) restarts+=("$rest") ;;
+        stop)    stops+=("$rest") ;;
+        *)       log "ignoring unknown directive: $directive" ;;
+    esac
+done < <(collect_manifest)
+
+gnist_set_wallpaper=0
+if [[ -n "$theme_mode" ]] && command -v gnist >/dev/null 2>&1; then
+    read -r mode _ <<<"$theme_mode"
+    if [[ "$mode" == "keep" ]]; then
+        gnist reload >/dev/null 2>&1 || true
+    else
+        # Restart Waybar after changing themes so it reloads the new style.
+        pkill -x waybar 2>/dev/null || true
+        gnist set "$mode" >/dev/null 2>&1 || true
+        gnist_set_wallpaper=1
+    fi
+fi
+
+if ((${#stops[@]})); then
+    for entry in "${stops[@]}"; do
+        read -r proc _ <<<"$entry"
+        ensure_stopped "$proc"
+    done
+fi
+
+if ((${#runs[@]})); then
+    for entry in "${runs[@]}"; do
+        read -r proc cmd <<<"$entry"
+        ensure_running "$proc" "$cmd"
+    done
+fi
+
+if ((${#restarts[@]})); then
+    for entry in "${restarts[@]}"; do
+        read -r proc cmd <<<"$entry"
+        restart_service "$proc" "$cmd"
+    done
+fi
+
+((gnist_set_wallpaper)) || restore_wallpaper

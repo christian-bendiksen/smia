@@ -1,0 +1,37 @@
+// Shares one ordered Chromium-family flag policy between Chromium and Brave.
+module "browser-flags" {
+    description "Wayland/GPU flag policy shared by chromium and brave"
+    slot "browser-policy"
+
+    inputs {
+        input "default-flags" type="list" item-type="string" {
+            default \
+                "--ozone-platform=wayland" \
+                "--ozone-platform-hint=wayland" \
+                "--enable-features=TouchpadOverscrollHistoryNavigation"
+        }
+
+        // Additional flags are appended verbatim, one per line:
+        //   extra-flags "--force-dark-mode" "--enable-gpu-rasterization"
+        input "extra-flags" type="list" item-type="string"
+    }
+
+    outputs {
+        render "~/.config/chromium-flags.conf" format="line-list" {
+            @each "flag" in="default-flags" {
+                @line (ref)"flag"
+            }
+            @each "flag" in="extra-flags" {
+                @line (ref)"flag"
+            }
+        }
+        render "~/.config/brave-flags.conf" format="line-list" {
+            @each "flag" in="default-flags" {
+                @line (ref)"flag"
+            }
+            @each "flag" in="extra-flags" {
+                @line (ref)"flag"
+            }
+        }
+    }
+}

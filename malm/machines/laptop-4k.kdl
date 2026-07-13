@@ -1,0 +1,52 @@
+// Shared geometry for the internal 4K/120Hz display and an external 4K display.
+// Dimensions and offsets are integers; refresh rates and scales are floats.
+variables {
+    global.display-internal-name    "eDP-1"
+    global.display-internal-width   3840
+    global.display-internal-height  2400
+    global.display-internal-refresh 120.001
+    global.display-internal-scale   2.5
+    global.display-internal-x       0
+    global.display-internal-y       0
+    global.display-external-name    "DP-3"
+    global.display-external-width   3840
+    global.display-external-height  2160
+    global.display-external-refresh 60.0
+    global.display-external-scale   1.5
+    global.display-external-x       1536
+    global.display-external-y       0
+}
+
+extend-module "kanshi" {
+    inputs {
+        input "profiles" type="collection" item-type="kdl-document" {
+            defaults {
+                item "internal" {
+                    profile "internal" @quote="double" {
+                        output (ref)"global.display-internal-name" @quote="double" {
+                            mode (f)"{{global.display-internal-width}}x{{global.display-internal-height}}@{{global.display-internal-refresh}}Hz"
+                            scale (ref)"global.display-internal-scale"
+                            transform "normal"
+                        }
+                    }
+                }
+                item "docked" {
+                    profile "docked" @quote="double" {
+                        output (ref)"global.display-internal-name" @quote="double" {
+                            mode (f)"{{global.display-internal-width}}x{{global.display-internal-height}}@{{global.display-internal-refresh}}Hz"
+                            scale (ref)"global.display-internal-scale"
+                            position (f)"{{global.display-internal-x}},{{global.display-internal-y}}"
+                            transform "normal"
+                        }
+                        output (ref)"global.display-external-name" @quote="double" {
+                            mode (f)"{{global.display-external-width}}x{{global.display-external-height}}@{{global.display-external-refresh}}Hz"
+                            scale (ref)"global.display-external-scale"
+                            position (f)"{{global.display-external-x}},{{global.display-external-y}}"
+                            transform "normal"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

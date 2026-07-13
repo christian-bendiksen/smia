@@ -1,0 +1,41 @@
+accent               = "#818B6B"
+cursor               = "#F3C892"
+foreground           = "#D6D3C0"
+background           = "#131714"
+selection_foreground = "#131714"
+selection_background = "#818B6B"
+
+# Base UI and terminal colors
+color0  = "#131714"   # Base color
+color1  = "#CE7B57"   # Error color
+color2  = "#818B6B"   # Success and primary accent color
+color3  = "#F3C892"   # Warning color
+color4  = "#798A51"   # Informational color
+color5  = "#8C8975"   # Secondary accent color
+color6  = "#7FA48C"   # Accent color
+color7  = "#D6D3C0"   # Primary text color
+
+# Bright terminal and syntax colors
+color8  = "#1B211C"   # Surface color
+color9  = "#E09A78"   # Constants, numbers, and attention states
+color10 = "#AAB988"   # Strings and additions
+color11 = "#E4DFC9"   # Types and attributes
+color12 = "#929F75"   # Functions and constructors
+color13 = "#9AA184"   # Keywords and namespaces
+color14 = "#8FB8A3"   # Operators and escape sequences
+color15 = "#F0EDDD"   # Highest-emphasis highlight
+
+# Surface levels
+surface      = "#1B211C"
+surface_high = "#232B24"
+overlay      = "#2C362D"
+
+# Semantic colors
+success = "#818B6B"
+warning = "#F3C892"
+error   = "#CE7B57"
+info    = "#7FA48C"
+
+# Border colors
+border_active   = "#818B6B"
+border_inactive = "#3E4A40"

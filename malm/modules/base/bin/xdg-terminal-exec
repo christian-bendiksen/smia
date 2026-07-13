@@ -1,0 +1,73 @@
+#!/usr/bin/env sh
+
+set -eu
+
+# Prefer the smia-menu runtime choice, then the default-apps seed.
+LISTS="${XDG_CONFIG_HOME:-$HOME/.config}/xdg-terminals.list ${XDG_CONFIG_HOME:-$HOME/.config}/xdg-terminals-default.list"
+# Keep this aligned with smia-menu's DESKTOP_DIRS so every selectable
+# desktop entry can be resolved, including Flatpak exports.
+APP_DIRS="$HOME/.local/share/applications:$HOME/.local/share/flatpak/exports/share/applications:/var/lib/flatpak/exports/share/applications:/usr/local/share/applications:/usr/share/applications"
+
+find_desktop() {
+    entry="$1"
+    case "$entry" in /*)
+        [ -r "$entry" ] && { printf '%s\n' "$entry"; return 0; }
+        return 1
+    esac
+    OLD_IFS="$IFS"
+    IFS=:
+    for d in $APP_DIRS; do
+        if [ -r "$d/$entry" ]; then
+            IFS="$OLD_IFS"
+            printf '%s\n' "$d/$entry"
+            return 0
+        fi
+    done
+    IFS="$OLD_IFS"
+    return 1
+}
+
+exec_binary() {
+    awk '
+        /^\[/ { in_de = ($0 == "[Desktop Entry]") }
+        in_de && /^Exec=/ {
+            sub(/^Exec=/, "")
+            gsub(/%[fFuUdDnNickvm]/, "")
+            n = split($0, a, /[ \t]+/)
+            for (i = 1; i <= n; i++) if (a[i] != "") { print a[i]; exit }
+        }
+    ' "$1"
+}
+
+launch() {
+    bin="$1"; shift
+    if [ "$#" -gt 0 ]; then
+        exec "$bin" -e "$@"
+    else
+        exec "$bin"
+    fi
+}
+
+for LIST in $LISTS; do
+    [ -r "$LIST" ] || continue
+    while IFS= read -r entry || [ -n "$entry" ]; do
+        case "$entry" in ''|\#*) continue ;; esac
+        desktop="$(find_desktop "$entry")" || continue
+        bin="$(exec_binary "$desktop")"
+        [ -z "$bin" ] && continue
+        launch "$bin" "$@"
+    done < "$LIST"
+done
+
+if [ -n "${TERMINAL:-}" ] && command -v "$TERMINAL" >/dev/null 2>&1; then
+    launch "$TERMINAL" "$@"
+fi
+
+for term in alacritty kitty foot ghostty wezterm xterm; do
+    if command -v "$term" >/dev/null 2>&1; then
+        launch "$term" "$@"
+    fi
+done
+
+echo "xdg-terminal-exec: no terminal emulator found" >&2
+exit 1

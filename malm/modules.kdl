@@ -1,0 +1,45 @@
+// Module index. Each modules/<name>/ package contains its KDL and deployed
+// assets. This order is only for readability; modules remain inert until used.
+//
+// Modules may define a slot, typed `inputs`, replaceable `fragments`, checked
+// `requires`, and owned `outputs`. Rendering is isolated to built-ins,
+// `global.*`, and the module's inputs. Create modules with
+// `scripts/new-module.sh <name> [--daemon]`.
+
+// Modules shared by all profiles.
+include "modules/base/base.kdl"
+include "modules/elephant/elephant.kdl"
+include "modules/gnist-core/gnist-core.kdl"
+include "modules/gnist-runtime/gnist-runtime.kdl"
+include "modules/shell/shell.kdl"
+include "modules/btop/btop.kdl"
+include "modules/helix/helix.kdl"
+include "modules/fontconfig/fontconfig.kdl"
+include "modules/portals/portals.kdl"
+include "modules/sddm/sddm.kdl"
+
+// Desktop surface modules.
+include "modules/terminals/terminals.kdl"
+include "modules/browser-flags/browser-flags.kdl"
+include "modules/lock-idle/lock-idle.kdl"
+include "modules/mako/mako.kdl"
+include "modules/swayosd/swayosd.kdl"
+include "modules/walker/walker.kdl"
+include "modules/fuzzel/fuzzel.kdl"
+include "modules/waybar/waybar.kdl"
+include "modules/kanshi/kanshi.kdl"
+include "modules/wallpaper/wallpaper.kdl"
+include "modules/screenshot/screenshot.kdl"
+include "modules/appearance/appearance.kdl"
+include "modules/default-apps/default-apps.kdl"
+include "modules/neovim/neovim.kdl"
+include "modules/vscode/vscode.kdl"
+include "modules/share-picker/share-picker.kdl"
+include "modules/rog-rgb/rog-rgb.kdl"
+
+include "modules/test/test.kdl"
+
+// Compositors: slot "compositor" permits exactly one active provider.
+include "modules/mango/mango.kdl"
+include "modules/niri/niri.kdl"
+include "modules/hypr/hypr.kdl"

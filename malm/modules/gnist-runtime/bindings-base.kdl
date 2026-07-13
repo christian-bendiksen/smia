@@ -1,0 +1,45 @@
+bind "xdg-desktop-portal-gtk" {
+    reload {
+        command {
+            argv "systemctl" "--user" "restart" "xdg-desktop-portal-gtk"
+        }
+    }
+}
+
+bind "waybar" {
+    reload {
+        signal process="waybar" signal="SIGUSR2"
+    }
+}
+
+bind "helix" {
+    reload {
+        signal process="hx" signal="SIGUSR1"
+    }
+}
+
+bind "kitty" {
+    reload {
+        signal process="kitty" signal="SIGUSR1"
+    }
+}
+
+bind "ghostty" {
+    reload {
+        signal process="ghostty" signal="SIGUSR2"
+    }
+}
+
+bind "btop" {
+    reload {
+        signal process="btop" signal="SIGUSR2"
+    }
+}
+
+bind "mako" {
+    reload {
+        command {
+            argv "makoctl" "reload"
+        }
+    }
+}

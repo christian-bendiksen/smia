@@ -1,0 +1,99 @@
+// One composed Walker configuration serves all profiles. Typed inputs carry
+// profile differences, and an unset emergency record emits no TOML block.
+module "walker" {
+    description "Walker application launcher config, themes and session fragment"
+    slot "launcher"
+
+    requires {
+        command "walker"
+    }
+
+    inputs {
+        input "theme" type="string" default="gnist-default"
+        input "placeholder-input" type="string" default=" Search..."
+        input "placeholder-list" type="string" default="No Results"
+        input "quick-activate" type="list" item-type="string"
+
+        // This optional record adds one profile-specific recovery action.
+        input "extra-emergency" type="record" optional=#true {
+            fields {
+                field "text" type="string" required=#true
+                field "command" type="string" required=#true
+            }
+        }
+
+        // Every profile retains a launcher restart action.
+        input "emergency-restart-text" type="string" default="Restart Walker"
+        input "emergency-restart-command" type="string" default="pkill -x walker; walker &"
+    }
+
+    outputs {
+        render "walker/config.toml" format="toml" {
+            "force_keyboard_focus" #true
+            "selection_wrap" #true
+            "theme" (ref)"theme"
+            "additional_theme_location" "./themes/"
+            "hide_action_hints" #true
+            "placeholders" {
+                default input=(ref)placeholder-input list=(ref)placeholder-list
+            }
+            "keybinds" {
+                "quick_activate" (ref)"quick-activate"
+                // close "Escape"
+                next "Tab" "Down"
+                previous "shift ISO_Left_Tab" "Up"
+            }
+            "columns" {
+                "symbols" 1
+            }
+            "providers" {
+                "max_results" 256
+                default "desktopapplications" "websearch"
+                prefixes {
+    - {
+        prefix "/"
+        provider providerlist
+    }
+    - {
+        prefix .
+        provider files
+    }
+    - {
+        prefix :
+        provider symbols
+    }
+    - {
+        prefix "="
+        provider calc
+    }
+    - {
+        prefix @
+        provider websearch
+    }
+    - {
+        prefix $
+        provider clipboard
+    }
+                }
+            }
+            @when-set "extra-emergency" {
+                emergencies {
+    - {
+        text (ref)extra-emergency.text
+        command (ref)extra-emergency.command
+    }
+                }
+            }
+            emergencies {
+    - {
+        text (ref)emergency-restart-text
+        command (ref)emergency-restart-command
+    }
+            }
+        }
+        // Static CSS and XML themes can be deployed directly without rendering.
+        dir "./themes" to="walker/themes"
+        // Profile-dependent configuration requires Walker to restart on activation.
+        file "./session.fragment" to="gnist/session.d/walker"
+    }
+}

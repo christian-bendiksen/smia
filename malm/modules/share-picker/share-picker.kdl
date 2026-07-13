@@ -1,0 +1,21 @@
+// This bridge exposes gnist CSS to hyprland-preview-share-picker. The picker
+// is not available from the Aeryn package repositories and must be installed
+// separately before enabling this module. Pass the stylesheet explicitly if
+// the installed picker does not discover it:
+// `-s ~/.config/hyprland-preview-share-picker/style.css`.
+module "share-picker" {
+    description "Theme bridge symlink for hyprland-preview-share-picker's stylesheet"
+
+    requires {
+        command "hyprland-preview-share-picker"
+    }
+
+    inputs {
+        input "style-ref" type="path" default="~/.config/gnist/themes/current/hyprland-preview-share-picker.css"
+    }
+
+    outputs {
+        dir "./config" to="hyprland-preview-share-picker"
+        symlink source=(ref)"style-ref" to="~/.config/hyprland-preview-share-picker/style.css" if-missing="allow"
+    }
+}

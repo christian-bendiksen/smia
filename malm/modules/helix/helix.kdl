@@ -1,0 +1,135 @@
+// Provides Helix settings and links its theme to the current gnist theme.
+module "helix" {
+    description "Helix editor configuration and gnist theme link"
+
+    requires {
+        command "hx"
+    }
+
+    inputs {
+        // [editor]
+        input "true-color"              type="bool"   default=#true
+        input "undercurl"               type="bool"   default=#true
+        input "autocompletion"          type="bool"   default=#true
+        input "auto-info"               type="bool"   default=#true
+        input "cursorline"              type="bool"   default=#true
+        input "color-modes"             type="bool"   default=#true
+        input "idle-timeout"            type="int"    default=40
+        input "line-number" type="enum" default="relative" {
+            values "absolute" "relative"
+        }
+        input "end-of-line-diagnostics" type="enum" default="hint" {
+            values "disable" "hint" "info" "warning" "error"
+        }
+        // [editor.cursor-shape]
+        input "cursor-insert" type="enum" default="bar" {
+            values "block" "bar" "underline" "hidden"
+        }
+        input "cursor-normal" type="enum" default="block" {
+            values "block" "bar" "underline" "hidden"
+        }
+        input "cursor-select" type="enum" default="underline" {
+            values "block" "bar" "underline" "hidden"
+        }
+        // [editor.lsp]
+        input "lsp-display-messages"          type="bool" default=#true
+        input "lsp-display-progress-messages" type="bool" default=#true
+        input "lsp-inlay-hints"               type="bool" default=#true
+        // [editor.inline-diagnostics]
+        input "inline-diagnostics-cursor-line" type="enum" default="hint" {
+            values "disable" "hint" "info" "warning" "error"
+        }
+        // [editor.whitespace.render]
+        input "whitespace-render-tab" type="enum" default="all" {
+            values "none" "all" "selection"
+        }
+        // [editor.indent-guides]
+        input "indent-guides-render"      type="bool"   default=#true
+        input "indent-guides-character"   type="string" default="╎"
+        input "indent-guides-skip-levels" type="int"    default=0
+        // [editor.statusline]
+        input "statusline-left" type="list" item-type="string" {
+            default "mode" "version-control" "read-only-indicator" \
+                    "file-name" "file-modification-indicator"
+        }
+        input "statusline-center" type="list" item-type="string" { default "diagnostics" }
+        input "statusline-right" type="list" item-type="string" {
+            default "register" "position" "primary-selection-length" \
+                    "selections" "file-encoding" "file-indent-style" \
+                    "file-line-ending" "position-percentage" "file-type" \
+                    "spacer"
+        }
+        input "statusline-mode-normal" type="string" default="●"
+        input "statusline-mode-insert" type="string" default="✚"
+        input "statusline-mode-select" type="string" default="▲"
+        input "statusline-diagnostics" type="list" item-type="string" { default "warning" "error" }
+        input "workspace-diagnostics"  type="list" item-type="string" { default "warning" "error" }
+        // [keys.normal]
+        input "keys-normal-tab" type="string" default="move_parent_node_end"
+        input "keys-normal-x"   type="list" item-type="string" {
+            default "extend_line_up" "extend_to_line_bounds"
+        }
+        input "theme-ref" type="path" default="~/.config/gnist/themes/current/helix.toml"
+    }
+
+    outputs {
+        render "helix/config.toml" format="toml" {
+            "theme" "gnist"
+            "editor" {
+                "true-color" (ref)"true-color"
+                "undercurl" (ref)"undercurl"
+                "auto-completion" (ref)"autocompletion"
+                "auto-info" (ref)"auto-info"
+                "cursorline" (ref)"cursorline"
+                "color-modes" (ref)"color-modes"
+                "idle-timeout" (ref)"idle-timeout"
+                "line-number" (ref)"line-number"
+                "end-of-line-diagnostics" (ref)"end-of-line-diagnostics"
+                "cursor-shape" {
+                    "insert" (ref)"cursor-insert"
+                    "normal" (ref)"cursor-normal"
+                    "select" (ref)"cursor-select"
+                }
+                "lsp" {
+                    "display-messages" (ref)"lsp-display-messages"
+                    "display-progress-messages" (ref)"lsp-display-progress-messages"
+                    "display-inlay-hints" (ref)"lsp-inlay-hints"
+                }
+                "inline-diagnostics" {
+                    "cursor-line" (ref)"inline-diagnostics-cursor-line"
+                }
+                "whitespace" {
+                    "render" {
+                        "tab" (ref)"whitespace-render-tab"
+                    }
+                }
+                "indent-guides" {
+                    "render" (ref)"indent-guides-render"
+                    "character" (ref)"indent-guides-character"
+                    "skip-levels" (ref)"indent-guides-skip-levels"
+                }
+                "statusline" {
+                    "left" (ref)"statusline-left"
+                    "center" (ref)"statusline-center"
+                    "right" (ref)"statusline-right"
+                    "diagnostics" (ref)"statusline-diagnostics"
+                    "workspace-diagnostics" (ref)"workspace-diagnostics"
+                    "mode" {
+                        "normal" (ref)"statusline-mode-normal"
+                        "insert" (ref)"statusline-mode-insert"
+                        "select" (ref)"statusline-mode-select"
+                    }
+                }
+            }
+            "keys" {
+                "normal" {
+                    "tab" (ref)"keys-normal-tab"
+                    "X" (ref)"keys-normal-x"
+                }
+            }
+        }
+        // Create the parent directory required by the gnist theme link.
+        file "./config/themes/.gitkeep" to="helix/themes/.gitkeep"
+        symlink source=(ref)"theme-ref" to="~/.config/helix/themes/gnist.toml" if-missing="allow"
+    }
+}

@@ -1,0 +1,202 @@
+// Shared Astral appearance and runtime settings for compositor-specific profiles.
+
+profile "astral" abstract=#true {
+    extends "desktop"
+
+    // Lock screen appearance.
+    use "lock-idle" {
+        with {
+            hide-cursor #true
+            blur-passes 6
+            blur-size 9
+            bg-noise 0.015
+            bg-contrast 0.88
+            bg-brightness 0.62
+            bg-vibrancy 0.22
+            animations #true
+            mark "✦"
+            show-clock #true
+            input-width 360
+            input-height 52
+            input-y -48
+            input-outer-color "$accent_color"
+            input-outline-thickness 2
+            input-rounding 16
+            input-shadow-passes 3
+            input-shadow-size 8
+            placeholder "<i>✦ Enter password…</i>"
+        }
+    }
+
+    use "walker" {
+        with {
+            theme "gnist-astral"
+            extra-emergency {
+                text "Reload Astral profile"
+                command "gnist set astral --transition-ms 320"
+            }
+            placeholder-input "✦ Search the void…"
+            placeholder-list "No results"
+            // Restart outside the GTK theme so broken CSS cannot block recovery.
+            emergency-restart-command "sh -lc 'pkill -x walker >/dev/null 2>&1 || true; walker --gapplication-service >/tmp/smia-walker.log 2>&1 &'"
+        }
+    }
+
+    use "mako" {
+        with {
+            border-radius 16
+            icon-border-radius 12
+        }
+    }
+
+    use "swayosd-style" {
+        fragments { replace "style" source="./swayosd/style.css" }
+    }
+    use "waybar" {
+        fragments {
+            replace "config" source="./waybar/config.jsonc"
+            replace "style" source="./waybar/style.css"
+        }
+    }
+
+    // Shared Astral runtime theme.
+    use "gnist-runtime" {
+        with {
+            theme "astral"
+            menu-theme "gnist-astral-menu"
+        }
+    }
+}
+
+profile "mango-astral" {
+    extends "astral"
+    // Mango layout and effects. The runtime module retains its default reload fragment.
+    use "mango" {
+        with {
+            tag-layout "scroller"
+        }
+        // Additional window and layer rules.
+        patch {
+            // Shell surfaces render their own material, so their layer rules
+            // suppress compositor blur and shadows.
+
+            set "settings.gappih" 8
+            set "settings.gappiv" 8
+            set "settings.gappoh" 16
+            set "settings.gappov" 16
+            set "windows.smartgaps" 1
+            set "settings.enable-floating-snap" 1
+            set "settings.snap-distance" 32
+
+            set "windows.blur" 1
+            set "windows.blur-layer" 1
+            set "windows.blur-params-num-passes" 4
+            set "windows.blur-params-radius" 10
+            set "windows.blur-params-noise" 0.03
+            set "windows.blur-params-brightness" 0.82
+            set "windows.blur-params-contrast" 0.92
+            set "windows.blur-params-saturation" 1.25
+            set "windows.shadows" 1
+            set "windows.layer-shadows" 1
+            set "windows.shadow-only-floating" 0
+            set "windows.shadows-blur" 20
+            set "windows.shadows-position-y" 3
+            set "windows.shadowscolor" "0x0a0c1966"
+            set "windows.border-radius" 12
+            set "windows.focused-opacity" 0.95
+            set "windows.unfocused-opacity" 0.86
+
+            set "windows.animation-type-open" "zoom"
+            set "windows.zoom-initial-ratio" 0.86
+            set "windows.zoom-end-ratio" 1.0
+            set "windows.fadein-begin-opacity" 0.35
+            set "windows.fadeout-begin-opacity" 1.0
+            set "windows.animation-duration-move" 380
+            set "windows.animation-duration-open" 340
+            set "windows.animation-duration-tag" 400
+            set "windows.animation-duration-close" 280
+            set "windows.animation-duration-focus" 140
+            set "windows.animation-curve-open" "0.16,1.0,0.3,1"
+            set "windows.animation-curve-move" "0.25,0.46,0.45,0.94"
+            set "windows.animation-curve-tag" "0.16,1.0,0.3,1"
+            set "windows.animation-curve-close" "0.4,0,0.2,1"
+            set "windows.animation-curve-focus" "0.16,1.0,0.3,1"
+            set "windows.animation-curve-opafadein" "0.16,1.0,0.3,1"
+
+            set "windows.default-mfact" 0.58
+            set "windows.scroller-prefer-center" 1
+            set "windows.scroller-default-proportion" 0.7
+            set "windows.scroller-proportion-preset" "0.5,0.7,0.86,1.0"
+            set "windows.overviewgappi" 8
+            set "windows.overviewgappo" 36
+            collection "window-rules" {
+                append "pavucontrol-float" { windowrule "isfloating:1,appid:pavucontrol" }
+                append "pavucontrol-pw-float" { windowrule "isfloating:1,appid:org.pulseaudio.pavucontrol" }
+                append "blueman-float" { windowrule "isfloating:1,appid:blueman-manager" }
+                append "nm-editor-float" { windowrule "isfloating:1,appid:nm-connection-editor" }
+                append "calculator-float" { windowrule "isfloating:1,appid:org.gnome.Calculator" }
+                append "pip-float" { windowrule "isfloating:1,isnoborder:1,title:^(Picture-in-Picture|Picture in picture)$" }
+            }
+            collection "layer-rules" {
+                append "waybar-noblur" { layerrule "noblur:1,layer_name:waybar" }
+                append "walker-material" { layerrule "noblur:1,noshadow:1,animation_type_open:zoom,animation_type_close:zoom,layer_name:walker" }
+                append "notifications-material" { layerrule "noblur:1,noshadow:1,layer_name:notifications" }
+            }
+        }
+    }
+}
+
+profile "niri-astral" {
+    extends "astral"
+    use "portals" {
+        with {
+            needs-wlr-backend #false
+            needs-gnome-backend #true
+            default "gnome;gtk;"
+            screenshot "gnome"
+            screen-cast "gnome"
+        }
+    }
+    use "gnist-runtime" {
+        fragments {
+            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-niri.kdl"
+        }
+    }
+    // Astral effects for Niri.
+    replace slot="compositor" module="niri" {
+        fragments {
+            replace "effects" source="./niri/effects.kdl"
+        }
+    }
+}
+
+profile "hypr-astral" {
+    extends "astral"
+    use "portals" {
+        with {
+            needs-wlr-backend #false
+            needs-hyprland-backend #true
+            default "hyprland;gtk;"
+            screenshot "hyprland"
+            screen-cast "hyprland"
+        }
+    }
+    replace slot="compositor" module="hypr" {
+        with {
+            gaps-in 8
+            gaps-out 16
+            rounding 12
+            active-opacity 0.95
+            inactive-opacity 0.86
+            blur #true
+            blur-size 10
+            blur-passes 4
+            shadow-range 8
+        }
+    }
+    use "gnist-runtime" {
+        fragments {
+            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-hyprland.kdl"
+        }
+    }
+}

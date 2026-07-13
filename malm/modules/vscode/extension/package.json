@@ -1,0 +1,14 @@
+{
+  "name": "gnist-theme",
+  "displayName": "Gnist Theme",
+  "description": "Live color theme bridged from the gnist theme engine.",
+  "publisher": "gnist",
+  "version": "1.0.0",
+  "engines": { "vscode": "^1.0.0" },
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [
+      { "label": "Gnist", "uiTheme": "vs-dark", "path": "./themes/gnist.json" }
+    ]
+  }
+}

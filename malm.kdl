@@ -1,0 +1,63 @@
+// Malm discovers this root file; includes define machines, modules, and profiles.
+// The `config`, `meta`, and `assets` blocks remain at the root.
+//
+//   malm plan  --profile mango-astral   # preview changes safely
+//   malm vars  --profile mango-astral   # inspect resolved variable scopes
+//   malm apply --profile mango-astral   # deploy with per-entry conflict backups
+
+// Bare destinations such as to="mango" resolve below ~/.config. Use an
+// absolute or "~/…" destination to override this per entry.
+config target="~/.config" default-profile="default"
+
+meta name="smia" \
+    author="Christian Bendiksen" \
+    homepage="https://github.com/christian-bendiksen/smia" \
+    malm-version=">=0.3,<0.4"
+
+// Shared design tokens use `global.*`, the cross-module variable namespace.
+// Outputs otherwise receive their typed inputs and Malm built-ins.
+variables {
+    // Fonts do not vary by machine or profile.
+    global.font-family  "JetBrainsMono Nerd Font"
+    global.font-mono    "JetBrainsMono Nerd Font Mono"
+    global.font-symbols "Symbols Nerd Font Mono"
+}
+
+// Malm owns these third-party payloads. Checksums pin each artifact, and
+// `installed-check` avoids reinstalling an existing payload.
+assets {
+    asset "jetbrains-mono-nerd" {
+        url "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip"
+        dst "~/.local/share/fonts/JetbrainsMono"
+        format "zip"
+        sha256 "76f05ff3ace48a464a6ca57977998784ff7bdbb65a6d915d7e401cd3927c493c"
+        installed-check "JetBrainsMonoNerdFont-Regular.ttf"
+        refresh-font-cache #true
+    }
+    asset "adw-gtk3" {
+        url "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.4/adw-gtk3v6.4.tar.xz"
+        dst "~/.local/share/themes"
+        format "tar-xz"
+        sha256 "c396e4f0df3eea081186ae13321345f21b9934691b4b4d75b4956f00cbd033d1"
+        installed-check "adw-gtk3"
+    }
+    asset "AerynOS-Eldritch" {
+        url "https://codeberg.org/StormRosenaa/AerynOS-Art-icons/raw/branch/main/AerynOS-Eldritch.tar.xz"
+        dst "~/.local/share/icons"
+        format "tar-xz"
+        require-sha256 #false
+        installed-check "AerynOS-Eldritch"
+    }
+}
+
+include "malm/slots.kdl"    // desktop session roles
+include "malm/modules.kdl"  // reusable role providers
+
+// Select one machine after modules.kdl because `extend-module` requires an
+// existing target. The machine also supplies Kanshi's line-list profile fragments.
+include "malm/machines/laptop-4k.kdl"
+
+include "malm/profiles.kdl" // CLI-selectable compositions
+
+// Optional machine-local overrides take precedence because they load last.
+include "~/.config/malm/local.kdl" optional=#true

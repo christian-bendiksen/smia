@@ -1,0 +1,84 @@
+# Source: https://github.com/catppuccin/btop/blob/main/themes/catppuccin_latte.theme
+# Main background color; leave empty for the terminal default or transparency.
+theme[main_bg]="#eff1f5"
+
+# Default text color
+theme[main_fg]="#4c4f69"
+
+# Box title color
+theme[title]="#4c4f69"
+
+# Keyboard shortcut highlight color
+theme[hi_fg]="#1e66f5"
+
+# Selected process background color
+theme[selected_bg]="#bcc0cc"
+
+# Selected process text color
+theme[selected_fg]="#1e66f5"
+
+# Inactive and disabled text color
+theme[inactive_fg]="#8c8fa1"
+
+# Graph overlay text color, including uptime and network scale labels
+theme[graph_text]="#dc8a78"
+
+# Percentage meter background color
+theme[meter_bg]="#bcc0cc"
+
+# Color for process details, status text, mini CPU graphs, and the details memory graph
+theme[proc_misc]="#dc8a78"
+
+# CPU, memory, network, and process box outline colors
+theme[cpu_box]="#8839ef" # Mauve palette color
+theme[mem_box]="#40a02b" # Green palette color
+theme[net_box]="#e64553" # Maroon palette color
+theme[proc_box]="#1e66f5" # Blue palette color
+
+# Box-divider and small-box line color
+theme[div_line]="#9ca0b0"
+
+# Temperature gradient from green through yellow to red
+theme[temp_start]="#40a02b"
+theme[temp_mid]="#df8e1d"
+theme[temp_end]="#d20f39"
+
+# CPU gradient from teal to lavender
+theme[cpu_start]="#179299"
+theme[cpu_mid]="#209fb5"
+theme[cpu_end]="#7287fd"
+
+# Free memory and disk gradient from mauve through lavender to blue
+theme[free_start]="#8839ef"
+theme[free_mid]="#7287fd"
+theme[free_end]="#1e66f5"
+
+# Cached memory and disk gradient from sapphire to lavender
+theme[cached_start]="#209fb5"
+theme[cached_mid]="#1e66f5"
+theme[cached_end]="#7287fd"
+
+# Available memory and disk gradient from peach to red
+theme[available_start]="#fe640b"
+theme[available_mid]="#e64553"
+theme[available_end]="#d20f39"
+
+# Used memory and disk gradient from green to sky
+theme[used_start]="#40a02b"
+theme[used_mid]="#179299"
+theme[used_end]="#04a5e5"
+
+# Download gradient from peach to red
+theme[download_start]="#fe640b"
+theme[download_mid]="#e64553"
+theme[download_end]="#d20f39"
+
+# Upload gradient from green to sky
+theme[upload_start]="#40a02b"
+theme[upload_mid]="#179299"
+theme[upload_end]="#04a5e5"
+
+# Process-box gradient for thread, memory, and CPU usage: sapphire to mauve
+theme[process_start]="#209fb5"
+theme[process_mid]="#7287fd"
+theme[process_end]="#8839ef"

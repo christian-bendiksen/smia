@@ -1,0 +1,42 @@
+accent               = "#82aaff"
+cursor               = "#86e1fc"
+foreground           = "#c8d3f5"
+background           = "#0f111a"
+selection_foreground = "#0f111a"
+selection_background = "#82aaff"
+
+# Standard terminal colors
+color0  = "#1b1e2d"   # Black void surface
+color1  = "#ff757f"   # Red tone
+color2  = "#c3e88d"   # Green tone
+color3  = "#ffc777"   # Yellow tone
+color4  = "#82aaff"   # Blue accent
+color5  = "#c099ff"   # Violet-magenta tone
+color6  = "#86e1fc"   # Cyan tone
+color7  = "#c8d3f5"   # White foreground
+
+# Bright terminal colors
+color8  = "#444a73"   # Bright black with a muted blue-gray tone
+color9  = "#ff8d94"   # Bright red tone
+color10 = "#c7fb6d"   # Bright green tone
+color11 = "#ffd8ab"   # Bright yellow tone
+color12 = "#9ab8ff"   # Bright blue tone
+color13 = "#caabff"   # Bright magenta tone
+color14 = "#b2ebff"   # Bright cyan tone
+color15 = "#ffffff"   # Bright white tone
+
+# Layered surfaces above the background
+surface      = "#161928"   # Level 1 for cards, sidebars, and panels
+surface_high = "#1e2235"   # Level 2 for inputs, active rows, and secondary panels
+overlay      = "#262b42"   # Level 3 for modal, popover, and drop-down backgrounds
+
+# Shared semantic state colors for all templates
+success      = "#c3e88d"   # Matches color2
+warning      = "#ffc777"   # Matches color3
+error        = "#ff757f"   # Matches color1
+info         = "#82aaff"   # Matches the accent
+muted        = "#828bb8"   # Dim text with 5.7:1 background contrast; color8 is reserved for surfaces
+
+# Named border colors
+border_active   = "#82aaff"   # Matches the accent
+border_inactive = "#444a73"   # Matches color8

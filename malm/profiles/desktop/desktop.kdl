@@ -1,0 +1,86 @@
+// Abstract base for selectable desktop profiles; module defaults supply
+// values that profiles do not override.
+
+profile "desktop" abstract=#true {
+    use "base"
+    use "elephant"
+    use "shell"
+    use "btop"
+    use "helix"
+    use "neovim"
+    use "vscode"
+    use "fontconfig"
+    use "portals"
+    use "sddm"
+    use "gnist-core"
+    use "browser-flags"
+    use "terminals"
+    use "lock-idle"
+    use "mako"
+    use "walker"
+    use "swayosd"
+    // Package defaults define the stock Waybar and swayosd appearance.
+    use "swayosd-style"
+    use "waybar"
+    use "kanshi"
+    use "wallpaper"
+    use "screenshot"
+    use "appearance"
+    use "default-apps"
+    use "mango"
+    // The stock session uses Mango with the Aeryn theme and runtime defaults.
+    use "gnist-runtime"
+}
+
+// The default session inherits "desktop" unchanged. Mango's `binds` belong to
+// its compositor provider and disappear when another compositor replaces it.
+profile "default" {
+    extends "desktop"
+}
+
+// `replace` swaps the inherited max=1 compositor provider. Using Niri directly
+// would activate a second compositor and fail slot validation.
+profile "niri" {
+    extends "desktop"
+    replace slot="compositor" module="niri"
+    use "portals" {
+        with {
+            needs-wlr-backend #false
+            needs-gnome-backend #true
+            default "gnome;gtk;"
+            screenshot "gnome"
+            screen-cast "gnome"
+        }
+    }
+    // Reusing an inherited module merges these values and preserves theme `aeryn`.
+    use "gnist-runtime" {
+        with {
+            menu-theme "gnist-default"
+        }
+        fragments {
+            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-niri.kdl"
+        }
+    }
+}
+
+profile "hypr" {
+    extends "desktop"
+    replace slot="compositor" module="hypr"
+    use "portals" {
+        with {
+            needs-wlr-backend #false
+            needs-hyprland-backend #true
+            default "hyprland;gtk;"
+            screenshot "hyprland"
+            screen-cast "hyprland"
+        }
+    }
+    use "gnist-runtime" {
+        with {
+            menu-theme "gnist-default"
+        }
+        fragments {
+            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-hyprland.kdl"
+        }
+    }
+}

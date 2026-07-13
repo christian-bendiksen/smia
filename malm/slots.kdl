@@ -1,0 +1,24 @@
+// Registry of desktop session roles.
+//
+// Modules declare the slots they provide. Validation rejects profiles that
+// activate more providers than a slot's `max` permits.
+//
+// Malm permits one `slots` block, so all roles are declared here.
+slots {
+    slot "compositor"     max=1 description="active Wayland compositor"
+    slot "bar"            max=1 description="active status bar"
+    slot "launcher"       max=1 description="active app launcher"
+    slot "notifications"  max=1 description="active notification daemon"
+    slot "osd"            max=1 description="on-screen display daemon"
+    slot "osd-style"      max=1 description="swayosd stylesheet"
+    slot "theme-runtime"  max=1 description="active theme / session metadata"
+    slot "terminal"       max=1 description="terminal config surfaces"
+    slot "browser-policy" max=1 description="browser Wayland/GPU flag policy"
+
+    // These roles have no separate behavior and style providers. Profiles swap
+    // their single provider with `replace slot="…" module="…"`.
+    slot "portal"           max=1 description="xdg-desktop-portal configuration"
+    slot "shell"            max=1 description="interactive shell environment"
+    slot "outputs"          max=1 description="output / monitor layout manager"
+    slot "wallpaper-daemon" max=1 description="background image renderer"
+}

@@ -1,0 +1,17 @@
+// Provides dynamic output management for the "outputs" slot. The selected
+// machine file owns both global.display-* values and its output profiles so
+// only one machine layout is deployed.
+module "kanshi" {
+    description "Kanshi dynamic output profiles composed from global.display-* tokens"
+    slot "outputs"
+
+    requires {
+        command "kanshi"
+    }
+
+    outputs {
+        render "kanshi/config" format="text" separator=" " validate="kanshi" {
+            @splice "profiles"
+        }
+    }
+}

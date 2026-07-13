@@ -1,0 +1,140 @@
+{
+  "name": "rail",
+  "reload_style_on_change": true,
+  "layer": "top",
+  "position": "left",
+  "width": 48,
+  "spacing": 0,
+  "margin-top": 0,
+  "margin-bottom": 0,
+
+  "modules-left": [
+    "custom/astral",
+    "ext/workspaces"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "custom/mpris",
+    "cpu",
+    "network",
+    "pulseaudio",
+    "battery",
+    "tray",
+    "custom/power"
+  ],
+
+  "custom/astral": {
+    "format": "✦",
+    "tooltip-format": "Astral · launcher",
+    "on-click": "walker",
+    "on-click-right": "smia-menu",
+    "align": 0.5
+  },
+
+  "ext/workspaces": {
+    "on-click": "activate",
+    "format": "{icon}",
+    "format-icons": {
+      "default": "",
+      "active": "",
+      "1": "", "2": "", "3": "", "4": "", "5": ""
+    },
+    "persistent-workspaces": {
+      "1": [], "2": [], "3": [], "4": [], "5": []
+    }
+  },
+
+  "clock": {
+    "format": "{:%H\n%M}",
+    "tooltip-format": "<big>{:%H:%M}</big>\n<tt>{calendar}</tt>",
+    "calendar": {
+      "format": {
+        "today": "<span color='#82aaff'><b>{}</b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode"
+    },
+    "align": 0.5
+  },
+
+  "custom/mpris": {
+    "exec": "playerctl -F metadata --format '{\"text\":\"󰎆\",\"tooltip\":\"{{title}} — {{artist}}\",\"class\":\"{{status}}\"}' 2>/dev/null",
+    "return-type": "json",
+    "format": "{text}",
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "align": 0.5
+  },
+
+  "cpu": {
+    "interval": 5,
+    "format": "󰍛",
+    "tooltip-format": "CPU {usage}%",
+    "on-click": "xdg-terminal-exec btop",
+    "align": 0.5
+  },
+
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "{icon}",
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰈀",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "on-click": "xdg-terminal-exec impala",
+    "align": 0.5
+  },
+
+  "pulseaudio": {
+    "format": "{icon}",
+    "format-muted": "󰖁",
+    "tooltip-format": "Volume {volume}%",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "scroll-step": 5,
+    "format-icons": {
+      "headphone": "󰋋",
+      "headset": "󰋎",
+      "default": ["󰕿", "󰖀", "󰕾"]
+    },
+    "align": 0.5
+  },
+
+  "battery": {
+    "format": "{icon}",
+    "format-charging": "󰂄",
+    "format-plugged": "󰚥",
+    "format-full": "󰂅",
+    "format-icons": [
+      "󰁺", "󰁻", "󰁼", "󰁽", "󰁾",
+      "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"
+    ],
+    "tooltip-format-discharging": "{power:>1.0f}W↓ {capacity}%",
+    "tooltip-format-charging": "{power:>1.0f}W↑ {capacity}%",
+    "interval": 5,
+    "states": {
+      "warning": 20,
+      "critical": 10
+    },
+    "align": 0.5
+  },
+
+  "tray": {
+    "icon-size": 14,
+    "spacing": 8
+  },
+
+  "custom/power": {
+    "format": "󰐥",
+    "tooltip-format": "Session",
+    "on-click": "hyprlock",
+    "on-click-right": "smia-menu",
+    "align": 0.5
+  }
+}

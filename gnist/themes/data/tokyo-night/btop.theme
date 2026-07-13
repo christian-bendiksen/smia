@@ -1,0 +1,81 @@
+# btop theme: Tokyo Night
+# Author: Pascal Jaeger
+
+# Main background color
+theme[main_bg]="#1a1b26"
+
+# Default text color
+theme[main_fg]="#cfc9c2"
+
+# Box title color
+theme[title]="#cfc9c2"
+
+# Keyboard shortcut highlight color
+theme[hi_fg]="#7dcfff"
+
+# Selected process background color
+theme[selected_bg]="#414868"
+
+# Selected process text color
+theme[selected_fg]="#cfc9c2"
+
+# Inactive and disabled text color
+theme[inactive_fg]="#565f89"
+
+# Color for process details, status text, mini CPU graphs, and the details memory graph
+theme[proc_misc]="#7dcfff"
+
+# CPU box outline color
+theme[cpu_box]="#565f89"
+
+# Memory and disk box outline color
+theme[mem_box]="#565f89"
+
+# Network box outline color
+theme[net_box]="#565f89"
+
+# Process box outline color
+theme[proc_box]="#565f89"
+
+# Box-divider and small-box line color
+theme[div_line]="#565f89"
+
+# Temperature graph gradient
+theme[temp_start]="#9ece6a"
+theme[temp_mid]="#e0af68"
+theme[temp_end]="#f7768e"
+
+# CPU graph gradient
+theme[cpu_start]="#9ece6a"
+theme[cpu_mid]="#e0af68"
+theme[cpu_end]="#f7768e"
+
+# Free memory and disk meter gradient
+theme[free_start]="#9ece6a"
+theme[free_mid]="#e0af68"
+theme[free_end]="#f7768e"
+
+# Cached memory and disk meter gradient
+theme[cached_start]="#9ece6a"
+theme[cached_mid]="#e0af68"
+theme[cached_end]="#f7768e"
+
+# Available memory and disk meter gradient
+theme[available_start]="#9ece6a"
+theme[available_mid]="#e0af68"
+theme[available_end]="#f7768e"
+
+# Used memory and disk meter gradient
+theme[used_start]="#9ece6a"
+theme[used_mid]="#e0af68"
+theme[used_end]="#f7768e"
+
+# Download graph gradient
+theme[download_start]="#9ece6a"
+theme[download_mid]="#e0af68"
+theme[download_end]="#f7768e"
+
+# Upload graph gradient
+theme[upload_start]="#9ece6a"
+theme[upload_mid]="#e0af68"
+theme[upload_end]="#f7768e"
