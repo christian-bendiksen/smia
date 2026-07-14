@@ -118,6 +118,12 @@ if [[ -n "$theme_mode" ]] && command -v gnist >/dev/null 2>&1; then
     fi
 fi
 
+# Reload existing processes before reconciling session-managed services. New or
+# restarted services read current config and must not receive startup signals.
+if ((reload_theme)); then
+    gnist reload >/dev/null 2>&1 || true
+fi
+
 if ((${#runs[@]})); then
     for entry in "${runs[@]}"; do
         read -r proc cmd <<<"$entry"
@@ -130,9 +136,4 @@ if ((${#restarts[@]})); then
         read -r proc cmd <<<"$entry"
         restart_service "$proc" "$cmd"
     done
-fi
-
-# Reload after service startup so bindings can reach newly started processes.
-if ((reload_theme)); then
-    gnist reload >/dev/null 2>&1 || true
 fi

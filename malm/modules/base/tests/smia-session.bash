@@ -23,6 +23,7 @@ EOF
 cat >"$tmp/bin/pgrep" <<'EOF'
 #!/usr/bin/env bash
 printf 'pgrep %s\n' "$*" >>"$SMIA_SESSION_TEST_LOG"
+[[ "${SMIA_SESSION_TEST_PROCESSES_MISSING:-0}" == 1 ]] && exit 1
 exit 0
 EOF
 
@@ -45,6 +46,16 @@ EOF
 cat >"$tmp/bin/malm" <<'EOF'
 #!/usr/bin/env bash
 printf 'malm %s\n' "$*" >>"$SMIA_SESSION_TEST_LOG"
+EOF
+
+cat >"$tmp/bin/setsid" <<'EOF'
+#!/usr/bin/env bash
+printf 'setsid %s\n' "$*" >>"$SMIA_SESSION_TEST_LOG"
+EOF
+
+cat >"$tmp/bin/waybar" <<'EOF'
+#!/usr/bin/env bash
+exit 0
 EOF
 
 chmod +x "$tmp/bin"/*
@@ -71,8 +82,24 @@ line_index() {
 current_index="$(line_index 'gnist current')" || fail "normal session did not inspect the active theme"
 service_index="$(line_index 'pgrep -x waybar')" || fail "normal session did not process services"
 reload_index="$(line_index 'gnist reload')" || fail "normal session did not reload Gnist"
-((current_index < service_index && service_index < reload_index)) \
-    || fail "Gnist reload did not run after service startup"
+((current_index < reload_index && reload_index < service_index)) \
+    || fail "Gnist reload did not run before service startup"
+
+cat >"$tmp/config/gnist/session.services" <<'EOF'
+theme aeryn
+restart waybar
+EOF
+: >"$log"
+SMIA_SESSION_TEST_PROCESSES_MISSING=1 "$session"
+reload_index="$(line_index 'gnist reload')" || fail "restart session did not reload Gnist"
+restart_index="$(line_index 'pkill -x waybar')" || fail "restart session did not reconcile Waybar"
+((reload_index < restart_index)) \
+    || fail "Waybar was restarted before receiving Gnist's reload signal"
+
+cat >"$tmp/config/gnist/session.services" <<'EOF'
+theme aeryn
+run waybar waybar
+EOF
 
 : >"$log"
 "$refresh"
