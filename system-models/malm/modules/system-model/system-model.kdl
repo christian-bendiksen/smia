@@ -12,7 +12,8 @@ module "system-model" {
                 item "unstable" {
                     unstable {
                         description "AerynOS unstable repository"
-                        uri "https://cdn.aerynos.dev/stream/unstable/x86_64/stone.index"
+                        base-uri "https://cdn.aerynos.dev/"
+                        version "stream/unstable"
                         priority 0
                     }
                 }

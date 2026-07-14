@@ -19,7 +19,8 @@ profile "model-mango" abstract=#true {
                 append "volatile" {
                     volatile {
                         description "AerynOS volatile repository"
-                        uri "https://cdn.aerynos.dev/stream/volatile/x86_64/stone.index"
+                        base-uri "https://cdn.aerynos.dev/"
+                        version "stream/volatile"
                         priority 10
                     }
                 }
