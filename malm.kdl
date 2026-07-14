@@ -18,8 +18,8 @@ meta name="smia" \
 // Outputs otherwise receive their typed inputs and Malm built-ins.
 variables {
     // Fonts do not vary by machine or profile.
-    global.font-family  "Adwaita Sans"
-    global.font-mono    "Adwaita Mono"
+    global.font-family  "RobotoMono Nerd Font"
+    global.font-mono    "RobotoMono Nerd Font Mono"
     global.font-symbols "Symbols Nerd Font Mono"
 }
 
