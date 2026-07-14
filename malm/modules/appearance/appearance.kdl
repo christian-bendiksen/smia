@@ -10,7 +10,7 @@ module "appearance" {
 
     inputs {
         input "font-name"    type="string" default="Adwaita Sans"
-        input "font-size"    type="float"  default=9.5
+        input "font-size"    type="float"  default=10
         input "gtk-theme"    type="string" default="adw-gtk3"
         input "cursor-theme" type="string" default="Adwaita"
         input "cursor-size"  type="int"    default=24

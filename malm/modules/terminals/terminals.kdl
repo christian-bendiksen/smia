@@ -34,7 +34,7 @@ module "terminals" {
             "shell_integration" (ref)"shell-integration"
             "allow_remote_control" "yes"
             "listen_on" "unix:~/.cache/kitty/kitty"
-            "font_family" (ref)"global.font-family"
+            "font_family" (ref)"global.font-mono"
             "bold_italic_font" "auto"
             "font_size" (ref)"font-size"
             "window_padding_width" (ref)"padding"
@@ -61,9 +61,9 @@ module "terminals" {
                 "osc52" "CopyPaste"
             }
             "font" {
-                normal family=(ref)global.font-family style=Regular
-                bold family=(ref)global.font-family style=Bold
-                italic family=(ref)global.font-family style=Italic
+                normal family=(ref)global.font-mono style=Regular
+                bold family=(ref)global.font-mono style=Bold
+                italic family=(ref)global.font-mono style=Italic
                 "size" (ref)"font-size"
             }
             "window" {
@@ -100,7 +100,7 @@ module "terminals" {
         render "ghostty/config.ghostty" format="key-value" separator=" = " quote="none" {
             "shell-integration" "none"
             @comment "Use the shared font family with a terminal-specific size."
-            "font-family" (ref)"global.font-family"
+            "font-family" (ref)"global.font-mono"
             "font-size" (ref)"font-size"
             @comment "Keep window appearance aligned with the other terminal backends."
             "background-opacity" (ref)"opacity"
