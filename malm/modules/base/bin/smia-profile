@@ -2,18 +2,13 @@
 
 set -euo pipefail
 
-if [[ $# -lt 1 || "$1" == "-h" || "$1" == "--help" ]]; then
-    printf 'usage: smia-profile <profile-name>\n' >&2
-    exit 2
-fi
+case "${1:-}" in
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia-profile PROFILE\n' >&2; exit 2; }
+        printf 'usage: smia-profile PROFILE\n'
+        exit 0
+        ;;
+esac
 
-profile="$1"
-
-if ! command -v malm >/dev/null 2>&1; then
-    printf 'smia-profile: malm not found in PATH\n' >&2
-    exit 1
-fi
-
-malm apply --profile "$profile" -y
-
-exec smia-session --apply-theme
+(($# == 1)) || { printf 'usage: smia-profile PROFILE\n' >&2; exit 2; }
+exec smia-profiles switch "$1"

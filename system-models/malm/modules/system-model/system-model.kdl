@@ -1,0 +1,77 @@
+module "system-model" {
+    description "Generate and inspect an AerynOS system model"
+
+    requires {
+        command "moss"
+        command "sudo"
+    }
+
+    inputs {
+        input "repositories" type="collection" item-type="kdl-document" {
+            defaults {
+                item "unstable" {
+                    unstable {
+                        description "AerynOS unstable repository"
+                        uri "https://cdn.aerynos.dev/stream/unstable/x86_64/stone.index"
+                        priority 0
+                    }
+                }
+            }
+        }
+        input "packages" type="collection" item-type="kdl-document" {
+            defaults {
+                item "kernel" { linux-desktop }
+                item "compositor" { mangowm }
+                item "portal-backend" { xdg-desktop-portal-wlr }
+
+                // Bootstrap tools must remain in the imported source of truth.
+                item "malm" { malm }
+                item "moss" { moss }
+                item "git" { git }
+                item "sudo" { sudo-rs }
+
+                // Shared system and desktop contract.
+                item "systemd" { systemd }
+                item "linux-firmware" { linux-firmware }
+                item "sof-firmware" { sof-firmware }
+                item "aeryn-utilities" { pkgset-aeryn-utilities }
+                item "smia-base" { pkgset-smia-base }
+                item "portal" { xdg-desktop-portal }
+                item "portal-gtk" { xdg-desktop-portal-gtk }
+                item "procps" { procps }
+                item "kanshi" { kanshi }
+                item "nautilus" { nautilus }
+                item "firefox" { firefox }
+                item "vscode" { vscode-bin }
+                item "build-essential" { build-essential }
+                item "curl" { curl }
+                item "ripgrep" { ripgrep }
+                item "plymouth" { plymouth }
+                item "pavucontrol" { pavucontrol }
+                item "liberation-fonts" { liberation-fonts-ttf }
+                item "adwaita-fonts" { adwaita-fonts }
+                item "roboto-mono-nerd" { font-roboto-mono-nerd }
+                item "symbols-nerd" { font-symbols-nerd }
+                item "os-artwork" { os-artwork }
+            }
+        }
+    }
+
+    outputs {
+        render "~/.local/share/smia-system-models/system-model.kdl" format="kdl" version=2 {
+            repositories {
+                splice "repositories"
+            }
+            packages {
+                splice "packages"
+            }
+        }
+        render "~/.local/share/smia-system-models/profile" format="scalar" {
+            @line (ref)"profile.name"
+        }
+        render "~/.local/bin/smia-system-model" \
+            format="text" executable=#true validate="shell" {
+            @file "./smia-system-model"
+        }
+    }
+}

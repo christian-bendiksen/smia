@@ -2,6 +2,15 @@
 
 set -euo pipefail
 
+case "${1:-}" in
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia-menu\n' >&2; exit 2; }
+        printf 'usage: smia-menu\n'
+        exit 0
+        ;;
+esac
+(($# == 0)) || { printf 'usage: smia-menu\n' >&2; exit 2; }
+
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 TERMINALS_LIST="$XDG_CONFIG_HOME/xdg-terminals.list"
@@ -281,34 +290,7 @@ network_menu() {
 }
 
 profiles_menu() {
-    local profiles
-    if ! profiles="$(malm profiles --selectable | sed -n 's/^     //p')"; then
-        notify "Profiles" "Failed to list profiles"
-        return 1
-    fi
-    [[ -z "$profiles" ]] && { notify "Profiles" "No selectable profiles found"; return 1; }
-
-    local profile label choice
-    local labels=()
-    declare -A label_to_profile
-    while IFS= read -r profile; do
-        case "$profile" in
-            hyprland)        label="Hyprland" ;;
-            hyprland-astral) label="Hyprland (Astral)" ;;
-            mango)           label="Mango (Default)" ;;
-            mango-astral)    label="Mango (Astral)" ;;
-            niri)            label="Niri" ;;
-            niri-astral)     label="Niri (Astral)" ;;
-            *)               label="$profile" ;;
-        esac
-        labels+=("$label")
-        label_to_profile["$label"]="$profile"
-    done <<<"$profiles"
-
-    choice="$(printf '%s\n' "${labels[@]}" | pick "Profiles")" || return 1
-    profile="${label_to_profile[$choice]:-}"
-    [[ -n "$profile" ]] || return 1
-    smia-profile "$profile"
+    smia-profiles select
 }
 
 services_menu() {

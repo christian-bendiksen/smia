@@ -1,0 +1,25 @@
+module "smia-cli" {
+    description "Bootstrap dispatcher and installer for Smia"
+
+    requires {
+        command "bash"
+        command "malm"
+    }
+
+    inputs {
+        input "repository-url" type="string" \
+            default="https://github.com/christian-bendiksen/smia.git"
+        input "branch" type="string" default="main"
+        input "model-state" type="string" default="smia-system-models"
+        input "desktop-state" type="string" default="default"
+    }
+
+    outputs {
+        render "~/.local/bin/smia" format="text" executable=#true validate="shell" {
+            @file "./smia"
+        }
+        render "~/.local/bin/smia-install" format="text" executable=#true validate="shell" {
+            @file "./smia-install.tpl" interpolate=#true
+        }
+    }
+}

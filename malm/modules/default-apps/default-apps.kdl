@@ -6,7 +6,7 @@ module "default-apps" {
     description "Declarative seed for default applications: mimeapps.list and the fallback terminal list"
 
     inputs {
-        input "browser"      type="string" default="brave-browser.desktop"
+        input "browser"      type="string" default="firefox.desktop"
         input "file-manager" type="string" default="org.gnome.Nautilus.desktop"
         input "editor"       type="string" default="Helix.desktop"
         input "terminal"     type="string" default="kitty.desktop"

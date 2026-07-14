@@ -1,0 +1,101 @@
+profile "installer-base" abstract=#true {
+    use "smia-cli"
+}
+
+profile "install" {
+    extends "installer-base"
+}
+
+profile "model-base" abstract=#true {
+    extends "installer-base"
+    use "system-model"
+}
+
+profile "model-mango" abstract=#true {
+    extends "model-base"
+    use "system-model" {
+        patch {
+            collection "repositories" {
+                append "volatile" {
+                    volatile {
+                        description "AerynOS volatile repository"
+                        uri "https://cdn.aerynos.dev/stream/volatile/x86_64/stone.index"
+                        priority 10
+                    }
+                }
+            }
+            collection "packages" {
+                replace "compositor" { mangowm }
+                replace "portal-backend" { xdg-desktop-portal-wlr }
+            }
+        }
+    }
+}
+
+profile "model-niri" abstract=#true {
+    extends "model-base"
+    use "system-model" {
+        patch {
+            collection "packages" {
+                replace "compositor" { niri }
+                replace "portal-backend" { xdg-desktop-portal-gnome }
+            }
+        }
+    }
+}
+
+profile "model-hyprland" abstract=#true {
+    extends "model-base"
+    use "system-model" {
+        patch {
+            collection "packages" {
+                replace "compositor" { hyprland }
+                replace "portal-backend" { xdg-desktop-portal-hyprland }
+            }
+        }
+    }
+}
+
+profile "kernel-desktop" abstract=#true {
+    use "system-model" {
+        patch {
+            collection "packages" {
+                replace "kernel" { linux-desktop }
+            }
+        }
+    }
+}
+
+profile "kernel-gaming" abstract=#true {
+    use "system-model" {
+        patch {
+            collection "packages" {
+                replace "kernel" { linux-gaming }
+            }
+        }
+    }
+}
+
+profile "mango-desktop" {
+    extends "model-mango" "kernel-desktop"
+}
+
+profile "mango-gaming" {
+    extends "model-mango" "kernel-gaming"
+}
+
+profile "niri-desktop" {
+    extends "model-niri" "kernel-desktop"
+}
+
+profile "niri-gaming" {
+    extends "model-niri" "kernel-gaming"
+}
+
+profile "hyprland-desktop" {
+    extends "model-hyprland" "kernel-desktop"
+}
+
+profile "hyprland-gaming" {
+    extends "model-hyprland" "kernel-gaming"
+}

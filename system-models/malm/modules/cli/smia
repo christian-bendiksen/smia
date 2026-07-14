@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: smia <command> [arguments...]
+
+Core commands:
+  help [command]  Show general or command help
+  list            List installed commands
+
+Installed commands are resolved as smia-<command> from PATH.
+Direct smia-* command names remain available.
+EOF
+}
+
+valid_name() {
+    [[ "$1" =~ ^[a-z0-9][a-z0-9-]*$ ]]
+}
+
+resolve_command() {
+    local name="$1" dir candidate found=0
+    local path_value="${PATH:-/usr/local/bin:/usr/bin:/bin}"
+    local path_dirs=()
+    IFS=: read -r -a path_dirs <<<"$path_value"
+    for dir in "${path_dirs[@]}"; do
+        [[ -n "$dir" && "$dir" == /* ]] || continue
+        candidate="$dir/smia-$name"
+        [[ -e "$candidate" || -L "$candidate" ]] || continue
+        found=1
+        [[ -f "$candidate" && -x "$candidate" ]] || continue
+        if [[ "$candidate" -ef "$0" ]]; then
+            printf 'smia: command resolves to the dispatcher itself: %s\n' "$name" >&2
+            return 126
+        fi
+        printf '%s\n' "$candidate"
+        return 0
+    done
+    ((found)) && return 126
+    return 127
+}
+
+installed_commands() {
+    local dir candidate name
+    local path_value="${PATH:-/usr/local/bin:/usr/bin:/bin}"
+    local path_dirs=()
+    declare -A seen=()
+    IFS=: read -r -a path_dirs <<<"$path_value"
+    for dir in "${path_dirs[@]}"; do
+        [[ -n "$dir" && "$dir" == /* ]] || continue
+        for candidate in "$dir"/smia-*; do
+            [[ -f "$candidate" && -x "$candidate" ]] || continue
+            [[ "$candidate" -ef "$0" ]] && continue
+            name="${candidate##*/smia-}"
+            valid_name "$name" || continue
+            [[ -n "${seen[$name]:-}" ]] && continue
+            seen["$name"]="$candidate"
+            printf '%s\t%s\n' "$name" "$candidate"
+        done
+    done
+}
+
+list_commands() {
+    local mode="${1:-}" rows
+    case "$mode" in
+        ""|--names|--verbose) ;;
+        *)
+            printf 'usage: smia list [--names|--verbose]\n' >&2
+            return 2
+            ;;
+    esac
+    rows="$(installed_commands | sort -t $'\t' -k1,1)"
+    if [[ "$mode" == --names ]]; then
+        if [[ -n "$rows" ]]; then
+            while IFS=$'\t' read -r name _; do
+                printf '%s\n' "$name"
+            done <<<"$rows"
+        fi
+        return 0
+    fi
+    if [[ "$mode" == --verbose ]]; then
+        printf 'COMMAND\tEXECUTABLE\n'
+        [[ -n "$rows" ]] && printf '%s\n' "$rows"
+        return 0
+    fi
+    printf 'Installed commands:\n'
+    if [[ -n "$rows" ]]; then
+        while IFS=$'\t' read -r name _; do
+            printf '  %s\n' "$name"
+        done <<<"$rows"
+    else
+        printf '  (none)\n'
+    fi
+}
+
+command_help() {
+    local name="$1" executable rc
+    if ! valid_name "$name"; then
+        printf 'smia: invalid command name: %s\n' "$name" >&2
+        return 2
+    fi
+    if executable="$(resolve_command "$name")"; then
+        printf 'Usage: smia %s [arguments...]\n\n' "$name"
+        printf 'Direct command: %s\n' "$executable"
+        printf 'Run `smia %s --help` for command-specific help.\n' "$name"
+        return 0
+    else
+        rc=$?
+    fi
+    printf 'smia: command not found: %s\n' "$name" >&2
+    return "$rc"
+}
+
+if (($# == 0)); then
+    usage
+    printf '\n'
+    list_commands
+    exit 0
+fi
+
+case "$1" in
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia --help\n' >&2; exit 2; }
+        usage
+        exit 0
+        ;;
+    help)
+        case $# in
+            1) usage; printf '\n'; list_commands ;;
+            2) command_help "$2" ;;
+            *) printf 'usage: smia help [command]\n' >&2; exit 2 ;;
+        esac
+        exit $?
+        ;;
+    list)
+        (($# <= 2)) || { printf 'usage: smia list [--names|--verbose]\n' >&2; exit 2; }
+        list_commands "${2:-}"
+        exit $?
+        ;;
+    --)
+        shift
+        (($# > 0)) || { printf 'smia: missing command after --\n' >&2; exit 2; }
+        ;;
+esac
+
+command_name="$1"
+shift
+if ! valid_name "$command_name"; then
+    printf 'smia: invalid command name: %s\n' "$command_name" >&2
+    exit 2
+fi
+
+depth="${SMIA_DISPATCH_DEPTH:-0}"
+[[ "$depth" =~ ^[0-9]+$ ]] || depth=0
+if ((depth >= 16)); then
+    printf 'smia: dispatch depth exceeded for command: %s\n' "$command_name" >&2
+    exit 126
+fi
+case ":${SMIA_DISPATCH_STACK:-}:" in
+    *":$command_name:"*)
+        printf 'smia: recursive command dispatch: %s\n' "$command_name" >&2
+        exit 126
+        ;;
+esac
+
+if executable="$(resolve_command "$command_name")"; then
+    :
+else
+    rc=$?
+    if ((rc == 126)); then
+        printf 'smia: command is not executable: %s\n' "$command_name" >&2
+    else
+        printf 'smia: command not found: %s\n' "$command_name" >&2
+    fi
+    exit "$rc"
+fi
+
+export SMIA_DISPATCH_DEPTH=$((depth + 1))
+export SMIA_DISPATCH_STACK="${SMIA_DISPATCH_STACK:+$SMIA_DISPATCH_STACK:}$command_name"
+exec "$executable" "$@"

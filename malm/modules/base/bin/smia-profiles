@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+SMIA_DESKTOP_STATE="${SMIA_DESKTOP_STATE:-default}"
+
+usage() {
+    cat <<'EOF'
+Usage: smia-profiles [list|current|select|switch PROFILE]
+
+Commands:
+  list             List selectable profile names (default)
+  current          Print the active profile
+  select           Choose and switch profile with Walker
+  switch PROFILE   Apply a profile and refresh the session
+EOF
+}
+
+require_command() {
+    command -v "$1" >/dev/null 2>&1 || {
+        printf 'smia-profiles: %s not found in PATH\n' "$1" >&2
+        exit 1
+    }
+}
+
+profile_names() {
+    local output line
+    require_command malm
+    if ! output="$(malm --state "$SMIA_DESKTOP_STATE" profiles --selectable)"; then
+        printf 'smia-profiles: failed to list profiles\n' >&2
+        return 1
+    fi
+    while IFS= read -r line; do
+        [[ "$line" == "     "* ]] && printf '%s\n' "${line#     }"
+    done <<<"$output"
+}
+
+current_profile() {
+    local profile_file="$XDG_CONFIG_HOME/gnist/profile" profile
+    [[ -r "$profile_file" ]] || {
+        printf 'smia-profiles: active profile not found: %s\n' "$profile_file" >&2
+        return 1
+    }
+    IFS= read -r profile < "$profile_file" || true
+    [[ -n "$profile" ]] || {
+        printf 'smia-profiles: active profile is empty\n' >&2
+        return 1
+    }
+    printf '%s\n' "$profile"
+}
+
+switch_profile() {
+    local profile="$1"
+    require_command malm
+    require_command smia-session
+    malm --state "$SMIA_DESKTOP_STATE" --profile "$profile" apply -y
+    exec smia-session --apply-theme
+}
+
+select_profile() {
+    require_command walker
+    local profiles profile label choice menu_theme
+    profiles="$(profile_names)"
+    [[ -n "$profiles" ]] || {
+        printf 'smia-profiles: no selectable profiles found\n' >&2
+        return 1
+    }
+
+    local labels=()
+    declare -A label_to_profile
+    while IFS= read -r profile; do
+        case "$profile" in
+            hyprland)        label="Hyprland" ;;
+            hyprland-astral) label="Hyprland (Astral)" ;;
+            mango)           label="Mango (Default)" ;;
+            mango-astral)    label="Mango (Astral)" ;;
+            niri)            label="Niri" ;;
+            niri-astral)     label="Niri (Astral)" ;;
+            *)               label="$profile" ;;
+        esac
+        labels+=("$label")
+        label_to_profile["$label"]="$profile"
+    done <<<"$profiles"
+
+    if [[ -r "$XDG_CONFIG_HOME/gnist/menu-theme" ]]; then
+        IFS= read -r menu_theme < "$XDG_CONFIG_HOME/gnist/menu-theme" || true
+    fi
+    menu_theme="${menu_theme:-gnist-menu}"
+    choice="$(printf '%s\n' "${labels[@]}" \
+        | walker --dmenu --placeholder "Profiles" --theme "$menu_theme")" || return 1
+    [[ -n "$choice" ]] || return 1
+    profile="${label_to_profile[$choice]:-}"
+    [[ -n "$profile" ]] || return 1
+    switch_profile "$profile"
+}
+
+case "${1:-list}" in
+    list)
+        (($# <= 2)) || { printf 'usage: smia-profiles list [--names]\n' >&2; exit 2; }
+        [[ "${2:-}" == "" || "${2:-}" == --names ]] \
+            || { printf 'usage: smia-profiles list [--names]\n' >&2; exit 2; }
+        profile_names
+        ;;
+    current)
+        (($# == 1)) || { printf 'usage: smia-profiles current\n' >&2; exit 2; }
+        current_profile
+        ;;
+    select)
+        (($# == 1)) || { printf 'usage: smia-profiles select\n' >&2; exit 2; }
+        select_profile
+        ;;
+    switch)
+        (($# == 2)) || { printf 'usage: smia-profiles switch PROFILE\n' >&2; exit 2; }
+        switch_profile "$2"
+        ;;
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia-profiles --help\n' >&2; exit 2; }
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

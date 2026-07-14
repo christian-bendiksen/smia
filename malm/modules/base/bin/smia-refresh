@@ -2,10 +2,19 @@
 
 set -euo pipefail
 
+case "${1:-}" in
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia-refresh\n' >&2; exit 2; }
+        printf 'usage: smia-refresh\n'
+        exit 0
+        ;;
+esac
+(($# == 0)) || { printf 'usage: smia-refresh\n' >&2; exit 2; }
+
 if ! command -v malm >/dev/null 2>&1; then
     printf 'smia-refresh: malm not found in PATH\n' >&2
     exit 1
 fi
 
-malm apply
+malm --state "${SMIA_DESKTOP_STATE:-default}" apply
 exec smia-session

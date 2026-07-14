@@ -34,6 +34,9 @@ module "shell" {
         render "~/.bashrc.d/alias.bash" format="text" validate="shell" {
             @compose "aliases"
         }
+        render "~/.bashrc.d/smia-completion.bash" format="text" validate="shell" {
+            @file "./smia-completion.bash"
+        }
 
         // environment.d expands ${HOME}; keep the value unquoted as before.
         render "~/.config/environment.d/gnist.conf" format="key-value" separator="=" quote="none" {
