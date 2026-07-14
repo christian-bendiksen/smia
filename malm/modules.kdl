@@ -32,7 +32,7 @@ include "modules/screenshot/screenshot.kdl"
 include "modules/appearance/appearance.kdl"
 include "modules/default-apps/default-apps.kdl"
 include "modules/neovim/neovim.kdl"
-include "modules/vscode/vscode.kdl"
+// include "modules/vscode/vscode.kdl"
 include "modules/share-picker/share-picker.kdl"
 include "modules/rog-rgb/rog-rgb.kdl"
 
