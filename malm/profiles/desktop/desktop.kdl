@@ -8,7 +8,7 @@ profile "desktop" abstract=#true {
     use "btop"
     use "helix"
     use "neovim"
-    use "vscode"
+    // use "vscode"
     use "fontconfig"
     use "portals"
     use "sddm"
