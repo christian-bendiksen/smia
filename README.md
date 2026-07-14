@@ -21,9 +21,9 @@ Choose the package set for the compositor you want:
 
 | Compositor | Package set | Malm profile |
 |---|---|---|
-| Mango | `pkgset-smia-mango` | `default` |
+| Mango | `pkgset-smia-mango` | `mango` |
 | Niri | `pkgset-smia-niri` | `niri` |
-| Hyprland | `pkgset-smia-hypr` | `hypr` |
+| Hyprland | `pkgset-smia-hypr` | `hyprland` |
 
 For example, install the Hyprland package set with:
 
@@ -36,7 +36,7 @@ Then apply the matching profile from the remote repository:
 ```sh
 malm apply https://github.com/christian-bendiksen/smia.git \
     --branch main \
-    --profile hypr \
+    --profile hyprland \
     --trust-remote \
     --track \
     --allow-local-includes \
@@ -68,7 +68,7 @@ variants:
 
 - `mango-astral`
 - `niri-astral`
-- `hypr-astral`
+- `hyprland-astral`
 
 To use a themed profile, apply the remote repository again with the new profile.
 For example:
@@ -166,7 +166,7 @@ Clone the repository when changing modules or profiles locally:
 git clone https://github.com/christian-bendiksen/smia.git
 cd smia
 malm check --repo . --all-profiles
-malm plan --repo . --profile default
+malm plan --repo . --profile mango
 ```
 
 Use `malm apply --repo . --profile PROFILE` only when you intentionally want to
