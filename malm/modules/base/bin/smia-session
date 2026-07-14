@@ -103,16 +103,18 @@ if ((${#prepares[@]})); then
     done
 fi
 
+reload_theme=0
 if [[ -n "$theme_mode" ]] && command -v gnist >/dev/null 2>&1; then
+    reload_theme=1
     read -r mode _ <<<"$theme_mode"
-    if [[ "$mode" == "keep" ]]; then
-        if ((apply_theme)); then
-            gnist reload >/dev/null 2>&1 || true
-        fi
-    elif ((apply_theme)) || ! gnist current >/dev/null 2>&1; then
+    if [[ "$mode" != "keep" ]] \
+        && { ((apply_theme)) || ! gnist current >/dev/null 2>&1; }; then
         # Restart Waybar after changing themes so it reloads the new style.
         pkill -x waybar 2>/dev/null || true
-        gnist set "$mode" >/dev/null 2>&1 || true
+        if gnist set "$mode" >/dev/null 2>&1; then
+            # `gnist set` runs the reload bindings itself.
+            reload_theme=0
+        fi
     fi
 fi
 
@@ -128,4 +130,9 @@ if ((${#restarts[@]})); then
         read -r proc cmd <<<"$entry"
         restart_service "$proc" "$cmd"
     done
+fi
+
+# Reload after service startup so bindings can reach newly started processes.
+if ((reload_theme)); then
+    gnist reload >/dev/null 2>&1 || true
 fi
