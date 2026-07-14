@@ -153,8 +153,7 @@ The generated Bash configuration also provides:
 | `theme` | Short alias for `gnist`. |
 
 `smia profiles switch` skips the Malm confirmation prompt. Use `malm plan`
-first when switching to an unfamiliar profile. Set `SMIA_DESKTOP_STATE` when
-the desktop configuration is installed in a state other than `default`.
+first when switching to an unfamiliar profile.
 
 Direct commands such as `smia-menu`, `smia-session`, and `smia-profile` remain
 available for compatibility and recovery.
@@ -200,7 +199,7 @@ Clone the repository when changing modules or profiles locally:
 git clone https://github.com/christian-bendiksen/smia.git
 cd smia
 malm check --repo . --all-profiles
-malm --repo system-models check --all-profiles
+malm --repo system-models --state smia-system-models check --all-profiles
 malm plan --repo . --profile mango
 ```
 

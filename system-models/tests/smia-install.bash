@@ -26,6 +26,7 @@ assert_not_contains() {
 
 "$real_malm" \
     --repo "$root/system-models" \
+    --state smia-system-models \
     --profile install \
     render --output "$work/rendered" >/dev/null
 

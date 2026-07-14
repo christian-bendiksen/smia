@@ -1,9 +1,9 @@
-config target="~" default-profile="install"
+config target="~" default-profile="install" required-state="smia-system-models"
 
 meta name="smia-system-models" \
     author="Christian Bendiksen" \
     homepage="https://github.com/christian-bendiksen/smia" \
-    malm-version=">=0.3,<0.4"
+    malm-version=">=0.3.1,<0.4"
 
 include "malm/modules/cli/cli.kdl"
 include "malm/modules/system-model/system-model.kdl"

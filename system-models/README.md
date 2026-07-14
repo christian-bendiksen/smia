@@ -119,7 +119,7 @@ independently, keeping profile layers composable.
 Validate every nested profile from the repository root:
 
 ```sh
-malm --repo system-models check --all-profiles
+malm --repo system-models --state smia-system-models check --all-profiles
 ```
 
 Render a profile without applying it:
