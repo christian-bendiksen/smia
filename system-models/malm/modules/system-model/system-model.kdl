@@ -33,6 +33,7 @@ module "system-model" {
 
                 // Smia-Base (minimal needed)
                 item "awww" { awww }
+                item "waybar" { waybar }
                 item "bluetui" { bluetui }
                 item "brightness" { brightnessctl }
                 item "btop" { btop }
