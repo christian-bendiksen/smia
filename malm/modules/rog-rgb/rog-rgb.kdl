@@ -1,6 +1,6 @@
 // This optional hardware module applies the gnist accent to ASUS ROG keys.
 // Stock profiles omit it; enable it per machine in local.kdl:
-//   profile "default" { use "rog-rgb" }
+//   profile "mango" { use "rog-rgb" }
 module "rog-rgb" {
     description "ASUS ROG keyboard RGB apply script following the gnist accent color"
 

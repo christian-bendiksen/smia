@@ -7,7 +7,7 @@
 
 // Bare destinations such as to="mango" resolve below ~/.config. Use an
 // absolute or "~/…" destination to override this per entry.
-config target="~/.config" default-profile="default"
+config target="~/.config" default-profile="mango"
 
 meta name="smia" \
     author="Christian Bendiksen" \

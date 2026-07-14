@@ -1,6 +1,6 @@
 // Provides fuzzel as an alternative for the single-provider "launcher" slot.
 // Select it per profile:
-//   profile "default" {
+//   profile "mango" {
 //       replace slot="launcher" module="fuzzel"
 //       use "mango" { patch { collection "binds" {
 //           replace "launcher" { bind "SUPER,A,spawn,fuzzel" }

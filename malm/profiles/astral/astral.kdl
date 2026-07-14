@@ -170,7 +170,7 @@ profile "niri-astral" {
     }
 }
 
-profile "hypr-astral" {
+profile "hyprland-astral" {
     extends "astral"
     use "portals" {
         with {

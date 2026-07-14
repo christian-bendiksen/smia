@@ -33,7 +33,7 @@ profile "desktop" abstract=#true {
 
 // The default session inherits "desktop" unchanged. Mango's `binds` belong to
 // its compositor provider and disappear when another compositor replaces it.
-profile "default" {
+profile "mango" {
     extends "desktop"
 }
 
@@ -62,7 +62,7 @@ profile "niri" {
     }
 }
 
-profile "hypr" {
+profile "hyprland" {
     extends "desktop"
     replace slot="compositor" module="hypr"
     use "portals" {

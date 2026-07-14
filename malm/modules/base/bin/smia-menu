@@ -280,6 +280,37 @@ network_menu() {
     esac
 }
 
+profiles_menu() {
+    local profiles
+    if ! profiles="$(malm profiles --selectable | sed -n 's/^     //p')"; then
+        notify "Profiles" "Failed to list profiles"
+        return 1
+    fi
+    [[ -z "$profiles" ]] && { notify "Profiles" "No selectable profiles found"; return 1; }
+
+    local profile label choice
+    local labels=()
+    declare -A label_to_profile
+    while IFS= read -r profile; do
+        case "$profile" in
+            hyprland)        label="Hyprland" ;;
+            hyprland-astral) label="Hyprland (Astral)" ;;
+            mango)           label="Mango (Default)" ;;
+            mango-astral)    label="Mango (Astral)" ;;
+            niri)            label="Niri" ;;
+            niri-astral)     label="Niri (Astral)" ;;
+            *)               label="$profile" ;;
+        esac
+        labels+=("$label")
+        label_to_profile["$label"]="$profile"
+    done <<<"$profiles"
+
+    choice="$(printf '%s\n' "${labels[@]}" | pick "Profiles")" || return 1
+    profile="${label_to_profile[$choice]:-}"
+    [[ -n "$profile" ]] || return 1
+    smia-profile "$profile"
+}
+
 services_menu() {
     # Derive services from the manifest and module-owned fragments instead of
     # maintaining a separate daemon list.
@@ -399,20 +430,22 @@ main() {
         local choice
         choice="$(printf '%s\n' \
             "󰔡  Toggles" \
+            "󰤨  Network" \
+            "󰘧  Profiles" \
             "󰔨  Themes" \
             "󰸉  Wallpaper" \
-            "󰤨  Network" \
-            "󰣖  Services" \
             "󱔢  Defaults" \
+            "󰣖  Services" \
             "󰐥  Power" \
             | pick "System")" || exit 0
         case "$choice" in
             *Toggles*)   toggles_menu || true ;;
+            *Network*)   network_menu && break ;;
+            *Profiles*)  profiles_menu && break ;;
             *Themes*)    themes_menu && break ;;
             *Wallpaper*) wallpaper_menu && break ;;
-            *Network*)   network_menu && break ;;
-            *Services*)  services_menu || true ;;
             *Defaults*)  defaults_menu || true ;;
+            *Services*)  services_menu || true ;;
             *Power*)     power_menu || true ;;
         esac
     done
