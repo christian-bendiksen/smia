@@ -31,19 +31,51 @@ module "system-model" {
                 item "git" { git }
                 item "sudo" { sudo-rs }
 
-                // Shared system and desktop contract.
+                // Smia-Base (minimal needed)
+                item "awww" { awww }
+                item "bluetui" { bluetui }
+                item "brightness" { brightnessctl }
+                item "btop" { btop }
+                item "elephant" { elephant }
+                // item "gnist" { gnist } // Not in repo yet.
+                item "gpu-record" { gpu-screen-recorder }
+                item "grim" { grim }
+                item "helix" { helix }
+                item "hypridle" { hypridle }
+                item "hyprlock" { hyprlock }
+                item "impala" { impala }
+                item "kitty" { kitty }
+                item "mako" { mako }
+                item "notify-send" { libnotify }
+                item "nvim" { neovim }
+                item "polkit" { polkit }
+                item "playerctl" { playerctl }
+                item "sddm" { sddm }
+                item "slurp" { slurp }
+                item "swayosd" { swayosd }
+                item "walker" { walker }
+                item "wl-clip" { wl-clipboard-rs }
+                item "wlsunset" { wlsunset }
+                // item "eldritch" { aerynos-eldritch-icon-theme } // not in repo yet
+                item "aeryn-base-desktop" { pkgset-aeryn-base-desktop }
+                item "polkit-kde-agent" { polkit-kde-agent }
+                item "xdg-desktop-portal" { xdg-desktop-portal }
+                item "xdg-desktop-portal-gtk" { xdg-desktop-portal-gtk }
+                item "xdg-desktop-portal-wlr" { xdg-desktop-portal-wlr }
+                item "xdg-desktop-portal-gnome" { xdg-desktop-portal-gnome }
+                item "xdg-utils" { xdg-utils }
+                item "yaru" { yaru-icon-theme }
+                item "noto" { font-noto }
+                item "symbols-nerd" { font-symbols-nerd }
+                item "os-artwork" { os-artwork }
                 item "systemd" { systemd }
                 item "linux-firmware" { linux-firmware }
                 item "sof-firmware" { sof-firmware }
                 item "aeryn-utilities" { pkgset-aeryn-utilities }
-                item "smia-base" { pkgset-smia-base }
-                item "portal" { xdg-desktop-portal }
-                item "portal-gtk" { xdg-desktop-portal-gtk }
                 item "procps" { procps }
                 item "kanshi" { kanshi }
                 item "nautilus" { nautilus }
                 item "firefox" { firefox }
-                item "vscode" { vscode-bin }
                 item "build-essential" { build-essential }
                 item "curl" { curl }
                 item "ripgrep" { ripgrep }
@@ -52,8 +84,6 @@ module "system-model" {
                 item "liberation-fonts" { liberation-fonts-ttf }
                 item "adwaita-fonts" { adwaita-fonts }
                 item "roboto-mono-nerd" { font-roboto-mono-nerd }
-                item "symbols-nerd" { font-symbols-nerd }
-                item "os-artwork" { os-artwork }
             }
         }
     }
