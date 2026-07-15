@@ -39,7 +39,8 @@ EOF
 chmod +x "$tmp/bin"/smia-*
 ln -s "$smia" "$tmp/bin/smia-loop"
 
-export PATH="$tmp/bin:$(dirname "$smia"):$root/bin:/usr/bin:/bin"
+smia_dir="$(dirname "$smia")"
+export PATH="$tmp/bin:$smia_dir:$root/bin:/usr/bin:/bin"
 export SMIA_TEST_SENTINEL="$tmp/executed"
 
 output="$($smia echo-args "two words" "" --flag)"
