@@ -112,13 +112,22 @@ output="$(SMIA_DESKTOP_STATE=desktop "$profiles" list)"
 output="$(XDG_CONFIG_HOME="$tmp/config" "$profiles" current)"
 [[ "$output" == mango ]] || fail "current profile was not read"
 output="$(SMIA_DESKTOP_STATE=desktop XDG_CONFIG_HOME="$tmp/config" \
-    XDG_CURRENT_DESKTOP=niri SMIA_TEST_WALKER_CHOICE='Niri (Astral)' "$profiles" select)"
+    XDG_CURRENT_DESKTOP=niri XDG_SESSION_DESKTOP=Hyprland \
+    SMIA_TEST_WALKER_CHOICE='Niri (Astral)' "$profiles" select)"
 [[ "$output" == $'malm:--state desktop --profile niri-astral apply -y\nsession:--apply-theme' ]] \
     || fail "profile selection did not switch the selected profile"
 [[ "$(<"$SMIA_TEST_WALKER_INPUT")" == $'Niri\nNiri (Astral)' ]] \
     || fail "profile selection was not filtered to the running compositor"
 
 output="$(env -u XDG_CURRENT_DESKTOP SMIA_DESKTOP_STATE=desktop \
+    XDG_CONFIG_HOME="$tmp/config" XDG_SESSION_DESKTOP=niri \
+    SMIA_TEST_WALKER_CHOICE='Niri' "$profiles" select)"
+[[ "$output" == $'malm:--state desktop --profile niri apply -y\nsession:--apply-theme' ]] \
+    || fail "profile selection did not detect the session desktop"
+[[ "$(<"$SMIA_TEST_WALKER_INPUT")" == $'Niri\nNiri (Astral)' ]] \
+    || fail "session desktop did not filter profiles"
+
+output="$(env -u XDG_CURRENT_DESKTOP -u XDG_SESSION_DESKTOP SMIA_DESKTOP_STATE=desktop \
     XDG_CONFIG_HOME="$tmp/config" SMIA_TEST_WALKER_CHOICE='Mango (Astral)' "$profiles" select)"
 [[ "$output" == $'malm:--state desktop --profile mango-astral apply -y\nsession:--apply-theme' ]] \
     || fail "profile selection did not fall back to the configured compositor"

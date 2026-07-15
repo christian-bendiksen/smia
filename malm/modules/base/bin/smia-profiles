@@ -56,9 +56,9 @@ profile_vars() {
 }
 
 profile_uses_provider() {
-    local vars
-    vars="$(profile_vars "$1")" || return 1
-    [[ "$vars" == *"\"module\": \"$2\""* ]]
+    local profile="$1" family="$2"
+    [[ "$family" == hypr ]] && family=hyprland
+    [[ "$profile" == "$family" || "$profile" == "$family"-* ]]
 }
 
 profile_compositor_provider() {
@@ -75,12 +75,14 @@ profile_compositor_provider() {
 }
 
 running_compositor_provider() {
-    local desktop="${XDG_CURRENT_DESKTOP:-}"
-    case "${desktop,,}" in
-        *mango*)     printf 'mango\n'; return 0 ;;
-        *niri*)      printf 'niri\n'; return 0 ;;
-        *hyprland*)  printf 'hypr\n'; return 0 ;;
-    esac
+    local desktop
+    for desktop in "${XDG_CURRENT_DESKTOP:-}" "${XDG_SESSION_DESKTOP:-}"; do
+        case "${desktop,,}" in
+            *mango*)     printf 'mango\n'; return 0 ;;
+            *niri*)      printf 'niri\n'; return 0 ;;
+            *hyprland*)  printf 'hypr\n'; return 0 ;;
+        esac
+    done
 
     if pgrep -x mango >/dev/null 2>&1; then printf 'mango\n'
     elif pgrep -x niri >/dev/null 2>&1; then printf 'niri\n'
