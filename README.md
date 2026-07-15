@@ -180,9 +180,6 @@ extend-profile "mango-astral" {
 }
 ```
 
-Run `malm plan` before applying local changes. The permission granted by
-`--allow-local-includes` is recorded for later tracked updates.
-
 System-model overrides belong in
 `~/.config/malm/smia-system-models.kdl`. See
 [`system-models/README.md`](system-models/README.md) for repository and package
