@@ -109,8 +109,6 @@ if [[ -n "$theme_mode" ]] && command -v gnist >/dev/null 2>&1; then
     read -r mode _ <<<"$theme_mode"
     if [[ "$mode" != "keep" ]] \
         && { ((apply_theme)) || ! gnist current >/dev/null 2>&1; }; then
-        # Restart Waybar after changing themes so it reloads the new style.
-        pkill -x waybar 2>/dev/null || true
         if gnist set "$mode" >/dev/null 2>&1; then
             # `gnist set` runs the reload bindings itself.
             reload_theme=0

@@ -25,8 +25,8 @@ module "swayosd" {
                 "max_volume" (ref)"max-volume"
             }
         }
-        // smia-session reads this fragment with the main service manifest.
-        file "./session.fragment" to="gnist/session.d/swayosd"
+        // The swayosd-server binding in gnist-runtime's bindings-base.kdl
+        // restarts the daemon on theme changes and starts it at session start.
     }
 }
 

@@ -1,7 +1,7 @@
 // One composed Walker configuration serves all profiles. Typed inputs carry
 // profile differences, and an unset emergency record emits no TOML block.
 module "walker" {
-    description "Walker application launcher config, themes and session fragment"
+    description "Walker application launcher config and themes"
     slot "launcher"
 
     requires {
@@ -93,7 +93,7 @@ module "walker" {
         }
         // Static CSS and XML themes can be deployed directly without rendering.
         dir "./themes" to="walker/themes"
-        // Profile-dependent configuration requires Walker to restart on activation.
-        file "./session.fragment" to="gnist/session.d/walker"
+        // The walker binding in gnist-runtime's bindings-base.kdl restarts the
+        // service on theme changes and starts it at session start.
     }
 }

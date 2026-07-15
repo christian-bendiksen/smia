@@ -6,9 +6,14 @@
 //     }
 // }
 
+// A restart also covers layout changes; SIGUSR2 only handles style reliably.
+// Because `smia-session` triggers a reload at login, this bind also starts
+// Waybar for the session.
 bind "waybar" {
     reload {
-        signal process="waybar" signal="SIGUSR2"
+        command {
+            argv "sh" "-c" "pkill -x waybar; waybar &"
+        }
     }
 }
 
@@ -40,6 +45,34 @@ bind "mako" {
     reload {
         command {
             argv "makoctl" "reload"
+        }
+    }
+}
+
+bind "swayosd-server" {
+    reload {
+        command {
+            argv "sh" "-c" "pkill -x swayosd-server; swayosd-server &"
+        }
+    }
+}
+
+// Walker loads its theme at startup, so gnist theme changes need a restart.
+// Like the other command binds, this also starts the service at session start.
+bind "walker" {
+    reload {
+        command {
+            argv "sh" "-c" "pkill -x walker; walker --gapplication-service &"
+        }
+    }
+}
+
+// The apply script follows the gnist accent; the optional `rog-rgb` module
+// renders it. On machines without that module the spawn is a silent no-op.
+bind "rog-rgb" {
+    reload {
+        command {
+            argv "gnist-rog-rgb-apply.sh"
         }
     }
 }
