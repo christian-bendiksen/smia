@@ -37,6 +37,24 @@ assert_eq "${#bootstrap_bins[@]}" 2
 [[ -x "$work/rendered/HOME/.local/bin/smia" ]] \
     || fail "install profile did not render an executable smia"
 
+model_profiles=(
+    mango-desktop mango-gaming
+    niri-desktop niri-gaming
+    hyprland-desktop hyprland-gaming
+)
+for model_profile in "${model_profiles[@]}"; do
+    model_output="$work/rendered-$model_profile"
+    HOME="$work/home" "$real_malm" \
+        --repo "$root/system-models" \
+        --state smia-system-models \
+        --profile "$model_profile" \
+        render --output "$model_output" >/dev/null
+    rendered_model="$(<"$model_output/HOME/.local/share/smia-system-models/system-model.kdl")"
+    assert_contains "$rendered_model" $'version "stream/unstable"\n        priority 10'
+    assert_contains "$rendered_model" $'version "stream/volatile"\n        priority 0'
+    assert_contains "$rendered_model" 'gnist'
+done
+
 mock_bin="$work/bin"
 mkdir -p "$mock_bin"
 

@@ -15,16 +15,6 @@ profile "model-mango" abstract=#true {
     extends "model-base"
     use "system-model" {
         patch {
-            collection "repositories" {
-                append "volatile" {
-                    volatile {
-                        description "AerynOS volatile repository"
-                        base-uri "https://cdn.aerynos.dev/"
-                        version "stream/volatile"
-                        priority 10
-                    }
-                }
-            }
             collection "packages" {
                 replace "compositor" { mangowm }
                 replace "portal-backend" { xdg-desktop-portal-wlr }
