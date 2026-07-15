@@ -27,6 +27,7 @@ module "system-model" {
 
                 // Bootstrap tools must remain in the imported source of truth.
                 item "malm" { malm }
+                item "gnist" { gnist }
                 item "moss" { moss }
                 item "git" { git }
                 item "sudo" { sudo-rs }
@@ -38,8 +39,6 @@ module "system-model" {
                 item "brightness" { brightnessctl }
                 item "btop" { btop }
                 item "elephant" { elephant }
-                // item "gnist" { gnist } // Not in repo yet.
-                item "malm" { malm }
                 item "gpu-record" { gpu-screen-recorder }
                 item "grim" { grim }
                 item "helix" { helix }
