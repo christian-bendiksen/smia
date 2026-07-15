@@ -21,26 +21,17 @@ Bootstrap the installer from the nested system-model configuration. Preview the
 two generated commands first:
 
 ```sh
-malm \
-    --config system-models/malm.kdl \
-    --state smia-system-models \
-    --profile install \
-    plan https://github.com/christian-bendiksen/smia.git \
-    --branch main \
-    --allow-local-includes
+malm plan https://github.com/christian-bendiksen/smia.git \
+    --config system-models/malm.kdl --state smia-system-models \
+    --profile install --branch main --allow-local-includes
 ```
 
 Apply and track that state when the plan looks correct:
 
 ```sh
-malm \
-    --config system-models/malm.kdl \
-    --state smia-system-models \
-    --profile install \
-    apply https://github.com/christian-bendiksen/smia.git \
-    --branch main \
-    --trust-remote \
-    --track \
+malm apply https://github.com/christian-bendiksen/smia.git \
+    --config system-models/malm.kdl --state smia-system-models \
+    --profile install --branch main --track --trust-remote \
     --allow-local-includes
 ```
 
