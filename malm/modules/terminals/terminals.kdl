@@ -5,7 +5,7 @@ module "terminals" {
     slot "terminal"
 
     inputs {
-        input "font-size" type="float" default=9.0
+        input "font-size" type="float" default=9.5
         input "padding" type="int" default=14
         input "opacity" type="float" default=1.0
         input "background-blur" type="int" default=0
