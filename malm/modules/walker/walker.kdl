@@ -93,6 +93,10 @@ module "walker" {
         }
         // Static CSS and XML themes can be deployed directly without rendering.
         dir "./themes" to="walker/themes"
+        render "gnist/services.d/walker" format="line-list" {
+            @comment "Force-restart entry consumed by `smia-menu`."
+            @line "restart walker  walker --gapplication-service"
+        }
         // The walker binding in gnist-runtime's bindings-base.kdl restarts the
         // service on theme changes and starts it at session start.
     }

@@ -25,6 +25,10 @@ module "swayosd" {
                 "max_volume" (ref)"max-volume"
             }
         }
+        render "gnist/services.d/swayosd" format="line-list" {
+            @comment "Force-restart entry consumed by `smia-menu`."
+            @line "restart swayosd-server  swayosd-server -s ~/.config/swayosd/style.css"
+        }
         // The swayosd-server binding in gnist-runtime's bindings-base.kdl
         // restarts the daemon on theme changes and starts it at session start.
     }

@@ -43,6 +43,7 @@ jobs:
       - name: shell behavior tests
         run: |
           bash malm/modules/base/tests/smia-cli.bash
+          bash malm/modules/base/tests/smia-menu.bash
           bash malm/modules/base/tests/smia-session.bash
 
   discover:

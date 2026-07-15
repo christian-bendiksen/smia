@@ -294,8 +294,9 @@ profiles_menu() {
 }
 
 services_menu() {
-    # Derive services from the manifest and module-owned fragments instead of
-    # maintaining a separate daemon list.
+    # Prefer explicit menu entries while retaining session restart directives
+    # for custom profiles and older configurations.
+    local service_dir="$XDG_CONFIG_HOME/gnist/services.d"
     local manifest="$XDG_CONFIG_HOME/gnist/session.services"
     local frag_dir="$XDG_CONFIG_HOME/gnist/session.d"
     local entries=()
@@ -323,9 +324,13 @@ services_menu() {
                 proc_to_cmd["$label"]="$proc $cmd"
                 ;;
         esac
-    done < <({ [[ -r "$manifest" ]] && cat "$manifest"; [[ -d "$frag_dir" ]] && cat "$frag_dir"/* 2>/dev/null; })
+    done < <(
+        for file in "$service_dir"/* "$manifest" "$frag_dir"/*; do
+            [[ -r "$file" ]] && cat "$file"
+        done
+    )
 
-    [[ ${#entries[@]} -eq 0 ]] && { notify "Services" "No services found in manifest"; return 1; }
+    [[ ${#entries[@]} -eq 0 ]] && { notify "Services" "No restartable services configured"; return 1; }
 
     while true; do
         local choice

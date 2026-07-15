@@ -59,5 +59,9 @@ module "mako" {
             @comment "The `makoctl reload` binding covers theme changes."
             @line "run mako"
         }
+        render "gnist/services.d/mako" format="line-list" {
+            @comment "Force-restart entry consumed by `smia-menu`."
+            @line "restart mako"
+        }
     }
 }
