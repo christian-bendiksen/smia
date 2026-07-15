@@ -17,7 +17,7 @@ theme[selected_bg]="#364538"
 theme[selected_fg]="#DEB266"
 
 # Inactive and disabled text color
-theme[inactive_fg]="#32473B"  
+theme[inactive_fg]="#32473B"
 
 # Graph overlay text color
 theme[graph_text]="#E6D8BA"
