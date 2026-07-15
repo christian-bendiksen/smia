@@ -96,7 +96,7 @@ profile "mango-astral" {
             set "windows.blur-params-brightness" 0.82
             set "windows.blur-params-contrast" 0.92
             set "windows.blur-params-saturation" 1.25
-            set "windows.shadows" 1
+            set "windows.shadows" 0
             set "windows.layer-shadows" 1
             set "windows.shadow-only-floating" 0
             set "windows.shadows-blur" 20
@@ -111,6 +111,7 @@ profile "mango-astral" {
             set "windows.zoom-end-ratio" 1.0
             set "windows.fadein-begin-opacity" 0.35
             set "windows.fadeout-begin-opacity" 1.0
+            set "windows.tag-animation-direction" 0
             set "windows.animation-duration-move" 380
             set "windows.animation-duration-open" 340
             set "windows.animation-duration-tag" 400

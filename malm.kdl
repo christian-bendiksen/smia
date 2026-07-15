@@ -12,7 +12,7 @@ config target="~/.config" default-profile="mango" required-state="default"
 meta name="smia" \
     author="Christian Bendiksen" \
     homepage="https://github.com/christian-bendiksen/smia" \
-    malm-version=">=0.3.1,<0.4"
+    malm-version=">=0.3.2,<0.4"
 
 // Shared design tokens use `global.*`, the cross-module variable namespace.
 // Outputs otherwise receive their typed inputs and Malm built-ins.
