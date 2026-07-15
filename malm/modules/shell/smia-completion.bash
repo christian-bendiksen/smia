@@ -33,12 +33,6 @@ _smia_complete() {
         list)
             mapfile -t COMPREPLY < <(compgen -W "--names --verbose" -- "$cur")
             ;;
-        profile)
-            if ((COMP_CWORD == 2)); then
-                candidates="$(_smia_profile_names)"
-                mapfile -t COMPREPLY < <(compgen -W "$candidates" -- "$cur")
-            fi
-            ;;
         profiles)
             if ((COMP_CWORD == 2)); then
                 mapfile -t COMPREPLY < <(compgen -W "list current select switch" -- "$cur")

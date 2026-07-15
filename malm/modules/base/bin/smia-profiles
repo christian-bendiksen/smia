@@ -4,6 +4,7 @@ set -euo pipefail
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 SMIA_DESKTOP_STATE="${SMIA_DESKTOP_STATE:-default}"
+COMPOSITOR_PROVIDERS=(mango niri hypr)
 
 usage() {
     cat <<'EOF'
@@ -50,6 +51,55 @@ current_profile() {
     printf '%s\n' "$profile"
 }
 
+profile_vars() {
+    malm --state "$SMIA_DESKTOP_STATE" --profile "$1" --json vars
+}
+
+profile_uses_provider() {
+    local vars
+    vars="$(profile_vars "$1")" || return 1
+    [[ "$vars" == *"\"module\": \"$2\""* ]]
+}
+
+profile_compositor_provider() {
+    local vars provider
+    vars="$(profile_vars "$1")" || return 1
+    # Malm's JSON lists resolved modules but does not currently include slots.
+    for provider in "${COMPOSITOR_PROVIDERS[@]}"; do
+        if [[ "$vars" == *"\"module\": \"$provider\""* ]]; then
+            printf '%s\n' "$provider"
+            return 0
+        fi
+    done
+    return 1
+}
+
+running_compositor_provider() {
+    local desktop="${XDG_CURRENT_DESKTOP:-}"
+    case "${desktop,,}" in
+        *mango*)     printf 'mango\n'; return 0 ;;
+        *niri*)      printf 'niri\n'; return 0 ;;
+        *hyprland*)  printf 'hypr\n'; return 0 ;;
+    esac
+
+    if pgrep -x mango >/dev/null 2>&1; then printf 'mango\n'
+    elif pgrep -x niri >/dev/null 2>&1; then printf 'niri\n'
+    elif pgrep -x Hyprland >/dev/null 2>&1; then printf 'hypr\n'
+    else return 1
+    fi
+}
+
+current_compositor_provider() {
+    local provider profile
+    if provider="$(running_compositor_provider)"; then
+        printf '%s\n' "$provider"
+        return 0
+    fi
+
+    profile="$(current_profile)" || return 1
+    profile_compositor_provider "$profile"
+}
+
 switch_profile() {
     local profile="$1"
     require_command malm
@@ -60,16 +110,31 @@ switch_profile() {
 
 select_profile() {
     require_command walker
-    local profiles profile label choice menu_theme
+    local profiles profile provider label choice menu_theme
     profiles="$(profile_names)"
     [[ -n "$profiles" ]] || {
         printf 'smia-profiles: no selectable profiles found\n' >&2
         return 1
     }
 
+    provider="$(current_compositor_provider)" || {
+        printf 'smia-profiles: unable to determine the current compositor provider\n' >&2
+        return 1
+    }
+
+    local compatible_profiles=()
+    while IFS= read -r profile; do
+        profile_uses_provider "$profile" "$provider" || continue
+        compatible_profiles+=("$profile")
+    done <<<"$profiles"
+    [[ ${#compatible_profiles[@]} -gt 0 ]] || {
+        printf 'smia-profiles: no selectable profiles found for compositor provider %s\n' "$provider" >&2
+        return 1
+    }
+
     local labels=()
     declare -A label_to_profile
-    while IFS= read -r profile; do
+    for profile in "${compatible_profiles[@]}"; do
         case "$profile" in
             hyprland)        label="Hyprland" ;;
             hyprland-astral) label="Hyprland (Astral)" ;;
@@ -81,7 +146,7 @@ select_profile() {
         esac
         labels+=("$label")
         label_to_profile["$label"]="$profile"
-    done <<<"$profiles"
+    done
 
     if [[ -r "$XDG_CONFIG_HOME/gnist/menu-theme" ]]; then
         IFS= read -r menu_theme < "$XDG_CONFIG_HOME/gnist/menu-theme" || true

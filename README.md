@@ -144,7 +144,7 @@ Smia provides a unified command that discovers installed `smia-*` plugins:
 | `smia session` | Starts the graphical session target and configured services. |
 | `smia system-model plan` | Previews the current generated model with Moss. |
 | `smia system-model apply` | Imports the current generated model through Moss. |
-| `xdg-terminal-exec [COMMAND]` | Runs a command in the terminal selected through `smia menu`, falling back to an installed terminal. |
+| `xdg-terminal-exec [COMMAND]` | Runs a command in the terminal selected through `smia menu` defaults. |
 
 The generated Bash configuration also provides:
 
@@ -154,9 +154,6 @@ The generated Bash configuration also provides:
 
 `smia profiles switch` skips the Malm confirmation prompt. Use `malm plan`
 first when switching to an unfamiliar profile.
-
-Direct commands such as `smia-menu`, `smia-session`, and `smia-profile` remain
-available for compatibility and recovery.
 
 ## Local changes
 

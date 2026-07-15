@@ -58,11 +58,9 @@ $smia help side-effect >/dev/null
 
 "$root/bin/smia-menu" --help >/dev/null
 "$root/bin/smia-refresh" --help >/dev/null
-"$root/bin/smia-profile" --help >/dev/null
 "$root/bin/smia-session" --help >/dev/null
 assert_status 2 "$root/bin/smia-menu" extra
 assert_status 2 "$root/bin/smia-refresh" extra
-assert_status 2 "$root/bin/smia-profile" one two
 assert_status 2 "$root/bin/smia-session" --help extra
 assert_status 2 "$profiles" unknown
 
@@ -70,7 +68,16 @@ cat > "$tmp/bin/malm" <<'EOF'
 #!/usr/bin/env bash
 case " $* " in
     *" profiles --selectable "*)
-        printf '\n  PROFILES\n     mango\n     niri-astral\n'
+        printf '\n  PROFILES\n     hyprland\n     hyprland-astral\n     mango\n     mango-astral\n     niri\n     niri-astral\n'
+        ;;
+    *" --profile hyprland --json vars "*|*" --profile hyprland-astral --json vars "*)
+        printf '{"instances":[{"module": "hypr"}]}\n'
+        ;;
+    *" --profile mango --json vars "*|*" --profile mango-astral --json vars "*)
+        printf '{"instances":[{"module": "mango"}]}\n'
+        ;;
+    *" --profile niri --json vars "*|*" --profile niri-astral --json vars "*)
+        printf '{"instances":[{"module": "niri"}]}\n'
         ;;
     *" apply -y "*)
         printf 'malm:%s\n' "$*"
@@ -83,23 +90,40 @@ esac
 EOF
 cat > "$tmp/bin/walker" <<'EOF'
 #!/usr/bin/env bash
-while IFS= read -r _; do :; done
-printf 'Niri (Astral)\n'
+mapfile -t choices
+printf '%s\n' "${choices[@]}" > "$SMIA_TEST_WALKER_INPUT"
+printf '%s\n' "$SMIA_TEST_WALKER_CHOICE"
 EOF
 cat > "$tmp/bin/smia-session" <<'EOF'
 #!/usr/bin/env bash
 printf 'session:%s\n' "$*"
 EOF
-chmod +x "$tmp/bin/malm" "$tmp/bin/walker" "$tmp/bin/smia-session"
+cat > "$tmp/bin/pgrep" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$tmp/bin/malm" "$tmp/bin/walker" "$tmp/bin/smia-session" "$tmp/bin/pgrep"
 printf 'mango\n' > "$tmp/config/gnist/profile"
+export SMIA_TEST_WALKER_INPUT="$tmp/walker-input"
 
 output="$(SMIA_DESKTOP_STATE=desktop "$profiles" list)"
-[[ "$output" == $'mango\nniri-astral' ]] || fail "profile listing was not parsed"
+[[ "$output" == $'hyprland\nhyprland-astral\nmango\nmango-astral\nniri\nniri-astral' ]] \
+    || fail "profile listing was not parsed"
 output="$(XDG_CONFIG_HOME="$tmp/config" "$profiles" current)"
 [[ "$output" == mango ]] || fail "current profile was not read"
-output="$(SMIA_DESKTOP_STATE=desktop XDG_CONFIG_HOME="$tmp/config" "$profiles" select)"
+output="$(SMIA_DESKTOP_STATE=desktop XDG_CONFIG_HOME="$tmp/config" \
+    XDG_CURRENT_DESKTOP=niri SMIA_TEST_WALKER_CHOICE='Niri (Astral)' "$profiles" select)"
 [[ "$output" == $'malm:--state desktop --profile niri-astral apply -y\nsession:--apply-theme' ]] \
     || fail "profile selection did not switch the selected profile"
+[[ "$(<"$SMIA_TEST_WALKER_INPUT")" == $'Niri\nNiri (Astral)' ]] \
+    || fail "profile selection was not filtered to the running compositor"
+
+output="$(env -u XDG_CURRENT_DESKTOP SMIA_DESKTOP_STATE=desktop \
+    XDG_CONFIG_HOME="$tmp/config" SMIA_TEST_WALKER_CHOICE='Mango (Astral)' "$profiles" select)"
+[[ "$output" == $'malm:--state desktop --profile mango-astral apply -y\nsession:--apply-theme' ]] \
+    || fail "profile selection did not fall back to the configured compositor"
+[[ "$(<"$SMIA_TEST_WALKER_INPUT")" == $'Mango (Default)\nMango (Astral)' ]] \
+    || fail "configured compositor fallback did not filter profiles"
 
 # shellcheck source=/dev/null
 source "$completion"
