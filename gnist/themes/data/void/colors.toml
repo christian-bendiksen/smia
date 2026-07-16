@@ -1,0 +1,40 @@
+# OLED black base with restrained grayscale chrome and readable ANSI states.
+accent               = "#E6E6E6"
+cursor               = "#FFFFFF"
+foreground           = "#E6E6E6"
+background           = "#000000"
+selection_foreground = "#000000"
+selection_background = "#E6E6E6"
+
+# Standard ANSI colors.
+color0 = "#000000"
+color1 = "#D16D6D"
+color2 = "#8FAF87"
+color3 = "#C7A96B"
+color4 = "#8BA7C7"
+color5 = "#AA8EBA"
+color6 = "#82B4B4"
+color7 = "#C8C8C8"
+
+# Bright ANSI colors.
+color8  = "#666666"
+color9  = "#EF8585"
+color10 = "#A7C99E"
+color11 = "#E2C17D"
+color12 = "#A4C2E3"
+color13 = "#C3A5D4"
+color14 = "#9DD0D0"
+color15 = "#FFFFFF"
+
+# Layered material and semantic tokens.
+surface      = "#080808"
+surface_high = "#111111"
+overlay      = "#191919"
+muted        = "#777777"
+success      = "#8FAF87"
+warning      = "#C7A96B"
+error        = "#D16D6D"
+critical     = "#D16D6D"
+info         = "#A4C2E3"
+border_active   = "#E6E6E6"
+border_inactive = "#242424"

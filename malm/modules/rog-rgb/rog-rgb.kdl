@@ -13,11 +13,14 @@ module "rog-rgb" {
     }
 
     outputs {
+        file "./gnist/asusctl.rgb.tpl" to="gnist/themes/templates/asusctl.rgb.tpl"
+        render "gnist/bindings.d/rog-rgb.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/rog-rgb.kdl"
+        }
         render "~/.local/bin/gnist-rog-rgb-apply.sh" format="text" executable=#true validate="shell" {
             @file "./apply.sh.tpl" interpolate=#true
         }
-        // The rog-rgb binding in gnist-runtime's bindings-base.kdl runs this
-        // script on theme changes and at session start, keeping the keyboard
-        // accent in sync with the active theme.
+        // The module-owned binding runs this script on theme changes and at
+        // session start, keeping the keyboard accent in sync.
     }
 }

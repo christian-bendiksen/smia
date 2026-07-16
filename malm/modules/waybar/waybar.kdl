@@ -25,6 +25,10 @@ module "waybar" {
     }
 
     outputs {
+        file "./gnist/waybar.css.tpl" to="gnist/themes/templates/waybar.css.tpl"
+        render "gnist/bindings.d/waybar.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/waybar.kdl"
+        }
         render "waybar/config.jsonc" format="text" validate="jsonc" {
             @compose "config"
         }
@@ -46,7 +50,7 @@ module "waybar" {
                 "font-family" (f)"'{{global.font-symbols}}'"
             }
         }
-        render "gnist/services.d/waybar" format="line-list" {
+        render "smia/services.d/waybar" format="line-list" {
             @comment "Force-restart entry consumed by `smia-menu`."
             @line "restart waybar"
         }

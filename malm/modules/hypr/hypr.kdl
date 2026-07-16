@@ -47,6 +47,10 @@ module "hypr" {
     }
 
     outputs {
+        file "./gnist/hyprland.lua.tpl" to="gnist/themes/templates/hyprland.lua.tpl"
+        render "gnist/bindings.d/hyprland.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/hyprland.kdl"
+        }
         // Behavior: plain Lua, edited as Lua.
         file "./hyprland.lua" to="hypr/hyprland.lua"
 

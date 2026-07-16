@@ -1,0 +1,40 @@
+# Warm editorial paper with ink-forward contrast.
+accent               = "#2D5E73"
+cursor               = "#2D5E73"
+foreground           = "#282620"
+background           = "#F7F3E8"
+selection_foreground = "#1F3138"
+selection_background = "#D5E3E5"
+
+# Standard ANSI colors.
+color0 = "#282620"
+color1 = "#A33D32"
+color2 = "#4D6B3A"
+color3 = "#8A621F"
+color4 = "#2D5E73"
+color5 = "#78517C"
+color6 = "#3F6D68"
+color7 = "#E8E2D3"
+
+# Bright ANSI colors.
+color8  = "#716D63"
+color9  = "#C25244"
+color10 = "#647F4C"
+color11 = "#A87A2B"
+color12 = "#47778D"
+color13 = "#916A94"
+color14 = "#56857F"
+color15 = "#FFFFFF"
+
+# Layered material and semantic tokens.
+surface      = "#EEE9DC"
+surface_high = "#E3DDCE"
+overlay      = "#D8D1C2"
+muted        = "#716D63"
+success      = "#4D6B3A"
+warning      = "#8A621F"
+error        = "#A33D32"
+critical     = "#A33D32"
+info         = "#2D5E73"
+border_active   = "#2D5E73"
+border_inactive = "#BDB6A7"

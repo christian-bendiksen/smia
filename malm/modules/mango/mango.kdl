@@ -351,6 +351,10 @@ module "mango" {
     }
 
     outputs {
+        file "./gnist/mango.conf.tpl" to="gnist/themes/templates/mango.conf.tpl"
+        render "gnist/bindings.d/mango.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/mango.kdl"
+        }
         render "mango/config.conf" format="key-value" separator="=" quote="none" validate="mango" {
             @comment "Mango entry point."
             source "~/.config/mango/conf.d/windows.conf"

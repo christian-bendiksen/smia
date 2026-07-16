@@ -1,0 +1,9 @@
+// A restart also covers layout changes and starts Waybar during session
+// initialization.
+bind "waybar" {
+    reload {
+        command {
+            argv "sh" "-c" "pkill -x waybar; waybar &"
+        }
+    }
+}

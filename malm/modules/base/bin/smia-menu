@@ -21,8 +21,7 @@ DESKTOP_DIRS=(
     /usr/local/share/applications
     /usr/share/applications
 )
-THEMES_DIR="$HOME/.config/gnist/themes/data"
-MENU_THEME="$(cat "$XDG_CONFIG_HOME/gnist/menu-theme" 2>/dev/null || printf 'gnist-menu')"
+MENU_THEME="$(cat "$XDG_CONFIG_HOME/smia/menu-theme" 2>/dev/null || printf 'gnist-menu')"
 
 notify() {
     command -v notify-send >/dev/null 2>&1 && notify-send "$@" || printf '%s\n' "$*" >&2
@@ -215,20 +214,22 @@ toggle_dnd() {
 }
 
 current_theme() {
-    local file="$XDG_CONFIG_HOME/gnist/themes/current.theme"
-    [[ -r "$file" ]] && tr -d '[:space:]' < "$file" || printf 'unknown'
+    local file="$XDG_CONFIG_HOME/gnist/themes/current.theme" theme
+    if [[ -r "$file" ]]; then
+        IFS= read -r theme < "$file" || true
+        printf '%s' "$theme"
+    else
+        printf 'unknown'
+    fi
 }
 
 list_themes() {
-    if [[ -d "$THEMES_DIR" ]]; then
-        ls -1 "$THEMES_DIR"
-    else
-        printf '%s\n' \
-            aeryn astral catppuccin catppuccin-latte ethereal \
-            everforest flexoki-light gruvbox hackerman kanagawa \
-            matte-black miasma nord osaka-jade ristretto rose-pine \
-            tokyo-night vantablack white
-    fi
+    local output theme
+    output="$(gnist list)"
+    while IFS= read -r theme; do
+        theme="${theme% (current)}"
+        [[ -n "$theme" ]] && printf '%s\n' "$theme"
+    done <<<"$output"
 }
 
 themes_menu() {
@@ -295,12 +296,13 @@ profiles_menu() {
 
 services_menu() {
     # Prefer explicit menu entries while retaining session restart directives
-    # for custom profiles and older configurations.
-    local service_dir="$XDG_CONFIG_HOME/gnist/services.d"
-    local manifest="$XDG_CONFIG_HOME/gnist/session.services"
-    local frag_dir="$XDG_CONFIG_HOME/gnist/session.d"
+    # for custom profiles.
+    local service_dir="$XDG_CONFIG_HOME/smia/services.d"
+    local manifest="$XDG_CONFIG_HOME/smia/session.services"
+    local frag_dir="$XDG_CONFIG_HOME/smia/session.d"
     local entries=()
     declare -A proc_to_cmd
+    declare -A seen_procs
 
     while IFS= read -r line; do
         [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
@@ -318,8 +320,9 @@ services_menu() {
                     elephant)           label="󰈞  Restart Elephant" ;;
                     *)                  label="󰝘  Restart ${proc}" ;;
                 esac
-                # Keep one entry when multiple fragments name the same process.
-                [[ -n "${proc_to_cmd[$label]:-}" ]] && continue
+                # Keep one entry when multiple sources name the same process.
+                [[ -n "${seen_procs["$proc"]+set}" ]] && continue
+                seen_procs["$proc"]=1
                 entries+=("$label")
                 proc_to_cmd["$label"]="$proc $cmd"
                 ;;

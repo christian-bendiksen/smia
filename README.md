@@ -83,6 +83,8 @@ variants:
 - `mango-astral`
 - `niri-astral`
 - `hyprland-astral`
+- `mango-paper`
+- `mango-void`
 
 The installer selects one of these profiles when passed `--astral`. After
 installation, switch desktop variants with the generated helper:

@@ -28,6 +28,10 @@ module "walker" {
     }
 
     outputs {
+        file "./gnist/walker.css.tpl" to="gnist/themes/templates/walker.css.tpl"
+        render "gnist/bindings.d/walker.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/walker.kdl"
+        }
         render "walker/config.toml" format="toml" {
             "force_keyboard_focus" #true
             "selection_wrap" #true
@@ -93,11 +97,11 @@ module "walker" {
         }
         // Static CSS and XML themes can be deployed directly without rendering.
         dir "./themes" to="walker/themes"
-        render "gnist/services.d/walker" format="line-list" {
+        render "smia/services.d/walker" format="line-list" {
             @comment "Force-restart entry consumed by `smia-menu`."
             @line "restart walker  walker --gapplication-service"
         }
-        // The walker binding in gnist-runtime's bindings-base.kdl restarts the
-        // service on theme changes and starts it at session start.
+        // The module-owned binding restarts the service on theme changes and
+        // starts it at session initialization.
     }
 }

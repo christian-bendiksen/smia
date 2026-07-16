@@ -17,4 +17,4 @@ if ! command -v malm >/dev/null 2>&1; then
 fi
 
 malm --state "${SMIA_DESKTOP_STATE:-default}" apply
-exec smia-session
+exec smia-session --reapply-theme

@@ -73,6 +73,10 @@ module "helix" {
     }
 
     outputs {
+        file "./gnist/helix.toml.tpl" to="gnist/themes/templates/helix.toml.tpl"
+        render "gnist/bindings.d/helix.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/helix.kdl"
+        }
         render "helix/config.toml" format="toml" {
             "theme" "gnist"
             "editor" {

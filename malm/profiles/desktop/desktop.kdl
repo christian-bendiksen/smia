@@ -12,7 +12,7 @@ profile "desktop" abstract=#true {
     use "fontconfig"
     use "portals"
     use "sddm"
-    use "gnist-core"
+    use "gnist"
     use "browser-flags"
     use "terminals"
     use "lock-idle"
@@ -26,9 +26,8 @@ profile "desktop" abstract=#true {
     use "screenshot"
     use "appearance"
     use "default-apps"
+    use "obsidian"
     use "mango"
-    // The stock session uses Mango with the Aeryn theme and runtime defaults.
-    use "gnist-runtime"
 }
 
 // The default session inherits "desktop" unchanged. Mango's `binds` belong to
@@ -51,13 +50,10 @@ profile "niri" {
             screen-cast "gnome"
         }
     }
-    // Reusing an inherited module merges these values and preserves theme `aeryn`.
-    use "gnist-runtime" {
+    // Reusing the inherited facade preserves the default Aeryn theme.
+    use "gnist" {
         with {
             menu-theme "gnist-default"
-        }
-        fragments {
-            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-niri.kdl"
         }
     }
 }
@@ -74,12 +70,9 @@ profile "hyprland" {
             screen-cast "hyprland"
         }
     }
-    use "gnist-runtime" {
+    use "gnist" {
         with {
             menu-theme "gnist-default"
-        }
-        fragments {
-            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-hyprland.kdl"
         }
     }
 }

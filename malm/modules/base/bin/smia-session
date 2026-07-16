@@ -3,25 +3,35 @@
 set -euo pipefail
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-MANIFEST="$XDG_CONFIG_HOME/gnist/session.services"
-FRAGMENT_DIR="$XDG_CONFIG_HOME/gnist/session.d"
+SMIA_CONFIG_DIR="$XDG_CONFIG_HOME/smia"
+MANIFEST="$SMIA_CONFIG_DIR/session.services"
+FRAGMENT_DIR="$SMIA_CONFIG_DIR/session.d"
+DEFAULT_THEME_FILE="$SMIA_CONFIG_DIR/default-theme"
 
 log() { printf 'smia-session: %s\n' "$*" >&2; }
 
-apply_theme=0
+mode=normal
 if (($# > 1)); then
-    printf 'usage: smia-session [--apply-theme]\n' >&2
+    printf 'usage: smia-session [--apply-theme|--reapply-theme]\n' >&2
     exit 2
 fi
 case "${1:-}" in
     "") ;;
-    --apply-theme) apply_theme=1 ;;
+    --apply-theme) mode=apply ;;
+    --reapply-theme) mode=reapply ;;
     -h|--help)
-        printf 'usage: smia-session [--apply-theme]\n'
+        cat <<'EOF'
+Usage: smia-session [--apply-theme|--reapply-theme]
+
+Modes:
+  normal           Reload the current Gnist theme, or set the default initially
+  --apply-theme    Set the configured default theme
+  --reapply-theme  Re-render the current theme, or set the default initially
+EOF
         exit 0
         ;;
     *)
-        printf 'usage: smia-session [--apply-theme]\n' >&2
+        printf 'usage: smia-session [--apply-theme|--reapply-theme]\n' >&2
         exit 2
         ;;
 esac
@@ -37,8 +47,8 @@ start_graphical_session() {
 
 start_graphical_session
 
-# Combine the main manifest with module-owned session.d fragments.
 collect_manifest() {
+    local frag
     [[ -r "$MANIFEST" ]] && cat "$MANIFEST"
     if [[ -d "$FRAGMENT_DIR" ]]; then
         for frag in "$FRAGMENT_DIR"/*; do
@@ -73,18 +83,25 @@ restart_service() {
     ensure_running "$proc" "$cmd"
 }
 
-theme_mode=""
 declare -a stops=() prepares=() runs=() restarts=()
+declare -A seen_processes=()
 
 while IFS= read -r line || [[ -n "$line" ]]; do
     [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
     read -r directive rest <<<"$line"
     case "$directive" in
-        theme)   theme_mode="$rest" ;;
-        prepare) prepares+=("$rest") ;;
-        run)     runs+=("$rest") ;;
-        restart) restarts+=("$rest") ;;
-        stop)    stops+=("$rest") ;;
+        prepare|run|restart|stop)
+            read -r proc _ <<<"$rest"
+            [[ -n "$proc" ]] || continue
+            [[ -n "${seen_processes["$proc"]+set}" ]] && continue
+            seen_processes["$proc"]=1
+            case "$directive" in
+                prepare) prepares+=("$rest") ;;
+                run)     runs+=("$rest") ;;
+                restart) restarts+=("$rest") ;;
+                stop)    stops+=("$rest") ;;
+            esac
+            ;;
         *)       log "ignoring unknown directive: $directive" ;;
     esac
 done < <(collect_manifest)
@@ -103,24 +120,50 @@ if ((${#prepares[@]})); then
     done
 fi
 
-reload_theme=0
-if [[ -n "$theme_mode" ]] && command -v gnist >/dev/null 2>&1; then
-    reload_theme=1
-    read -r mode _ <<<"$theme_mode"
-    if [[ "$mode" != "keep" ]] \
-        && { ((apply_theme)) || ! gnist current >/dev/null 2>&1; }; then
-        if gnist set "$mode" >/dev/null 2>&1; then
-            # `gnist set` runs the reload bindings itself.
-            reload_theme=0
-        fi
-    fi
-fi
+set_default_theme() {
+    local theme
+    [[ -r "$DEFAULT_THEME_FILE" ]] || {
+        log "default theme not found: $DEFAULT_THEME_FILE"
+        exit 1
+    }
+    IFS= read -r theme < "$DEFAULT_THEME_FILE" || true
+    [[ -n "$theme" ]] || {
+        log "default theme is empty: $DEFAULT_THEME_FILE"
+        exit 1
+    }
+    gnist set "$theme" >/dev/null 2>&1 || {
+        log "failed to activate theme '$theme'"
+        exit 1
+    }
+}
 
-# Reload existing processes before reconciling session-managed services. New or
-# restarted services read current config and must not receive startup signals.
-if ((reload_theme)); then
-    gnist reload >/dev/null 2>&1 || true
-fi
+# Apply the theme before reconciling session-managed services. New or restarted
+# services then read current configuration and do not receive startup signals.
+case "$mode" in
+    normal)
+        if gnist current >/dev/null 2>&1; then
+            gnist reload >/dev/null 2>&1 || {
+                log "failed to reload the current theme"
+                exit 1
+            }
+        else
+            set_default_theme
+        fi
+        ;;
+    apply)
+        set_default_theme
+        ;;
+    reapply)
+        if gnist current >/dev/null 2>&1; then
+            gnist reapply >/dev/null 2>&1 || {
+                log "failed to reapply the current theme"
+                exit 1
+            }
+        else
+            set_default_theme
+        fi
+        ;;
+esac
 
 if ((${#runs[@]})); then
     for entry in "${runs[@]}"; do

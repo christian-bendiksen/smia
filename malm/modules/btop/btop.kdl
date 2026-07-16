@@ -16,6 +16,10 @@ module "btop" {
     }
 
     outputs {
+        file "./gnist/btop.theme.tpl" to="gnist/themes/templates/btop.theme.tpl"
+        render "gnist/bindings.d/btop.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/btop.kdl"
+        }
         // btop requires quotes only for strings; booleans and integers stay native.
         render "btop/btop.conf" format="key-value" separator=" = " quote="none" {
             "color_theme" "\"current\""

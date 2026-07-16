@@ -9,8 +9,7 @@
 // Modules shared by all profiles.
 include "modules/base/base.kdl"
 include "modules/elephant/elephant.kdl"
-include "modules/gnist-core/gnist-core.kdl"
-include "modules/gnist-runtime/gnist-runtime.kdl"
+include "modules/gnist/gnist.kdl"
 include "modules/shell/shell.kdl"
 include "modules/btop/btop.kdl"
 include "modules/helix/helix.kdl"
@@ -35,6 +34,7 @@ include "modules/neovim/neovim.kdl"
 // include "modules/vscode/vscode.kdl"
 include "modules/share-picker/share-picker.kdl"
 include "modules/rog-rgb/rog-rgb.kdl"
+include "modules/obsidian/obsidian.kdl"
 
 include "modules/test/test.kdl"
 

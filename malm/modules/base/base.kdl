@@ -22,7 +22,7 @@ module "base" {
     outputs {
         dir  "./bin" to="~/.local/bin"
         file "./smia-session.target" to="systemd/user/smia-session.target"
-        render "gnist/session.d/awww" format="line-list" {
+        render "smia/session.d/awww" format="line-list" {
             @comment "Awww restores the last wallpaper for each output from its cache."
             @line "stop swaybg"
             @line "stop swww-daemon"
@@ -30,7 +30,7 @@ module "base" {
             @line "prepare awww-daemon"
         }
 
-        // These directories provide parents for gnist-core's gtk.css links.
+        // These directories provide parents for appearance's gtk.css links.
         dir "./gtk-3.0" to="gtk-3.0"
         dir "./gtk-4.0" to="gtk-4.0"
     }

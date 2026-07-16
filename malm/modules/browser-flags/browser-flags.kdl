@@ -17,6 +17,7 @@ module "browser-flags" {
     }
 
     outputs {
+        file "./gnist/chromium.theme.tpl" to="gnist/themes/templates/chromium.theme.tpl"
         render "~/.config/chromium-flags.conf" format="line-list" {
             @each "flag" in="default-flags" {
                 @line (ref)"flag"

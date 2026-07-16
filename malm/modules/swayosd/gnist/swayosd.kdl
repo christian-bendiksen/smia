@@ -1,0 +1,7 @@
+bind "swayosd-server" {
+    reload {
+        command {
+            argv "sh" "-c" "pkill -x swayosd-server; swayosd-server &"
+        }
+    }
+}

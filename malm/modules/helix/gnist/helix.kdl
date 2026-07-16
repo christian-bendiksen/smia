@@ -1,0 +1,5 @@
+bind "helix" {
+    reload {
+        signal process="hx" signal="SIGUSR1"
+    }
+}

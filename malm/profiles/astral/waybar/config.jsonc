@@ -51,7 +51,7 @@
     "tooltip-format": "<big>{:%H:%M}</big>\n<tt>{calendar}</tt>",
     "calendar": {
       "format": {
-        "today": "<span color='#82aaff'><b>{}</b></span>"
+        "today": "<b>{}</b>"
       }
     },
     "actions": {

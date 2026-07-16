@@ -154,6 +154,10 @@ module "niri" {
     }
 
     outputs {
+        file "./gnist/niri-colors.kdl.tpl" to="gnist/themes/templates/niri-colors.kdl.tpl"
+        render "gnist/bindings.d/niri.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/niri.kdl"
+        }
         render "niri/config.kdl" format="kdl" version=1 {
             input {
                 keyboard {

@@ -38,7 +38,7 @@ profile_names() {
 }
 
 current_profile() {
-    local profile_file="$XDG_CONFIG_HOME/gnist/profile" profile
+    local profile_file="$XDG_CONFIG_HOME/smia/profile" profile
     [[ -r "$profile_file" ]] || {
         printf 'smia-profiles: active profile not found: %s\n' "$profile_file" >&2
         return 1
@@ -142,6 +142,8 @@ select_profile() {
             hyprland-astral) label="Hyprland (Astral)" ;;
             mango)           label="Mango (Default)" ;;
             mango-astral)    label="Mango (Astral)" ;;
+            mango-paper)     label="Mango (Paper)" ;;
+            mango-void)      label="Mango (Void)" ;;
             niri)            label="Niri" ;;
             niri-astral)     label="Niri (Astral)" ;;
             *)               label="$profile" ;;
@@ -150,8 +152,8 @@ select_profile() {
         label_to_profile["$label"]="$profile"
     done
 
-    if [[ -r "$XDG_CONFIG_HOME/gnist/menu-theme" ]]; then
-        IFS= read -r menu_theme < "$XDG_CONFIG_HOME/gnist/menu-theme" || true
+    if [[ -r "$XDG_CONFIG_HOME/smia/menu-theme" ]]; then
+        IFS= read -r menu_theme < "$XDG_CONFIG_HOME/smia/menu-theme" || true
     fi
     menu_theme="${menu_theme:-gnist-menu}"
     choice="$(printf '%s\n' "${labels[@]}" \

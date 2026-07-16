@@ -1,0 +1,7 @@
+bind "rog-rgb" {
+    reload {
+        command {
+            argv "gnist-rog-rgb-apply.sh"
+        }
+    }
+}

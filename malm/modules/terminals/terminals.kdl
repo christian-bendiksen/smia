@@ -30,6 +30,12 @@ module "terminals" {
     }
 
     outputs {
+        file "./gnist/alacritty.toml.tpl" to="gnist/themes/templates/alacritty.toml.tpl"
+        file "./gnist/ghostty.conf.tpl" to="gnist/themes/templates/ghostty.conf.tpl"
+        file "./gnist/kitty.conf.tpl" to="gnist/themes/templates/kitty.conf.tpl"
+        render "gnist/bindings.d/terminals.kdl" format="text" validate="kdl-v2" {
+            @file "./gnist/terminals.kdl"
+        }
         render "kitty/kitty.conf" format="key-value" separator=" " quote="none" {
             "shell_integration" (ref)"shell-integration"
             "allow_remote_control" "yes"

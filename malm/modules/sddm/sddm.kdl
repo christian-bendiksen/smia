@@ -7,4 +7,8 @@ module "sddm" {
         command "sddm"
     }
 
+    outputs {
+        file "./gnist/sddm-theme.conf.tpl" to="gnist/themes/templates/sddm-theme.conf.tpl"
+    }
+
 }

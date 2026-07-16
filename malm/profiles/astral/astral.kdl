@@ -33,7 +33,7 @@ profile "astral" abstract=#true {
             theme "gnist-astral"
             extra-emergency {
                 text "Reload Astral profile"
-                command "gnist set astral --transition-ms 320"
+                command "gnist set astral"
             }
             placeholder-input "✦ Search the void…"
             placeholder-list "No results"
@@ -49,6 +49,14 @@ profile "astral" abstract=#true {
         }
     }
 
+    use "terminals" {
+        with {
+            padding 18
+            opacity 0.86
+            background-blur 24
+        }
+    }
+
     use "swayosd-style" {
         fragments { replace "style" source="./swayosd/style.css" }
     }
@@ -60,9 +68,9 @@ profile "astral" abstract=#true {
     }
 
     // Shared Astral runtime theme.
-    use "gnist-runtime" {
+    use "gnist" {
         with {
-            theme "astral"
+            default-theme "astral"
             menu-theme "gnist-astral-menu"
         }
     }
@@ -70,7 +78,7 @@ profile "astral" abstract=#true {
 
 profile "mango-astral" {
     extends "astral"
-    // Mango layout and effects. The runtime module retains its default reload fragment.
+    // Mango layout and effects.
     use "mango" {
         with {
             tag-layout "scroller"
@@ -158,11 +166,6 @@ profile "niri-astral" {
             screen-cast "gnome"
         }
     }
-    use "gnist-runtime" {
-        fragments {
-            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-niri.kdl"
-        }
-    }
     // Astral effects for Niri.
     replace slot="compositor" module="niri" {
         fragments {
@@ -193,11 +196,6 @@ profile "hyprland-astral" {
             blur-size 10
             blur-passes 4
             shadow-range 8
-        }
-    }
-    use "gnist-runtime" {
-        fragments {
-            replace "compositor-reload" source="malm/modules/gnist-runtime/reload-hyprland.kdl"
         }
     }
 }

@@ -1,4 +1,3 @@
-// Compositor reload binding selected by Hyprland profiles.
 bind "hyprland" {
     reload {
         command {

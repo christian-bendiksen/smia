@@ -34,19 +34,22 @@ Most changes begin in one of three places:
 
 ## Profiles
 
-Smia has one stock and one Astral profile for each supported compositor:
+Smia has stock and Astral profiles for each supported compositor, plus two
+Mango-first material profiles:
 
 | Profile | Description |
 |---|---|
 | `mango` | Mango with the stock Smia appearance. This is the default. |
 | `mango-astral` | Mango with the Astral appearance and behavior. |
+| `mango-paper` | Light, flat Paper material with gentle motion. |
+| `mango-void` | OLED-black Void material with reduced motion. |
 | `niri` | Niri with the stock Smia appearance. |
 | `niri-astral` | Niri with the Astral appearance and effects. |
 | `hyprland` | Hyprland with the stock Smia appearance. |
 | `hyprland-astral` | Hyprland with the Astral appearance, rules, and bindings. |
 
-`desktop` and `astral` are abstract profiles. They hold shared configuration and
-cannot be selected directly.
+`desktop`, `astral`, and `mango-material` are abstract profiles. They hold shared
+configuration and cannot be selected directly.
 
 From the repository root, these are the useful development commands:
 
@@ -112,7 +115,7 @@ unrelated profiles:
   substitutions. Put loops, conditions, and typed structure in KDL.
 - **Separate deployment from runtime theming.** Malm decides what is installed;
   Gnist decides which colors and wallpaper are active right now.
-- **Validate every profile.** A change to a shared module can affect all six
+- **Validate every profile.** A change to a shared module can affect all eight
   selectable profiles, so run `malm check --all-profiles` before applying it.
 
 ## Local overrides

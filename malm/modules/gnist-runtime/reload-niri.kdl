@@ -1,6 +1,0 @@
-// Compositor reload binding selected by Niri profiles.
-bind "niri" {
-    reload {
-        action "reload-config"
-    }
-}

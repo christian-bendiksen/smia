@@ -1,4 +1,3 @@
-// Compositor reload binding selected by Mango profiles.
 bind "mango" {
     reload {
         command {

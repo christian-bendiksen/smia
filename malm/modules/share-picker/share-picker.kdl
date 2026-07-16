@@ -15,6 +15,7 @@ module "share-picker" {
     }
 
     outputs {
+        file "./gnist/hyprland-preview-share-picker.css.tpl" to="gnist/themes/templates/hyprland-preview-share-picker.css.tpl"
         dir "./config" to="hyprland-preview-share-picker"
         symlink source=(ref)"style-ref" to="~/.config/hyprland-preview-share-picker/style.css" if-missing="allow"
     }
