@@ -138,7 +138,7 @@ into private scratch space and remembers the moving selector for future updates
 with `smia update`.
 
 Tracking resolves the `malm.lock` committed at the tracked revision. That lock
-must match its own commit. The `dev` branch carries a matching lock.
+must match its own commit.
 
 1. Initialize the Malm store and track Smia with the desired profile. This
    example selects Mango with the desktop kernel.
@@ -150,7 +150,7 @@ track_scratch=$(mktemp -d)
 chmod 700 "$track_scratch"
 malm plan track \
     --source-url https://github.com/christian-bendiksen/smia.git \
-    --selector refs/heads/dev \
+    --selector refs/heads/main \
     --git-executable /usr/bin/git \
     --root-scratch "$track_scratch" \
     --profile mango \
