@@ -1,0 +1,12 @@
+// Installs the Gnist loader without owning the user's init.lua.
+module "neovim" {
+    description "Neovim Gnist theme loader"
+
+    requires {
+        command "nvim"
+    }
+
+    outputs {
+        file "./init.lua" to="nvim/lua/gnist/init.lua"
+    }
+}

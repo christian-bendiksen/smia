@@ -1,0 +1,16 @@
+module "smia-cli" {
+    description "Smia command dispatcher and single-plan installer"
+
+    requires {
+        command "/usr/bin/env"
+        command "bash"
+        command "cat"
+        command "malm"
+        command "sort"
+    }
+
+    outputs {
+        file "./smia" to="~/.local/bin/smia" executable=#true
+        file "./smia-install" to="~/.local/bin/smia-install" executable=#true
+    }
+}

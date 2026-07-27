@@ -1,0 +1,62 @@
+profile "desktop" abstract=#true {
+    use "smia-cli"
+    use "base"
+    use "system-model"
+    use "menu"
+    use "elephant"
+    use "shell"
+    use "btop"
+    use "helix"
+    use "neovim"
+    use "fontconfig"
+    use "portals"
+    use "gnist"
+    use "browser-flags"
+    use "terminals"
+    use "lock-idle"
+    use "mako"
+    use "walker-support"
+    use "walker"
+    use "swayosd"
+    // Package defaults define the stock Waybar and swayosd appearance.
+    use "swayosd-style"
+    use "waybar"
+    use "kanshi"
+    use "screenshot"
+    use "record"
+    use "night-light"
+    use "appearance"
+    use "default-apps"
+    use "obsidian"
+    use "mango"
+}
+
+// Mango is inherited from desktop; replacement providers remove its binds too.
+profile "mango" {
+    extends "desktop"
+}
+
+profile "niri" {
+    extends "desktop" "niri-provider"
+    // Keep the inherited Gnist facade and change only the Walker menu theme.
+    use "gnist" {
+        with {
+            menu-theme "gnist-default"
+        }
+    }
+}
+
+profile "hyprland" {
+    extends "desktop" "hyprland-provider"
+    use "gnist" {
+        with {
+            menu-theme "gnist-menu"
+        }
+    }
+}
+
+// The bootstrap profile installs only the dispatcher and one-plan installer.
+// It is intentionally absent from the selectable desktop profile manifest.
+profile "install" {
+    use "smia-cli"
+}

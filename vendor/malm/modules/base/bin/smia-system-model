@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+model="$HOME/.local/share/smia-system-models/system-model.kdl"
+
+usage() {
+    printf 'usage: smia-system-model <path|plan|apply>\n'
+}
+
+case "${1:-}" in
+    path)
+        (($# == 1)) || { usage >&2; exit 2; }
+        printf '%s\n' "$model"
+        ;;
+    plan)
+        (($# == 1)) || { usage >&2; exit 2; }
+        [[ -r "$model" ]] || {
+            printf 'smia-system-model: model not found: %s\n' "$model" >&2
+            exit 1
+        }
+        exec moss sync --import "$model" --dry-run
+        ;;
+    apply)
+        (($# == 1)) || { usage >&2; exit 2; }
+        [[ -r "$model" ]] || {
+            printf 'smia-system-model: model not found: %s\n' "$model" >&2
+            exit 1
+        }
+        exec sudo moss sync --import "$model"
+        ;;
+    -h|--help)
+        (($# == 1)) || { usage >&2; exit 2; }
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

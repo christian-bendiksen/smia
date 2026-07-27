@@ -1,0 +1,13 @@
+[package]
+name = "malm-host-check"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+malm-config = { version = "=0.4.0", path = "../../../../malm/crates/malm-config" }
+malm-format-component-api = { version = "=0.4.0", path = "../../../../malm/crates/malm-format-component-api" }
+malm-format-component-host = { version = "=0.4.0", path = "../../../../malm/crates/malm-format-component-host" }
+malm-types = { version = "=0.4.0", path = "../../../../malm/crates/malm-types" }

@@ -1,0 +1,47 @@
+layout {
+    gaps 16
+
+    shadow {
+        on
+        softness 20
+        spread 3
+        offset x=0 y=3
+        color "#0a0c1966"
+    }
+}
+
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+    background-effect {
+        blur true
+        noise 0.03
+        saturation 1.25
+    }
+}
+
+window-rule {
+    match is-active=true
+    opacity 0.95
+}
+window-rule {
+    match is-active=false
+    opacity 0.86
+}
+
+animations {
+    window-open {
+        duration-ms 340
+        curve "cubic-bezier" 0.16 1.0 0.3 1.0
+    }
+    window-close {
+        duration-ms 280
+        curve "ease-out-quad"
+    }
+    window-movement {
+        spring damping-ratio=1.0 stiffness=700 epsilon=0.0001
+    }
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=700 epsilon=0.0001
+    }
+}

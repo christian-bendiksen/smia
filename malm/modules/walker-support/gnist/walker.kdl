@@ -1,0 +1,9 @@
+// Walker loads its theme at startup, so theme changes require a restart. This
+// also starts the service during session initialization.
+bind "walker" {
+    reload {
+        command {
+            argv "sh" "-c" "pkill -x walker; walker --gapplication-service &"
+        }
+    }
+}

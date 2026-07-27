@@ -1,0 +1,18 @@
+// Malm permits one slots block. max=1 rejects competing providers for a role.
+slots {
+    slot "compositor"     max=1 description="active Wayland compositor"
+    slot "bar"            max=1 description="active status bar"
+    slot "launcher"       max=1 description="active app launcher"
+    slot "notifications"  max=1 description="active notification daemon"
+    slot "osd"            max=1 description="on-screen display daemon"
+    slot "osd-style"      max=1 description="swayosd stylesheet"
+    slot "theme-runtime"  max=1 description="active theme / session metadata"
+    slot "terminal"       max=1 description="terminal config surfaces"
+    slot "browser-policy" max=1 description="browser Wayland/GPU flag policy"
+
+    // These roles combine behavior and style, so profiles replace the whole
+    // provider.
+    slot "portal"           max=1 description="xdg-desktop-portal configuration"
+    slot "shell"            max=1 description="interactive shell environment"
+    slot "outputs"          max=1 description="output / monitor layout manager"
+}

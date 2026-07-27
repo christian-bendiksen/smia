@@ -1,0 +1,105 @@
+// Shared Walker config and dmenu support stay active when another launcher owns
+// the launcher slot.
+module "walker-support" {
+    description "Walker configuration, themes, and service integration"
+
+    requires {
+        command "walker"
+    }
+
+    types {
+        record "emergency" {
+            fields {
+                field "text" type="string" required=#true
+                field "command" type="string" required=#true
+            }
+        }
+    }
+
+    inputs {
+        input "theme" type="string" default="gnist-default"
+        input "placeholder-input" type="string" default=" Search..."
+        input "placeholder-list" type="string" default="No Results"
+        input "quick-activate" type="list<string>"
+
+        input "extra-emergency" type="emergency?"
+
+        // Desktop profiles always retain a Walker restart action.
+        input "emergency-restart-text" type="string" default="Restart Walker"
+        input "emergency-restart-command" type="string" default="pkill -x walker; walker &"
+    }
+
+    outputs {
+        file "./gnist/walker.css.tpl" to="gnist/themes/templates/walker.css.tpl"
+        render "gnist/bindings.d/walker.kdl" format="text" {
+            @include-file "./gnist/walker.kdl"
+        }
+        render "walker/config.toml" format="toml" {
+            "force_keyboard_focus" #true
+            "selection_wrap" #true
+            "theme" (ref)"theme"
+            "additional_theme_location" "./themes/"
+            "hide_action_hints" #true
+            "placeholders" {
+                default input=(ref)placeholder-input list=(ref)placeholder-list
+            }
+            "keybinds" {
+                "quick_activate" (ref)"quick-activate"
+                next "Tab" "Down"
+                previous "shift ISO_Left_Tab" "Up"
+            }
+            "columns" {
+                "symbols" 1
+            }
+            "providers" {
+                "max_results" 256
+                default "desktopapplications" "websearch"
+                prefixes {
+    - {
+        prefix "/"
+        provider providerlist
+    }
+    - {
+        prefix .
+        provider files
+    }
+    - {
+        prefix :
+        provider symbols
+    }
+    - {
+        prefix "="
+        provider calc
+    }
+    - {
+        prefix @
+        provider websearch
+    }
+    - {
+        prefix $
+        provider clipboard
+    }
+                }
+            }
+            @if-present "extra-emergency" {
+                emergencies {
+    - {
+        text (ref)extra-emergency.text
+        command (ref)extra-emergency.command
+    }
+                }
+            }
+            emergencies {
+    - {
+        text (ref)emergency-restart-text
+        command (ref)emergency-restart-command
+    }
+            }
+        }
+        dir "./themes" to="walker/themes"
+        render "smia/services.d/walker" format="line-list" {
+            @comment "Force-restart entry consumed by `smia-menu`."
+            @line "restart walker  walker --gapplication-service"
+        }
+    }
+}

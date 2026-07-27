@@ -1,0 +1,9 @@
+// Obsidian consumes only a Gnist-rendered template; vault-specific setup stays
+// outside Malm.
+module "obsidian" {
+    description "Gnist template for Obsidian's generated theme stylesheet"
+
+    outputs {
+        file "./gnist/obsidian.css.tpl" to="gnist/themes/templates/obsidian.css.tpl"
+    }
+}

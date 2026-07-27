@@ -1,0 +1,5 @@
+bind "btop" {
+    reload {
+        signal process="btop" signal="SIGUSR2"
+    }
+}

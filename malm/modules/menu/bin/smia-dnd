@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: smia-dnd [toggle|status [--waybar]]
+
+Toggles Mako's do-not-disturb mode and refreshes the Waybar notification
+indicator on every change. Toggle is the default. `status --waybar` prints
+the indicator JSON and always exits 0.
+EOF
+}
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send "$@" || printf '%s\n' "$*" >&2
+}
+
+signal_waybar() {
+    pkill -RTMIN+10 waybar >/dev/null 2>&1 || true
+}
+
+dnd_active() {
+    makoctl mode 2>/dev/null | grep -qx do-not-disturb
+}
+
+case "${1:-toggle}" in
+    status)
+        if [[ "${2:-}" == --waybar ]]; then
+            if command -v makoctl >/dev/null 2>&1 && dnd_active; then
+                printf '{"text":"󰂛","tooltip":"Do Not Disturb: on","class":"active"}\n'
+            else
+                printf '{"text":""}\n'
+            fi
+            exit 0
+        fi
+        if ! command -v makoctl >/dev/null 2>&1; then
+            echo unavailable
+            exit 3
+        fi
+        if dnd_active; then
+            echo on
+        else
+            echo off
+            exit 1
+        fi
+        ;;
+    toggle)
+        if ! command -v makoctl >/dev/null 2>&1; then
+            notify "Do Not Disturb" "makoctl not found"
+            exit 0
+        fi
+        if dnd_active; then
+            makoctl mode -r do-not-disturb >/dev/null
+        else
+            makoctl mode -a do-not-disturb >/dev/null
+        fi
+        signal_waybar
+        ;;
+    -h|--help)
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

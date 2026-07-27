@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SMIA_DESKTOP_NAMESPACE="${SMIA_DESKTOP_NAMESPACE:-default}"
+SMIA_GIT_EXECUTABLE="${SMIA_GIT_EXECUTABLE:-/usr/bin/git}"
+
+usage() {
+    cat <<'EOF'
+Usage: smia-update
+
+Prepare a review plan for the tracked Smia namespace. This command never
+applies a plan, imports a Moss model, or changes the running session.
+EOF
+}
+
+require_command() {
+    command -v "$1" >/dev/null 2>&1 || {
+        printf 'smia-update: %s not found in PATH\n' "$1" >&2
+        exit 1
+    }
+}
+
+step() {
+    printf '\nsmia-update: %s\n' "$1"
+}
+
+case "${1:-}" in
+    "") ;;
+    -h|--help)
+        (($# == 1)) || { usage >&2; exit 2; }
+        usage
+        exit 0
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac
+
+require_command malm
+[[ -x "$SMIA_GIT_EXECUTABLE" ]] || {
+    printf 'smia-update: trusted Git executable is unavailable: %s\n' \
+        "$SMIA_GIT_EXECUTABLE" >&2
+    exit 1
+}
+
+scratch_root="$(mktemp -d "${XDG_RUNTIME_DIR:-/tmp}/smia-update.XXXXXX")"
+cleanup() { rm -rf -- "$scratch_root"; }
+trap cleanup EXIT
+
+root_scratch="$scratch_root/$SMIA_DESKTOP_NAMESPACE"
+mkdir -m 700 -- "$root_scratch"
+step "preparing tracked update for namespace $SMIA_DESKTOP_NAMESPACE"
+malm plan refresh \
+    --namespace "$SMIA_DESKTOP_NAMESPACE" \
+    --git-executable "$SMIA_GIT_EXECUTABLE" \
+    --root-scratch "$root_scratch"
+
+cat <<'EOF'
+
+No plan was applied. Review the returned plan with `malm plan show PLAN_ID`,
+then apply it with its exact approval digest when required. Preview package
+changes afterward with `smia system-model plan`.
+EOF

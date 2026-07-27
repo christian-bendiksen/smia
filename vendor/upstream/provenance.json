@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "decoder": {
+    "name": "malm.posix-ustar.none",
+    "version": 1
+  },
+  "archives": [
+    {
+      "id": "adw-gtk3-dark",
+      "archive_path": "vendor/upstream/adw-gtk3-dark.tar",
+      "destination": ".local/share/themes/adw-gtk3-dark",
+      "source_id": "adw-gtk3-v6.4",
+      "source_kind": "remote-tar-xz",
+      "source_path": "vendor/upstream/adw-gtk3v6.4.tar.xz",
+      "source_subpath": "adw-gtk3-dark",
+      "source_digest_kind": "compressed-payload-sha256",
+      "source_digest": "sha256-c396e4f0df3eea081186ae13321345f21b9934691b4b4d75b4956f00cbd033d1",
+      "raw_archive_digest": "sha256-a58ce4b46859df2f10ddc576e19b24c2394a9f43d8007524ce7e7ec13c1ce36d",
+      "raw_archive_byte_len": 1095168,
+      "malm_file_object_digest": "sha256-841ef942fa7065c6ab8a3c92973b648abeeeaea6df6ae2062cfc027f16f43f6e",
+      "canonical_tree_digest": "sha256-87c504f3a526992f570c664f7bf9ea29a846ef0aef797be4cee9506b6d663731",
+      "tree_entries": 66,
+      "tree_file_bytes": 1044458,
+      "tree_max_depth": 3
+    },
+    {
+      "id": "adw-gtk3",
+      "archive_path": "vendor/upstream/adw-gtk3.tar",
+      "destination": ".local/share/themes/adw-gtk3",
+      "source_id": "adw-gtk3-v6.4",
+      "source_kind": "remote-tar-xz",
+      "source_path": "vendor/upstream/adw-gtk3v6.4.tar.xz",
+      "source_subpath": "adw-gtk3",
+      "source_digest_kind": "compressed-payload-sha256",
+      "source_digest": "sha256-c396e4f0df3eea081186ae13321345f21b9934691b4b4d75b4956f00cbd033d1",
+      "raw_archive_digest": "sha256-955c80710b27c98d103660e69bb55f485c24817bdce0924eaa9403946ec638e6",
+      "raw_archive_byte_len": 1088000,
+      "malm_file_object_digest": "sha256-6f48cb239a1e9f730070f8938cd736df860735c32642e5f598dc8b4cddea1de0",
+      "canonical_tree_digest": "sha256-4fa89ba41884cfa22f52a9a9ef78b61cf00189f8ec29e69fcb9b265d5567a881",
+      "tree_entries": 66,
+      "tree_file_bytes": 1037702,
+      "tree_max_depth": 3
+    },
+    {
+      "id": "aerynos-eldritch-icons",
+      "archive_path": "vendor/upstream/aerynos-eldritch-icons.tar",
+      "destination": ".local/share/icons/AerynOS-Eldritch",
+      "source_id": "aerynos-eldritch-icons",
+      "source_kind": "remote-tar-xz",
+      "source_path": "vendor/upstream/AerynOS-Eldritch.tar.xz",
+      "source_subpath": "AerynOS-Eldritch",
+      "source_digest_kind": "compressed-payload-sha256",
+      "source_digest": "sha256-1552ad7cf77702a18b4bbf859122843aeb1e034b1b45d03e02f9b2bfb2b9bf84",
+      "raw_archive_digest": "sha256-eeb8b8b13b72eb9fb12072f4345a0bcb37073729f166c4f32a4d40bcccecfe6d",
+      "raw_archive_byte_len": 8459264,
+      "malm_file_object_digest": "sha256-1dc2ced13951e78b29e2bafee7654ad500e7a5e1a5c3fb6c328724b71f561686",
+      "canonical_tree_digest": "sha256-0093f8cbdbffcc6df44944aff54af50183c7a00d0c0544ea59bc40654da1452e",
+      "tree_entries": 1689,
+      "tree_file_bytes": 7156313,
+      "tree_max_depth": 3
+    }
+  ]
+}

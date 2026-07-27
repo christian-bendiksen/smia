@@ -1,0 +1,85 @@
+// Defines system font policy with typed font references.
+module "fontconfig" {
+    description "Fontconfig font policy: monospace from global tokens, typed fallback sans family"
+
+    requires {
+        command "fc-cache"
+    }
+
+    inputs {
+        input "sans-font" type="string" default="Liberation Sans"
+    }
+
+    outputs {
+        render "fontconfig/fonts.conf" format="xml" declaration=#true {
+            "fontconfig" {
+                repeat "match" {
+                    attr "target" "pattern"
+                    "test" {
+                        attr "name" "family"
+                        attr "qual" "any"
+                        "string" "sans-serif"
+                    }
+                    "edit" {
+                        attr "name" "family"
+                        attr "mode" "assign"
+                        attr "binding" "strong"
+                        "string" (ref)"sans-font"
+                    }
+                }
+                repeat "match" {
+                    attr "target" "pattern"
+                    "test" {
+                        attr "name" "family"
+                        attr "qual" "any"
+                        "string" "serif"
+                    }
+                    "edit" {
+                        attr "name" "family"
+                        attr "mode" "assign"
+                        attr "binding" "strong"
+                        "string" "Liberation Serif"
+                    }
+                }
+                repeat "match" {
+                    attr "target" "pattern"
+                    "test" {
+                        attr "name" "family"
+                        attr "qual" "any"
+                        "string" "monospace"
+                    }
+                    "edit" {
+                        attr "name" "family"
+                        attr "mode" "assign"
+                        attr "binding" "strong"
+                        "string" (ref)"global.font-mono"
+                    }
+                }
+                repeat "alias" {
+                    "family" "system-ui"
+                    "prefer" {
+                        "family" (ref)"sans-font"
+                    }
+                }
+                repeat "alias" {
+                    "family" "ui-monospace"
+                    "default" {
+                        "family" (ref)"global.font-mono"
+                    }
+                }
+                repeat "alias" {
+                    "family" "-apple-system"
+                    "prefer" {
+                        "family" (ref)"sans-font"
+                    }
+                }
+                repeat "alias" {
+                    "family" "BlinkMacSystemFont"
+                    "prefer" {
+                        "family" (ref)"sans-font"
+                    }
+                }
+            }
+        }
+    }
+}

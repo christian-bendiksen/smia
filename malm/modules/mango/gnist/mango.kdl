@@ -1,0 +1,7 @@
+bind "mango" {
+    reload {
+        command {
+            argv "mmsg" "dispatch" "reload_config"
+        }
+    }
+}

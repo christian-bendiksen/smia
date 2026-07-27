@@ -1,0 +1,265 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+MANAGED_ITEMS_FILE="$XDG_CONFIG_HOME/smia/menu-items"
+MENU_BACK_STATUS=10
+MANAGED_FILTER_ACTIVE=0
+declare -A ENABLED_MANAGED_ITEMS=()
+
+MENU_THEME="gnist-menu"
+if [[ -r "$XDG_CONFIG_HOME/smia/menu-theme" ]]; then
+    IFS= read -r MENU_THEME < "$XDG_CONFIG_HOME/smia/menu-theme" || true
+    [[ -n "$MENU_THEME" ]] || MENU_THEME="gnist-menu"
+fi
+
+usage() {
+    cat <<'EOF'
+Usage: smia-menu [COMMAND]
+
+Commands:
+  list [--verbose]  List discovered menu plugins
+  pick PLACEHOLDER  Read choices from stdin and open Walker
+  notify TITLE [BODY]
+                    Send a desktop notification with a stderr fallback
+
+With no command, opens the system menu. Executable plugins are discovered as
+*.sh files in $XDG_CONFIG_HOME/smia/menu.d, $XDG_DATA_HOME/smia/menu.d, the
+managed ~/.local/share/smia/menu.d fallback, and each $XDG_DATA_DIRS/smia/menu.d
+directory.
+EOF
+}
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send "$@" || printf '%s\n' "$*" >&2
+}
+
+pick() {
+    local out rc
+    if out="$(walker --dmenu --placeholder "$1" --theme "$MENU_THEME")"; then
+        :
+    else
+        rc=$?
+        ((rc == 1 || rc == 130)) && return "$MENU_BACK_STATUS"
+        return "$rc"
+    fi
+    [[ -n "$out" ]] || return "$MENU_BACK_STATUS"
+    printf '%s\n' "$out"
+}
+
+valid_plugin_id() {
+    [[ "$1" =~ ^[a-z0-9][a-z0-9-]*$ ]]
+}
+
+plugin_metadata() {
+    local file="$1" line label="" order=50 managed=false
+    while IFS= read -r line; do
+        case "$line" in
+            '#!'*|'#'*|'') ;;
+            *) break ;;
+        esac
+        case "$line" in
+            '# smia-menu-label: '*) label="${line#\# smia-menu-label: }" ;;
+            '# smia-menu-order: '*) order="${line#\# smia-menu-order: }" ;;
+            '# smia-menu-managed: '*) managed="${line#\# smia-menu-managed: }" ;;
+        esac
+    done < "$file"
+
+    [[ -n "$label" && "$label" != *$'\t'* ]] || return 1
+    [[ "$order" =~ ^[0-9]+$ ]] || return 1
+    [[ "$managed" == true || "$managed" == false ]] || return 1
+    printf '%s\t%s\t%s\n' "$order" "$label" "$managed"
+}
+
+load_managed_items() {
+    local line
+    MANAGED_FILTER_ACTIVE=0
+    ENABLED_MANAGED_ITEMS=()
+    [[ -r "$MANAGED_ITEMS_FILE" ]] || return 0
+    MANAGED_FILTER_ACTIVE=1
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
+        if ! valid_plugin_id "$line"; then
+            printf 'smia-menu: ignoring invalid managed plugin ID: %s\n' "$line" >&2
+            continue
+        fi
+        ENABLED_MANAGED_ITEMS["$line"]=1
+    done < "$MANAGED_ITEMS_FILE"
+}
+
+plugin_directories() {
+    local data_dirs=() dirs=(
+        "$XDG_CONFIG_HOME/smia/menu.d"
+        "$XDG_DATA_HOME/smia/menu.d"
+        "$HOME/.local/share/smia/menu.d"
+    )
+    local dir
+    declare -A seen=()
+    IFS=: read -r -a data_dirs <<<"$XDG_DATA_DIRS"
+    for dir in "${data_dirs[@]}"; do
+        [[ -n "$dir" ]] && dirs+=("$dir/smia/menu.d")
+    done
+    for dir in "${dirs[@]}"; do
+        [[ -n "${seen[$dir]+set}" ]] && continue
+        seen["$dir"]=1
+        printf '%s\n' "$dir"
+    done
+}
+
+discover_plugins() {
+    local dir file base id metadata order label managed
+    declare -A seen_ids=()
+    declare -A seen_labels=()
+    load_managed_items
+
+    while IFS= read -r dir; do
+        [[ -d "$dir" ]] || continue
+        for file in "$dir"/*.sh; do
+            [[ -f "$file" && -x "$file" ]] || continue
+            [[ "$file" != *$'\t'* && "$file" != *$'\n'* ]] || continue
+            base="${file##*/}"
+            id="${base%.sh}"
+            if ! valid_plugin_id "$id"; then
+                printf 'smia-menu: ignoring plugin with invalid ID: %s\n' "$file" >&2
+                continue
+            fi
+            [[ -z "${seen_ids[$id]+set}" ]] || continue
+            if ! metadata="$(plugin_metadata "$file")"; then
+                printf 'smia-menu: ignoring plugin with invalid metadata: %s\n' "$file" >&2
+                continue
+            fi
+            order="${metadata%%$'\t'*}"
+            metadata="${metadata#*$'\t'}"
+            label="${metadata%%$'\t'*}"
+            managed="${metadata#*$'\t'}"
+            if [[ "$managed" == true && "$MANAGED_FILTER_ACTIVE" -eq 1 \
+                && -z "${ENABLED_MANAGED_ITEMS[$id]+set}" ]]; then
+                continue
+            fi
+            if [[ -n "${seen_labels[$label]+set}" ]]; then
+                printf 'smia-menu: ignoring plugin with duplicate label: %s\n' "$file" >&2
+                continue
+            fi
+            seen_ids["$id"]=1
+            seen_labels["$label"]=1
+            printf '%s\t%s\t%s\t%s\n' "$order" "$id" "$label" "$file"
+        done
+    done < <(plugin_directories)
+}
+
+plugin_rows() {
+    discover_plugins | sort -t $'\t' -k1,1n -k2,2
+}
+
+list_plugins() {
+    local mode="${1:-}" rows id label
+    case "$mode" in
+        ""|--verbose) ;;
+        *)
+            printf 'usage: smia-menu list [--verbose]\n' >&2
+            return 2
+            ;;
+    esac
+
+    rows="$(plugin_rows)"
+    if [[ "$mode" == --verbose ]]; then
+        printf 'ORDER\tID\tLABEL\tEXECUTABLE\n'
+        [[ -n "$rows" ]] && printf '%s\n' "$rows"
+        return 0
+    fi
+
+    printf 'Installed menu plugins:\n'
+    if [[ -z "$rows" ]]; then
+        printf '  (none)\n'
+        return 0
+    fi
+    while IFS=$'\t' read -r _ id label _; do
+        printf '  %-16s %s\n' "$id" "$label"
+    done <<<"$rows"
+}
+
+menu_command() {
+    case "$0" in
+        /*) printf '%s\n' "$0" ;;
+        */*) printf '%s/%s\n' "$PWD" "$0" ;;
+        *) command -v -- "$0" ;;
+    esac
+}
+
+main() {
+    local rows choice id label path rc
+    local labels=()
+    declare -A label_to_path=()
+    declare -A label_to_id=()
+
+    while true; do
+        rows="$(plugin_rows)"
+        if [[ -z "$rows" ]]; then
+            notify "smia-menu" "No menu plugins found"
+            return 0
+        fi
+
+        labels=()
+        label_to_path=()
+        label_to_id=()
+        while IFS=$'\t' read -r _ id label path; do
+            labels+=("$label")
+            label_to_path["$label"]="$path"
+            label_to_id["$label"]="$id"
+        done <<<"$rows"
+
+        if choice="$(printf '%s\n' "${labels[@]}" | pick "System")"; then
+            :
+        else
+            rc=$?
+            ((rc == MENU_BACK_STATUS)) && return 0
+            notify "smia-menu" "Picker failed with status $rc"
+            return "$rc"
+        fi
+        path="${label_to_path[$choice]:-}"
+        id="${label_to_id[$choice]:-}"
+        [[ -n "$path" && -n "$id" ]] || continue
+
+        SMIA_MENU_COMMAND="${SMIA_MENU_COMMAND:-$(menu_command)}"
+        export SMIA_MENU_COMMAND
+        export SMIA_MENU_BACK_STATUS="$MENU_BACK_STATUS"
+        if "$path"; then
+            return 0
+        else
+            rc=$?
+        fi
+        ((rc == MENU_BACK_STATUS)) && continue
+        notify "smia-menu" "Plugin $id failed with status $rc"
+    done
+}
+
+case "${1:-}" in
+    "")
+        (($# == 0)) || { printf 'usage: smia-menu\n' >&2; exit 2; }
+        main
+        ;;
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia-menu --help\n' >&2; exit 2; }
+        usage
+        ;;
+    list)
+        (($# <= 2)) || { printf 'usage: smia-menu list [--verbose]\n' >&2; exit 2; }
+        list_plugins "${2:-}"
+        ;;
+    pick)
+        (($# == 2)) || { printf 'usage: smia-menu pick PLACEHOLDER\n' >&2; exit 2; }
+        pick "$2"
+        ;;
+    notify)
+        (($# >= 2 && $# <= 3)) || { printf 'usage: smia-menu notify TITLE [BODY]\n' >&2; exit 2; }
+        shift
+        notify "$@"
+        ;;
+    *)
+        printf 'usage: smia-menu [list [--verbose]|pick PLACEHOLDER|notify TITLE [BODY]]\n' >&2
+        exit 2
+        ;;
+esac

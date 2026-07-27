@@ -1,0 +1,16 @@
+[package]
+name = "render-lua-data"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wit-bindgen = { version = "=0.44.0", default-features = false, features = [
+  "macros",
+  "realloc",
+] }

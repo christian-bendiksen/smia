@@ -1,0 +1,35 @@
+// Gaming variants keep the desktop composition intact and change only the
+// kernel selected in the generated Moss model.
+profile "kernel-gaming" abstract=#true {
+    use "system-model" {
+        patch {
+            collection "packages" {
+                replace "kernel" name="linux-gaming"
+            }
+        }
+    }
+}
+
+profile "mango-gaming" {
+    extends "mango" "kernel-gaming"
+}
+
+profile "niri-gaming" {
+    extends "niri" "kernel-gaming"
+}
+
+profile "hyprland-gaming" {
+    extends "hyprland" "kernel-gaming"
+}
+
+profile "mango-gaming-astral" {
+    extends "mango-astral" "kernel-gaming"
+}
+
+profile "niri-gaming-astral" {
+    extends "niri-astral" "kernel-gaming"
+}
+
+profile "hyprland-gaming-astral" {
+    extends "hyprland-astral" "kernel-gaming"
+}

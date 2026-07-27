@@ -1,0 +1,57 @@
+// Bare destinations resolve below the target; "~/" and absolute paths do not.
+config target="~/.config" default-profile="mango" required-state="default"
+
+meta name="smia" \
+    author="Christian Bendiksen" \
+    homepage="https://github.com/christian-bendiksen/smia" \
+    malm-version=">=0.4.0,<0.5"
+
+// `global.*` is the cross-module variable namespace.
+variables {
+    // Fonts do not vary by machine or profile.
+    global.font-family  "RobotoMono Nerd Font"
+    global.font-mono    "RobotoMono Nerd Font Mono"
+    global.font-symbols "Symbols Nerd Font Mono"
+}
+
+// Malm owns these vendored archives. Checksums pin their bytes, URLs record
+// provenance, and installed checks avoid replacing existing payloads.
+assets {
+    asset "adw-gtk3" {
+        url "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.4/adw-gtk3v6.4.tar.xz"
+        dst "~/.local/share/themes"
+        format "tar"
+        sha256 "955c80710b27c98d103660e69bb55f485c24817bdce0924eaa9403946ec638e6"
+        path "vendor/upstream/adw-gtk3.tar"
+        installed-check "adw-gtk3"
+    }
+    asset "adw-gtk3-dark" {
+        url "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.4/adw-gtk3v6.4.tar.xz"
+        dst "~/.local/share/themes"
+        format "tar"
+        sha256 "a58ce4b46859df2f10ddc576e19b24c2394a9f43d8007524ce7e7ec13c1ce36d"
+        path "vendor/upstream/adw-gtk3-dark.tar"
+        installed-check "adw-gtk3-dark"
+    }
+    asset "AerynOS-Eldritch" {
+        url "https://codeberg.org/StormRosenaa/AerynOS-Art-icons/raw/branch/main/AerynOS-Eldritch.tar.xz"
+        dst "~/.local/share/icons"
+        format "tar"
+        sha256 "eeb8b8b13b72eb9fb12072f4345a0bcb37073729f166c4f32a4d40bcccecfe6d"
+        path "vendor/upstream/aerynos-eldritch-icons.tar"
+        installed-check "AerynOS-Eldritch"
+    }
+}
+
+include "malm/slots.kdl"
+include "malm/modules.kdl"
+
+// Select one machine after its modules; extend-module requires an existing
+// target. The machine owns display geometry and Kanshi profiles.
+include "malm/machines/laptop-4k.kdl"
+
+include "malm/profiles.kdl"
+
+// Machine-local overlays are value-only and layer last. Their bytes are plan
+// inputs, and each applied overlay is reported during plan review.
+overlay "local" path="~/.config/malm/local.kdl" optional=#true

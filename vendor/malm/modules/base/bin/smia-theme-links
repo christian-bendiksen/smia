@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+profile_file="$XDG_CONFIG_HOME/smia/profile"
+
+# Rebuild module-owned links after Gnist publishes the current theme. Never
+# replace a user-owned file at a managed path.
+link_one() {
+    local link="$1" target="$2"
+    if [[ -e "$link" && ! -L "$link" ]]; then
+        printf 'smia-theme-links: refusing to replace non-symlink: %s\n' "$link" >&2
+        return 1
+    fi
+    mkdir -p -- "${link%/*}"
+    ln -sfn -- "$target" "$link"
+}
+
+link_one \
+    "$XDG_CONFIG_HOME/btop/themes/current.theme" \
+    "$XDG_CONFIG_HOME/gnist/themes/current/btop.theme"
+link_one \
+    "$XDG_CONFIG_HOME/helix/themes/gnist.toml" \
+    "$XDG_CONFIG_HOME/gnist/themes/current/helix.toml"
+link_one \
+    "$XDG_CONFIG_HOME/gtk-3.0/gtk.css" \
+    "$XDG_CONFIG_HOME/gnist/themes/current/gtk.css"
+link_one \
+    "$XDG_CONFIG_HOME/gtk-4.0/gtk.css" \
+    "$XDG_CONFIG_HOME/gnist/themes/current/gtk.css"
+
+profile=""
+[[ -r "$profile_file" ]] && IFS= read -r profile < "$profile_file"
+niri_link="$XDG_CONFIG_HOME/niri/niri-colors.kdl"
+niri_target="$XDG_CONFIG_HOME/gnist/themes/current/niri-colors.kdl"
+# Niri alone consumes this link. Remove only the target managed here.
+if [[ "$profile" == niri || "$profile" == niri-* ]]; then
+    link_one "$niri_link" "$niri_target"
+elif [[ -L "$niri_link" && "$(readlink -- "$niri_link")" == "$niri_target" ]]; then
+    rm -- "$niri_link"
+fi

@@ -1,0 +1,14 @@
+// Owns the launcher slot and installs Walker's xdg-launcher-exec facade.
+// walker-support owns shared config, themes, and dmenu support.
+module "walker" {
+    description "Walker application launcher provider"
+    slot "launcher"
+
+    requires {
+        command "walker"
+    }
+
+    outputs {
+        file "./bin/xdg-launcher-exec" to="~/.local/bin/xdg-launcher-exec" executable=#true
+    }
+}

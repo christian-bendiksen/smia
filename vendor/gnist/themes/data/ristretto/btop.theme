@@ -1,0 +1,81 @@
+# btop theme: Monokai Pro Ristretto
+# Adapted from the Monokai theme.
+
+# Main background color; leave empty for the terminal default or transparency.
+theme[main_bg]="#2c2421"
+
+# Default text color
+theme[main_fg]="#e6d9db"
+
+# Box title color
+theme[title]="#e6d9db"
+
+# Keyboard shortcut highlight color
+theme[hi_fg]="#fd6883"
+
+# Selected process background color
+theme[selected_bg]="#3d2f2a"
+
+# Selected process text color
+theme[selected_fg]="#e6d9db"
+
+# Inactive and disabled text color
+theme[inactive_fg]="#72696a"
+
+# Color for process details, status text, mini CPU graphs, and the details memory graph
+theme[proc_misc]="#adda78"
+
+# CPU box outline color
+theme[cpu_box]="#5b4a45"
+
+# Memory and disk box outline color
+theme[mem_box]="#5b4a45"
+
+# Network box outline color
+theme[net_box]="#5b4a45"
+
+# Process box outline color
+theme[proc_box]="#5b4a45"
+
+# Box-divider and small-box line color
+theme[div_line]="#72696a"
+
+# Temperature graph gradient
+theme[temp_start]="#a8a9eb"
+theme[temp_mid]="#f38d70"
+theme[temp_end]="#fd6a85"
+
+# CPU graph gradient
+theme[cpu_start]="#adda78"
+theme[cpu_mid]="#f9cc6c"
+theme[cpu_end]="#fd6883"
+
+# Free memory and disk meter gradient
+theme[free_start]="#5b4a45"
+theme[free_mid]="#adda78"
+theme[free_end]="#c5e2a3"
+
+# Cached memory and disk meter gradient
+theme[cached_start]="#5b4a45"
+theme[cached_mid]="#85dacc"
+theme[cached_end]="#b3e8dd"
+
+# Available memory and disk meter gradient
+theme[available_start]="#5b4a45"
+theme[available_mid]="#f9cc6c"
+theme[available_end]="#fce2a3"
+
+# Used memory and disk meter gradient
+theme[used_start]="#5b4a45"
+theme[used_mid]="#fd6a85"
+theme[used_end]="#feb5c7"
+
+# Download graph gradient
+theme[download_start]="#3d2f2a"
+theme[download_mid]="#a8a9eb"
+theme[download_end]="#c5c6f0"
+
+# Upload graph gradient
+theme[upload_start]="#3d2f2a"
+theme[upload_mid]="#fd6a85"
+theme[upload_end]="#feb5c7"

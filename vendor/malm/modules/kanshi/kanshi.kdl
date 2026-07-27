@@ -1,0 +1,60 @@
+// Provides dynamic output management for the "outputs" slot. The selected
+// machine file owns both global.display-* values and its output profiles so
+// only one machine layout is deployed.
+module "kanshi" {
+    description "Kanshi dynamic output profiles composed from global.display-* tokens"
+    slot "outputs"
+
+    requires {
+        command "kanshi"
+    }
+
+    types {
+        refine "kanshi-profile-name" base="string" format="identifier"
+        enum "display-output" { values "internal" "external" }
+        record "logical-output" {
+            fields {
+                field "display" type="display-output" required=#true
+                field "position" type="bool" required=#true default=#false
+            }
+        }
+        alias "logical-outputs" type="list<logical-output>"
+        record "output-profile" {
+            fields {
+                field "name" type="kanshi-profile-name" required=#true
+                field "outputs" type="logical-outputs" required=#true
+            }
+        }
+    }
+
+    outputs {
+        render "kanshi/config" format="text" separator=" " {
+            @for-each "profile" in="profiles" {
+                profile (ref)"profile.name" @quote="double" {
+                    @for-each "output" in="profile.outputs" {
+                        @if "output.display" is="internal" {
+                            output (ref)"global.display-internal-name" @quote="double" {
+                                mode (f)"{{global.display-internal-width}}x{{global.display-internal-height}}@{{global.display-internal-refresh}}Hz"
+                                scale (ref)"global.display-internal-scale"
+                                @if "output.position" {
+                                    position (f)"{{global.display-internal-x}},{{global.display-internal-y}}"
+                                }
+                                transform "normal"
+                            }
+                        }
+                        @if "output.display" is="external" {
+                            output (ref)"global.display-external-name" @quote="double" {
+                                mode (f)"{{global.display-external-width}}x{{global.display-external-height}}@{{global.display-external-refresh}}Hz"
+                                scale (ref)"global.display-external-scale"
+                                @if "output.position" {
+                                    position (f)"{{global.display-external-x}},{{global.display-external-y}}"
+                                }
+                                transform "normal"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

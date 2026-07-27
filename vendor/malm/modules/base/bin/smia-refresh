@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+case "${1:-}" in
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia-refresh\n' >&2; exit 2; }
+        printf 'usage: smia-refresh\n'
+        exit 0
+        ;;
+esac
+(($# == 0)) || { printf 'usage: smia-refresh\n' >&2; exit 2; }
+
+if ! command -v smia-session >/dev/null 2>&1; then
+    printf 'smia-refresh: smia-session not found in PATH\n' >&2
+    exit 1
+fi
+
+exec smia-session --reapply-theme

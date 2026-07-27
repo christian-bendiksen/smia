@@ -1,0 +1,31 @@
+// Capture only the source and vendored payloads needed to evaluate this pack.
+pack schema-version=1 package-id="dev.aerynos.smia" {
+    modules {
+    }
+    config-documents {
+        document "malm.kdl"
+    }
+    dependencies {
+    }
+    templates {
+    }
+    schemas {
+    }
+    assets {
+        asset "vendor/upstream/adw-gtk3.tar"
+        asset "vendor/upstream/adw-gtk3-dark.tar"
+        asset "vendor/upstream/aerynos-eldritch-icons.tar"
+    }
+    components {
+        component "render-lua-data" path="vendor/render-lua-data.wasm" digest="sha256-5c95310034f813d8e9e6e85041ec80f3cdb7342707ccf8a80510476dc0d1f9e4" interface="format-component/v1"
+    }
+    captures {
+        include "malm.kdl"
+        include "malm"
+        include "gnist"
+        include "vendor/upstream/adw-gtk3.tar"
+        include "vendor/upstream/adw-gtk3-dark.tar"
+        include "vendor/upstream/aerynos-eldritch-icons.tar"
+        include "vendor/render-lua-data.wasm"
+    }
+}

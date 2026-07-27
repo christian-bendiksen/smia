@@ -1,0 +1,7 @@
+bind "mako" {
+    reload {
+        command {
+            argv "makoctl" "reload"
+        }
+    }
+}

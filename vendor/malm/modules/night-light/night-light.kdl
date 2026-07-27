@@ -1,0 +1,30 @@
+// wlsunset blue-light reduction. The generated wrapper embeds location and
+// temperature arguments for explicit toggle and restart actions. It is not
+// session-managed so profile and theme refreshes preserve the selected state.
+module "night-light" {
+    description "wlsunset blue-light reduction with a generated toggle wrapper"
+
+    requires {
+        command "wlsunset"
+        command "pgrep"
+        command "pkill"
+    }
+
+    inputs {
+        // Oslo defaults; override in ~/.config/malm/local.kdl for other machines.
+        input "latitude"   type="float" default=59.9
+        input "longitude"  type="float" default=10.8
+        input "day-temp"   type="int"   default=6500
+        input "night-temp" type="int"   default=4000
+    }
+
+    outputs {
+        render "~/.local/bin/smia-night-light" format="text" executable=#true {
+            @include-file "./smia-night-light.tpl" interpolate=#true
+        }
+        render "smia/services.d/night-light" format="line-list" {
+            @comment "Force-restart entry consumed by `smia-menu`."
+            @line "restart wlsunset smia-night-light start"
+        }
+    }
+}

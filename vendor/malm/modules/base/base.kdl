@@ -1,0 +1,82 @@
+// Provides the commands, session target, and Awww daemon shared by every
+// desktop profile. It also creates GTK configuration directories required by
+// theme links; application-specific configuration remains in provider modules.
+module "base" {
+    description "Session foundation: Smia commands, systemd user target, and Awww lifecycle"
+
+    requires {
+        command "awww"
+        command "awww-daemon"
+        command "bash"
+        command "gnist"
+        command "iconv"
+        command "malm"
+        command "mktemp"
+        command "pgrep"
+        command "pkill"
+        command "rm"
+        command "setsid"
+        command "systemctl"
+        command "walker"
+        // External tools the deployed base scripts invoke, declared here so
+        // the generated requirement manifest stays complete.
+        command "/usr/bin/env"
+        command "/usr/bin/git"
+        command "awk"
+        command "basename"
+        command "cat"
+        command "cut"
+        command "date"
+        command "dbus-update-activation-environment"
+        command "dirname"
+        command "find"
+        command "grep"
+        command "head"
+        command "id"
+        command "kitty"
+        command "less"
+        command "ln"
+        command "loginctl"
+        command "makoctl"
+        command "mkdir"
+        command "moss"
+        command "mv"
+        command "readlink"
+        command "seq"
+        command "sh"
+        command "sleep"
+        command "sudo"
+        command "tr"
+    }
+
+    outputs {
+        // Deployed modes are declared, not captured: pack files are pure
+        // bytes, so executable trees say so explicitly.
+        dir  "./bin" to="~/.local/bin" executable=#true
+        file "./smia-session.target" to="systemd/user/smia-session.target"
+        // smia-profiles reads this appearance catalog; smia-status reads the
+        // requirement manifest below. Kernel variants stay out of the catalog.
+        render "smia/profiles" format="line-list" {
+            @line "mango"
+            @line "niri"
+            @line "hyprland"
+            @line "mango-astral"
+            @line "niri-astral"
+            @line "hyprland-astral"
+        }
+        render "smia/requirements.commands" format="line-list" {
+            @requirements
+        }
+        render "smia/session.d/awww" format="line-list" {
+            @comment "Awww restores the last wallpaper for each output from its cache."
+            @line "stop swaybg"
+            @line "stop swww-daemon"
+            @line "stop hyprpaper"
+            @line "prepare awww-daemon"
+        }
+
+        // These directories provide parents for appearance's gtk.css links.
+        dir "./gtk-3.0" to="gtk-3.0"
+        dir "./gtk-4.0" to="gtk-4.0"
+    }
+}

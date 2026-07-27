@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+
+tool_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+command_name=${1:-verify}
+
+toolchain=
+if [ -n "${CARGO:-}" ]; then
+    cargo=$CARGO
+    toolchain=+1.95.0
+elif command -v cargo >/dev/null 2>&1; then
+    cargo=$(command -v cargo)
+    command -v rustup >/dev/null 2>&1 && toolchain=+1.95.0
+elif [ -x "${HOME:-}/.cargo/bin/cargo" ]; then
+    cargo=$HOME/.cargo/bin/cargo
+    [ -x "${HOME:-}/.cargo/bin/rustup" ] && toolchain=+1.95.0
+else
+    printf '%s\n' 'vendor-assets: cargo was not found' >&2
+    exit 1
+fi
+
+target_dir=${CARGO_TARGET_DIR:-${XDG_CACHE_HOME:-${HOME:-/tmp}/.cache}/smia-vendor-assets-target}
+export CARGO_TARGET_DIR=$target_dir
+
+case "$command_name" in
+    fetch)
+        exec "$cargo" $toolchain run --quiet --locked \
+            --manifest-path "$tool_dir/Cargo.toml" -- "$@"
+        ;;
+    generate|verify)
+        # Generation and verification must not consult a registry or the network.
+        export CARGO_NET_OFFLINE=true
+        exec "$cargo" $toolchain run --quiet --offline --locked \
+            --manifest-path "$tool_dir/Cargo.toml" -- "$@"
+        ;;
+    *)
+        printf 'usage: %s {fetch|generate|verify}\n' "$0" >&2
+        exit 2
+        ;;
+esac

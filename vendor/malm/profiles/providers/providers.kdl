@@ -1,0 +1,44 @@
+// Each compositor provider extends desktop so replace targets its active Mango
+// provider.
+
+profile "niri-provider" abstract=#true {
+    extends "desktop"
+    replace slot="compositor" module="niri"
+    use "portals" {
+        with {
+            needs-wlr-backend #false
+            needs-gnome-backend #true
+            default "gnome;gtk;"
+            screenshot "gnome"
+            screen-cast "gnome"
+        }
+    }
+    use "system-model" {
+        patch {
+            collection "packages" {
+                replace "compositor" name="niri"
+            }
+        }
+    }
+}
+
+profile "hyprland-provider" abstract=#true {
+    extends "desktop"
+    replace slot="compositor" module="hypr"
+    use "portals" {
+        with {
+            needs-wlr-backend #false
+            needs-hyprland-backend #true
+            default "hyprland;gtk;"
+            screenshot "hyprland"
+            screen-cast "hyprland"
+        }
+    }
+    use "system-model" {
+        patch {
+            collection "packages" {
+                replace "compositor" name="hyprland"
+            }
+        }
+    }
+}

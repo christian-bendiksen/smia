@@ -1,0 +1,267 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+SMIA_DESKTOP_NAMESPACE="${SMIA_DESKTOP_NAMESPACE:-default}"
+SMIA_PROFILE_MANIFEST="${SMIA_PROFILE_MANIFEST:-$XDG_CONFIG_HOME/smia/profiles}"
+COMPOSITOR_PROVIDERS=(mango niri hypr)
+
+usage() {
+    cat <<'EOF'
+Usage: smia-profiles [list|current|select|switch PROFILE]
+
+Commands:
+  list             List selectable profile names (default)
+  current          Print the active profile
+  select           Choose, deploy, and activate a profile with Walker
+  switch PROFILE   Deploy PROFILE, apply its default theme, and refresh the session
+EOF
+}
+
+require_command() {
+    command -v "$1" >/dev/null 2>&1 || {
+        printf 'smia-profiles: %s not found in PATH\n' "$1" >&2
+        exit 1
+    }
+}
+
+profile_names() {
+    [[ -r "$SMIA_PROFILE_MANIFEST" ]] || {
+        printf 'smia-profiles: profile manifest not found: %s\n' \
+            "$SMIA_PROFILE_MANIFEST" >&2
+        return 1
+    }
+    while IFS= read -r profile || [[ -n "$profile" ]]; do
+        [[ "$profile" =~ ^[[:space:]]*(#|$) ]] || printf '%s\n' "$profile"
+    done < "$SMIA_PROFILE_MANIFEST"
+}
+
+current_profile() {
+    local profile_file="$XDG_CONFIG_HOME/smia/profile" profile
+    [[ -r "$profile_file" ]] || {
+        printf 'smia-profiles: active profile not found: %s\n' "$profile_file" >&2
+        return 1
+    }
+    IFS= read -r profile < "$profile_file" || true
+    [[ -n "$profile" ]] || {
+        printf 'smia-profiles: active profile is empty\n' >&2
+        return 1
+    }
+    printf '%s\n' "$profile"
+}
+
+profile_uses_provider() {
+    local profile="$1" family="$2"
+    [[ "$family" == hypr ]] && family=hyprland
+    [[ "$profile" == "$family" || "$profile" == "$family"-* ]]
+}
+
+profile_compositor_provider() {
+    case "$1" in
+        mango*) printf 'mango\n' ;;
+        niri*) printf 'niri\n' ;;
+        hyprland*) printf 'hypr\n' ;;
+        *) return 1 ;;
+    esac
+}
+
+running_compositor_provider() {
+    local desktop
+    for desktop in "${XDG_CURRENT_DESKTOP:-}" "${XDG_SESSION_DESKTOP:-}"; do
+        case "${desktop,,}" in
+            *mango*)     printf 'mango\n'; return 0 ;;
+            *niri*)      printf 'niri\n'; return 0 ;;
+            *hyprland*)  printf 'hypr\n'; return 0 ;;
+        esac
+    done
+
+    if pgrep -x mango >/dev/null 2>&1; then printf 'mango\n'
+    elif pgrep -x niri >/dev/null 2>&1; then printf 'niri\n'
+    elif pgrep -x Hyprland >/dev/null 2>&1; then printf 'hypr\n'
+    else return 1
+    fi
+}
+
+current_compositor_provider() {
+    local provider profile
+    if provider="$(running_compositor_provider)"; then
+        printf '%s\n' "$provider"
+        return 0
+    fi
+
+    profile="$(current_profile)" || return 1
+    profile_compositor_provider "$profile"
+}
+
+switch_profile() {
+    local profile="$1" active_profile active_provider requested_provider
+    local deployment_profile plan_json plan_id family rc=0
+    require_command malm
+    require_command python3
+    require_command smia-session
+    profile_names | grep -Fx -- "$profile" >/dev/null || {
+        printf 'smia-profiles: unknown profile: %s\n' "$profile" >&2
+        return 2
+    }
+    active_profile="$(current_profile)" || return 1
+    active_provider="$(profile_compositor_provider "$active_profile")" || return 1
+    requested_provider="$(profile_compositor_provider "$profile")" || return 1
+    if [[ "$active_provider" != "$requested_provider" ]]; then
+        printf 'smia-profiles: compositor changes require `smia install MODEL_PROFILE`\n' >&2
+        return 2
+    fi
+
+    deployment_profile="$profile"
+    if [[ "$active_profile" == *-gaming* ]]; then
+        family="${profile%%-*}"
+        deployment_profile="${family}-gaming${profile#"$family"}"
+    fi
+    plan_json="$(malm plan switch-profile "$deployment_profile" \
+        --namespace "$SMIA_DESKTOP_NAMESPACE" --format json)" || rc=$?
+    if ((rc != 0)); then
+        [[ -z "$plan_json" ]] || printf '%s\n' "$plan_json" >&2
+        printf 'smia-profiles: profile switch failed (exit %d)\n' "$rc" >&2
+        return "$rc"
+    fi
+    if ! plan_id="$(printf '%s\n' "$plan_json" | python3 -c '
+import json
+import re
+import sys
+
+def unique_object(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError
+        value[key] = item
+    return value
+
+try:
+    envelope = json.load(sys.stdin, object_pairs_hook=unique_object)
+except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+    raise SystemExit(1)
+
+if not isinstance(envelope, dict):
+    raise SystemExit(1)
+data = envelope.get("data")
+if (
+    type(envelope.get("schema_version")) is not int
+    or envelope["schema_version"] != 1
+    or envelope.get("command") != "plan.switch-profile"
+    or envelope.get("outcome") != "planned"
+    or not isinstance(data, dict)
+):
+    raise SystemExit(1)
+plan_id = data.get("plan_id")
+if not isinstance(plan_id, str) or re.fullmatch(r"pp-[0-9a-f]{64}", plan_id) is None:
+    raise SystemExit(1)
+print(plan_id)
+')"; then
+        printf 'smia-profiles: profile switch returned no valid plan ID\n' >&2
+        return 1
+    fi
+
+    malm plan apply "$plan_id" --yes || rc=$?
+    if ((rc != 0)); then
+        printf 'smia-profiles: profile deployment failed (exit %d)\n' "$rc" >&2
+        return "$rc"
+    fi
+
+    smia-session --apply-theme || rc=$?
+    if ((rc != 0)); then
+        printf 'smia-profiles: profile deployed, but session refresh failed (exit %d)\n' \
+            "$rc" >&2
+        return "$rc"
+    fi
+    printf 'Profile %s deployed as %s; default theme applied and session refreshed.\n' \
+        "$profile" "$deployment_profile"
+}
+
+select_profile() {
+    require_command walker
+    local profiles profile provider label choice menu_theme rc
+    local cancel_status="${SMIA_MENU_BACK_STATUS:-1}"
+    profiles="$(profile_names)"
+    [[ -n "$profiles" ]] || {
+        printf 'smia-profiles: no selectable profiles found\n' >&2
+        return 1
+    }
+
+    provider="$(current_compositor_provider)" || {
+        printf 'smia-profiles: unable to determine the current compositor provider\n' >&2
+        return 1
+    }
+
+    local compatible_profiles=()
+    while IFS= read -r profile; do
+        profile_uses_provider "$profile" "$provider" || continue
+        compatible_profiles+=("$profile")
+    done <<<"$profiles"
+    [[ ${#compatible_profiles[@]} -gt 0 ]] || {
+        printf 'smia-profiles: no selectable profiles found for compositor provider %s\n' "$provider" >&2
+        return 1
+    }
+
+    local labels=()
+    declare -A label_to_profile
+    for profile in "${compatible_profiles[@]}"; do
+        case "$profile" in
+            hyprland)        label="Hyprland" ;;
+            hyprland-astral) label="Hyprland (Astral)" ;;
+            mango)           label="Mango (Default)" ;;
+            mango-astral)    label="Mango (Astral)" ;;
+            niri)            label="Niri" ;;
+            niri-astral)     label="Niri (Astral)" ;;
+            *)               label="$profile" ;;
+        esac
+        labels+=("$label")
+        label_to_profile["$label"]="$profile"
+    done
+
+    if [[ -r "$XDG_CONFIG_HOME/smia/menu-theme" ]]; then
+        IFS= read -r menu_theme < "$XDG_CONFIG_HOME/smia/menu-theme" || true
+    fi
+    menu_theme="${menu_theme:-gnist-menu}"
+    if choice="$(printf '%s\n' "${labels[@]}" \
+        | walker --dmenu --placeholder "Profiles" --theme "$menu_theme")"; then
+        :
+    else
+        rc=$?
+        ((rc == 1 || rc == 130)) && return "$cancel_status"
+        return "$rc"
+    fi
+    [[ -n "$choice" ]] || return "$cancel_status"
+    profile="${label_to_profile[$choice]:-}"
+    [[ -n "$profile" ]] || return 1
+    switch_profile "$profile"
+}
+
+case "${1:-list}" in
+    list)
+        (($# <= 2)) || { printf 'usage: smia-profiles list [--names]\n' >&2; exit 2; }
+        [[ "${2:-}" == "" || "${2:-}" == --names ]] \
+            || { printf 'usage: smia-profiles list [--names]\n' >&2; exit 2; }
+        profile_names
+        ;;
+    current)
+        (($# == 1)) || { printf 'usage: smia-profiles current\n' >&2; exit 2; }
+        current_profile
+        ;;
+    select)
+        (($# == 1)) || { printf 'usage: smia-profiles select\n' >&2; exit 2; }
+        select_profile
+        ;;
+    switch)
+        (($# == 2)) || { printf 'usage: smia-profiles switch PROFILE\n' >&2; exit 2; }
+        switch_profile "$2"
+        ;;
+    -h|--help)
+        (($# == 1)) || { printf 'usage: smia-profiles --help\n' >&2; exit 2; }
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

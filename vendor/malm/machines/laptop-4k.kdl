@@ -1,0 +1,38 @@
+// This machine owns display names, geometry, and Kanshi output profiles.
+// Dimensions and offsets use integers; refresh rates and scales use floats.
+variables {
+    global.display-internal-name    "eDP-1"
+    global.display-internal-width   3840
+    global.display-internal-height  2400
+    global.display-internal-refresh 120.001
+    global.display-internal-scale   2.5
+    global.display-internal-x       0
+    global.display-internal-y       0
+    global.display-external-name    "DP-3"
+    global.display-external-width   3840
+    global.display-external-height  2160
+    global.display-external-refresh 60.0
+    global.display-external-scale   1.5
+    global.display-external-x       1536
+    global.display-external-y       0
+}
+
+extend-module "kanshi" {
+    inputs {
+        input "profiles" type="collection<output-profile>" {
+            defaults {
+                item "internal" name="internal" {
+                    outputs {
+                        item display="internal"
+                    }
+                }
+                item "docked" name="docked" {
+                    outputs {
+                        item display="internal" position=#true
+                        item display="external" position=#true
+                    }
+                }
+            }
+        }
+    }
+}

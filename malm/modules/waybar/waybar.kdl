@@ -1,0 +1,52 @@
+// CSS order is Gnist palette tokens, selected profile styles, then generated
+// font rules. Profiles replace the complete native config or style fragment.
+module "waybar" {
+    description "Waybar status bar: profile-replaceable config and style fragments"
+    slot "bar"
+
+    requires {
+        command "waybar"
+        command "playerctl"
+        command "wpctl"
+        command "impala"
+        command "bluetui"
+    }
+
+    fragments {
+        // A profile replacement supplies the complete JSONC document.
+        fragment "config" format="jsonc" cardinality="one" {
+            default "./config-default.jsonc"
+        }
+        // A profile replacement supplies the complete CSS fragment.
+        fragment "style" format="gtk-css" cardinality="one" {
+            default "./styles/default.css"
+        }
+    }
+
+    outputs {
+        file "./gnist/waybar.css.tpl" to="gnist/themes/templates/waybar.css.tpl"
+        file "./gnist/waybar.kdl" to="gnist/bindings.d/waybar.kdl"
+        render "waybar/config.jsonc" format="text" {
+            @include-fragment "config"
+        }
+        render "waybar/theme.css" format="text" {
+            @include-fragment "style"
+        }
+        render "waybar/style.css" format="css" {
+            at-rule "import" #""theme.css""#
+            "*" {
+                "font-family" (f)"'{{global.font-family}}', '{{global.font-symbols}}', sans-serif"
+            }
+            "window#waybar.rail, window#waybar.rail *" {
+                "font-family" (f)"'{{global.font-mono}}', '{{global.font-symbols}}', monospace"
+            }
+            "#clock" {
+                "font-family" (f)"'{{global.font-mono}}', monospace"
+            }
+        }
+        render "smia/services.d/waybar" format="line-list" {
+            @comment "Force-restart entry consumed by `smia-menu`."
+            @line "restart waybar"
+        }
+    }
+}

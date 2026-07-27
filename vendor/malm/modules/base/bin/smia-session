@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+SMIA_CONFIG_DIR="$XDG_CONFIG_HOME/smia"
+MANIFEST="$SMIA_CONFIG_DIR/session.services"
+FRAGMENT_DIR="$SMIA_CONFIG_DIR/session.d"
+DEFAULT_THEME_FILE="$SMIA_CONFIG_DIR/default-theme"
+
+log() { printf 'smia-session: %s\n' "$*" >&2; }
+
+mode=normal
+if (($# > 1)); then
+    printf 'usage: smia-session [--apply-theme|--reapply-theme]\n' >&2
+    exit 2
+fi
+case "${1:-}" in
+    "") ;;
+    --apply-theme) mode=apply ;;
+    --reapply-theme) mode=reapply ;;
+    -h|--help)
+        cat <<'EOF'
+Usage: smia-session [--apply-theme|--reapply-theme]
+
+Modes:
+  normal           Reload the current Gnist theme, or set the default initially
+  --apply-theme    Set the configured default theme
+  --reapply-theme  Re-render the current theme, or set the default initially
+EOF
+        exit 0
+        ;;
+    *)
+        printf 'usage: smia-session [--apply-theme|--reapply-theme]\n' >&2
+        exit 2
+        ;;
+esac
+
+start_graphical_session() {
+    command -v systemctl >/dev/null 2>&1 || return 0
+    local env_vars="WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE"
+    systemctl --user import-environment $env_vars 2>/dev/null || true
+    command -v dbus-update-activation-environment >/dev/null 2>&1 \
+        && dbus-update-activation-environment --systemd $env_vars 2>/dev/null || true
+    systemctl --user start smia-session.target 2>/dev/null || true
+}
+
+start_graphical_session
+
+collect_manifest() {
+    local frag
+    [[ -r "$MANIFEST" ]] && cat "$MANIFEST"
+    if [[ -d "$FRAGMENT_DIR" ]]; then
+        for frag in "$FRAGMENT_DIR"/*; do
+            [[ -r "$frag" ]] && cat "$frag"
+        done
+    fi
+}
+
+ensure_running() {
+    local proc="$1" cmd="$2"
+    [[ -z "$cmd" ]] && cmd="$proc"
+    pgrep -x "$proc" >/dev/null 2>&1 && return 0
+    if ! command -v "${cmd%% *}" >/dev/null 2>&1; then
+        log "missing command for '$proc': ${cmd%% *}"
+        return 0
+    fi
+    setsid sh -c "$cmd" >"${XDG_RUNTIME_DIR:-/tmp}/smia-${proc}.log" 2>&1 </dev/null &
+    disown 2>/dev/null || true
+}
+
+ensure_stopped() {
+    pkill -x "$1" >/dev/null 2>&1 || true
+}
+
+restart_service() {
+    local proc="$1" cmd="$2"
+    pkill -x "$proc" >/dev/null 2>&1 || true
+    for _ in $(seq 1 40); do
+        pgrep -x "$proc" >/dev/null 2>&1 || break
+        sleep 0.05
+    done
+    ensure_running "$proc" "$cmd"
+}
+
+declare -a stops=() prepares=() runs=() restarts=()
+declare -A seen_processes=()
+
+while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ "$line" =~ ^[[:space:]]*(#|$) ]] && continue
+    read -r directive rest <<<"$line"
+    case "$directive" in
+        prepare|run|restart|stop)
+            read -r proc _ <<<"$rest"
+            [[ -n "$proc" ]] || continue
+            [[ -n "${seen_processes["$proc"]+set}" ]] && continue
+            seen_processes["$proc"]=1
+            case "$directive" in
+                prepare) prepares+=("$rest") ;;
+                run)     runs+=("$rest") ;;
+                restart) restarts+=("$rest") ;;
+                stop)    stops+=("$rest") ;;
+            esac
+            ;;
+        *)       log "ignoring unknown directive: $directive" ;;
+    esac
+done < <(collect_manifest)
+
+if ((${#stops[@]})); then
+    for entry in "${stops[@]}"; do
+        read -r proc _ <<<"$entry"
+        ensure_stopped "$proc"
+    done
+fi
+
+if ((${#prepares[@]})); then
+    for entry in "${prepares[@]}"; do
+        read -r proc cmd <<<"$entry"
+        ensure_running "$proc" "$cmd"
+    done
+fi
+
+set_default_theme() {
+    local theme
+    [[ -r "$DEFAULT_THEME_FILE" ]] || {
+        log "default theme not found: $DEFAULT_THEME_FILE"
+        exit 1
+    }
+    IFS= read -r theme < "$DEFAULT_THEME_FILE" || true
+    [[ -n "$theme" ]] || {
+        log "default theme is empty: $DEFAULT_THEME_FILE"
+        exit 1
+    }
+    gnist set "$theme" >/dev/null 2>&1 || {
+        log "failed to activate theme '$theme'"
+        exit 1
+    }
+}
+
+# Apply the theme before reconciling session-managed services. New or restarted
+# services then read current configuration and do not receive startup signals.
+case "$mode" in
+    normal)
+        if gnist current >/dev/null 2>&1; then
+            gnist reload >/dev/null 2>&1 || {
+                log "failed to reload the current theme"
+                exit 1
+            }
+        else
+            set_default_theme
+        fi
+        ;;
+    apply)
+        set_default_theme
+        ;;
+    reapply)
+        if gnist current >/dev/null 2>&1; then
+            gnist reapply >/dev/null 2>&1 || {
+                log "failed to reapply the current theme"
+                exit 1
+            }
+        else
+            set_default_theme
+        fi
+        ;;
+esac
+
+if command -v smia-theme-links >/dev/null 2>&1; then
+    smia-theme-links
+fi
+
+if ((${#runs[@]})); then
+    for entry in "${runs[@]}"; do
+        read -r proc cmd <<<"$entry"
+        ensure_running "$proc" "$cmd"
+    done
+fi
+
+if ((${#restarts[@]})); then
+    for entry in "${restarts[@]}"; do
+        read -r proc cmd <<<"$entry"
+        restart_service "$proc" "$cmd"
+    done
+fi

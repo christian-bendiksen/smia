@@ -1,0 +1,382 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode=${1:-}
+if [[ "$mode" != "verify" && "$mode" != "update" ]]; then
+  printf '%s\n' "usage: ${FORMAT_COMPONENT_TOOL_PATH:-tools/smia-format-component} verify|update" >&2
+  exit 2
+fi
+
+root=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
+components="$root/components"
+malm_root=${MALM_ROOT:-"$root/../malm"}
+toolchain=1.95.0
+host_check_dir="$components/component-builder/malm-host-check"
+host_check_manifest="$host_check_dir/Cargo.toml"
+component_package=${FORMAT_COMPONENT_PACKAGE:-render-lua-data}
+component_source=${FORMAT_COMPONENT_SOURCE:-render-lua-data}
+component_core=${FORMAT_COMPONENT_CORE:-render_lua_data.wasm}
+component_name=${FORMAT_COMPONENT_NAME:-render-lua-data.wasm}
+component_label=${FORMAT_COMPONENT_LABEL:-render-lua-data}
+host_command=${FORMAT_COMPONENT_HOST_COMMAND:-verify-render-lua-data}
+wit="$components/$component_source/wit/malm-format-component.wit"
+checked_component=${FORMAT_COMPONENT_CHECKED_COMPONENT:-"$root/vendor/render-lua-data.wasm"}
+checked_manifest=${FORMAT_COMPONENT_CHECKED_MANIFEST:-"$root/vendor/render-lua-data.manifest.json"}
+
+if [[ ! -d "$malm_root" ]]; then
+  printf 'MALM_ROOT is not a directory: %s\n' "$malm_root" >&2
+  exit 1
+fi
+malm_root=$(CDPATH= cd -- "$malm_root" && pwd -P)
+
+# Resolve the declarations themselves, rather than assuming MALM_ROOT controls
+# Cargo's relative path dependencies.
+path_dependency_pattern='^(malm-[a-z0-9-]+)[[:space:]]*=.*path[[:space:]]*=[[:space:]]*"([^"]+)"'
+path_dependency_count=0
+while IFS= read -r dependency; do
+  [[ "$dependency" =~ $path_dependency_pattern ]] || continue
+  dependency_name=${BASH_REMATCH[1]}
+  dependency_path=${BASH_REMATCH[2]}
+  path_dependency_count=$((path_dependency_count + 1))
+  if [[ ! -d "$host_check_dir/$dependency_path" ]]; then
+    printf 'Cargo path dependency is missing: %s -> %s\n' \
+      "$dependency_name" "$host_check_dir/$dependency_path" >&2
+    exit 1
+  fi
+  cargo_dependency=$(CDPATH= cd -- "$host_check_dir/$dependency_path" && pwd -P)
+  cargo_malm_root=${cargo_dependency%/crates/$dependency_name}
+  if [[ "$cargo_malm_root" == "$cargo_dependency" || "$cargo_malm_root" != "$malm_root" ]]; then
+    printf 'MALM_ROOT does not match Cargo path dependency %s: %s != %s\n' \
+      "$dependency_name" "$malm_root" "$cargo_malm_root" >&2
+    exit 1
+  fi
+  expected_dependency="$malm_root/crates/$dependency_name"
+  if [[ ! -d "$expected_dependency" ]]; then
+    printf 'MALM_ROOT does not match Cargo path dependency %s: %s\n' \
+      "$dependency_name" "$cargo_dependency" >&2
+    exit 1
+  fi
+  expected_dependency=$(CDPATH= cd -- "$expected_dependency" && pwd -P)
+  if [[ "$cargo_dependency" != "$expected_dependency" ]]; then
+    printf 'MALM_ROOT does not match Cargo path dependency %s: %s != %s\n' \
+      "$dependency_name" "$malm_root" "${cargo_dependency%/crates/$dependency_name}" >&2
+    exit 1
+  fi
+done < "$host_check_manifest"
+if ((path_dependency_count == 0)); then
+  printf 'no Malm Cargo path dependencies found in %s\n' "$host_check_manifest" >&2
+  exit 1
+fi
+
+malm_wit="$malm_root/crates/malm-format-component-api/wit/malm-format-component.wit"
+
+if ! command -v cargo >/dev/null 2>&1 \
+  && [[ -n "${HOME:-}" && -x "$HOME/.cargo/bin/cargo" ]]; then
+  export PATH="$HOME/.cargo/bin:$PATH"
+fi
+if ! command -v cargo >/dev/null 2>&1 || ! command -v rustup >/dev/null 2>&1; then
+  printf '%s\n' "cargo and rustup are required (no cargo-component or wasm-tools CLI is used)" >&2
+  exit 1
+fi
+cargo_bin=$(command -v cargo)
+rustup_bin=$(command -v rustup)
+
+if [[ -n "${CARGO_HOME:-}" ]]; then
+  cargo_home=$CARGO_HOME
+elif [[ -n "${HOME:-}" ]]; then
+  cargo_home="$HOME/.cargo"
+else
+  printf '%s\n' "CARGO_HOME or HOME is required" >&2
+  exit 1
+fi
+if [[ ! -d "$cargo_home" ]]; then
+  printf 'Cargo home is not a directory: %s\n' "$cargo_home" >&2
+  exit 1
+fi
+cargo_home=$(CDPATH= cd -- "$cargo_home" && pwd -P)
+
+if [[ -n "${RUSTUP_HOME:-}" ]]; then
+  rustup_home=$RUSTUP_HOME
+elif [[ -n "${HOME:-}" ]]; then
+  rustup_home="$HOME/.rustup"
+else
+  printf '%s\n' "RUSTUP_HOME or HOME is required" >&2
+  exit 1
+fi
+if [[ ! -d "$rustup_home" ]]; then
+  printf 'Rustup home is not a directory: %s\n' "$rustup_home" >&2
+  exit 1
+fi
+rustup_home=$(CDPATH= cd -- "$rustup_home" && pwd -P)
+sysroot=$("$rustup_bin" run "$toolchain" rustc --print sysroot)
+if [[ "$sysroot" != /* || ! -d "$sysroot" ]]; then
+  printf 'Rust %s sysroot is not an absolute directory: %s\n' "$toolchain" "$sysroot" >&2
+  exit 1
+fi
+sysroot=$(CDPATH= cd -- "$sysroot" && pwd -P)
+
+if [[ ! -f "$malm_wit" ]]; then
+  printf 'missing normative Malm WIT: %s\n' "$malm_wit" >&2
+  exit 1
+fi
+if ! cmp -s -- "$wit" "$malm_wit"; then
+  printf '%s\n' "vendored WIT differs from the normative Malm WIT" >&2
+  exit 1
+fi
+
+native_target=${CARGO_TARGET_DIR:-"$components/target"}
+tmp_parent=${TMPDIR:-"$components/target"}
+mkdir -p -- "$native_target" "$tmp_parent"
+native_target=$(CDPATH= cd -- "$native_target" && pwd -P)
+tmp_parent=$(CDPATH= cd -- "$tmp_parent" && pwd -P)
+tmp=$(mktemp -d "$tmp_parent/$component_label.XXXXXXXX")
+trap 'rm -rf -- "$tmp"' EXIT
+
+export CARGO_INCREMENTAL=0
+export CARGO_NET_OFFLINE=true
+export SOURCE_DATE_EPOCH=0
+
+env -u CARGO_ENCODED_RUSTFLAGS -u RUSTFLAGS "$cargo_bin" +"$toolchain" build \
+  --offline \
+  --locked \
+  --manifest-path "$components/Cargo.toml" \
+  --package component-builder \
+  --package malm-host-check \
+  --target-dir "$native_target"
+
+builder="$native_target/debug/component-builder"
+host_check="$native_target/debug/malm-host-check"
+profile=$("$host_check" profile-digest)
+
+prepare_build_context() {
+  local context=$1
+  local checkout="$context/checkouts"
+  local source="$checkout/smia/components"
+  local isolated_cargo_home="$context/cargo-home"
+  local registry="$cargo_home/registry"
+
+  if [[ ! -d "$registry/cache" || ! -d "$registry/index" ]]; then
+    printf 'offline Cargo registry cache or index is missing under %s\n' "$registry" >&2
+    exit 1
+  fi
+
+  mkdir -p -- \
+    "$source" \
+    "$context/home" \
+    "$context/target" \
+    "$context/tmp" \
+    "$isolated_cargo_home/registry"
+  cp -- \
+    "$components/Cargo.lock" \
+    "$components/Cargo.toml" \
+    "$components/rust-toolchain.toml" \
+    "$source/"
+  cp -a -- \
+    "$components/component-builder" \
+    "$components/render-lua-data" \
+    "$source/"
+
+  # Cargo must be able to resolve every workspace member, although only the
+  # component is compiled in these copied workspaces.
+  ln -s -- "$malm_root" "$checkout/malm"
+
+  # Share immutable downloads and the index, but force Cargo to unpack crate
+  # sources beneath each isolated CARGO_HOME. Rustc therefore sees genuinely
+  # different absolute registry source paths in the two builds.
+  ln -s -- "$registry/cache" "$isolated_cargo_home/registry/cache"
+  ln -s -- "$registry/index" "$isolated_cargo_home/registry/index"
+}
+
+append_remap() {
+  local from=$1
+  local to=$2
+
+  if [[ "$from" != /* || "$from" == *$'\x1f'* || "$to" == *$'\x1f'* ]]; then
+    printf 'path cannot be encoded safely for rustc remapping: %q\n' "$from" >&2
+    exit 1
+  fi
+  rustflags+=("--remap-path-prefix=$from=$to")
+}
+
+audit_component_paths() {
+  local component=$1
+  shift
+  local path prefix
+
+  for path in "$@"; do
+    [[ -n "$path" && "$path" != "/" ]] || continue
+    if LC_ALL=C grep -aFq -- "$path" "$component"; then
+      printf 'component contains an absolute host/build path: %s\n' "$path" >&2
+      return 1
+    fi
+  done
+
+  # Also reject recognizable homes, registries, toolchains, temporary roots,
+  # and common hosted-build roots that were not present on this machine.
+  for prefix in \
+    '/home/' \
+    '/Users/' \
+    '/tmp/' \
+    '/var/tmp/' \
+    '/run/user/' \
+    '/workspace/' \
+    '/workspaces/' \
+    '/builds/' \
+    '/__w/' \
+    '/github/workspace/' \
+    '/runner/_work/' \
+    '/opt/hostedtoolcache/' \
+    '/.cargo/registry/' \
+    '/.rustup/toolchains/'; do
+    if LC_ALL=C grep -aFq -- "$prefix" "$component"; then
+      printf 'component contains a recognized absolute host/build path prefix: %s\n' \
+        "$prefix" >&2
+      return 1
+    fi
+  done
+  if LC_ALL=C grep -aEq '[A-Za-z]:[\\/](Users|Temp|Windows[\\/]Temp)[\\/]' "$component"; then
+    printf '%s\n' "component contains a recognized Windows host/build path" >&2
+    return 1
+  fi
+}
+
+build_component() {
+  local name=$1
+  local context="$tmp/$name-context"
+  local source="$context/checkouts/smia/components"
+  local isolated_cargo_home="$context/cargo-home"
+  local build_home="$context/home"
+  local target="$context/target"
+  local build_tmp="$context/tmp"
+  local core="$target/wasm32-unknown-unknown/release/$component_core"
+  local component="$tmp/$name.wasm"
+  local encoded_rustflags
+  local -a rustflags=()
+
+  prepare_build_context "$context"
+
+  # rustc applies the last matching remap. Broad host roots come first and
+  # each concrete compiler input root follows with a stable virtual identity.
+  if [[ -n "${HOME:-}" && "$HOME" == /* ]]; then
+    append_remap "$HOME" host-home
+  fi
+  append_remap "$root" smia-origin
+  append_remap "$malm_root" malm-origin
+  append_remap "$cargo_home" cargo-origin
+  append_remap "$cargo_home/registry/src" cargo-registry-origin
+  append_remap "$rustup_home" rustup-origin
+  append_remap "$sysroot" rust-toolchain
+  append_remap "$context" build-context
+  append_remap "$source" smia
+  append_remap "$build_home" build-home
+  append_remap "$isolated_cargo_home" cargo-home
+  append_remap "$isolated_cargo_home/registry/src" cargo-registry
+  append_remap "$target" build-target
+  append_remap "$build_tmp" build-tmp
+  local IFS=$'\x1f'
+  encoded_rustflags="${rustflags[*]}"
+
+  (
+    # Cargo discovers configuration from its process directory, not from the
+    # manifest path. Starting at / prevents checkout-parent config leakage;
+    # the isolated CARGO_HOME below prevents user config leakage.
+    CDPATH= cd -- /
+    env \
+      -u CARGO_BUILD_RUSTC \
+      -u CARGO_BUILD_RUSTC_WRAPPER \
+      -u CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER \
+      -u CARGO_BUILD_RUSTFLAGS \
+      -u CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS \
+      -u RUSTC \
+      -u RUSTC_WRAPPER \
+      -u RUSTC_WORKSPACE_WRAPPER \
+      -u RUSTFLAGS \
+      HOME="$build_home" \
+      CARGO_HOME="$isolated_cargo_home" \
+      CARGO_TARGET_DIR="$target" \
+      CARGO_ENCODED_RUSTFLAGS="$encoded_rustflags" \
+      RUSTUP_HOME="$rustup_home" \
+      TMPDIR="$build_tmp" \
+      "$cargo_bin" +"$toolchain" build \
+        --offline \
+        --locked \
+        --manifest-path "$source/Cargo.toml" \
+        --package "$component_package" \
+        --release \
+        --target wasm32-unknown-unknown
+  )
+  "$builder" pack "$core" "$component"
+  audit_component_paths \
+    "$component" \
+    "${HOME:-}" \
+    "$root" \
+    "$malm_root" \
+    "$cargo_home" \
+    "$rustup_home" \
+    "$sysroot" \
+    "$tmp" \
+    "$context" \
+    "$source" \
+    "$build_home" \
+    "$isolated_cargo_home" \
+    "$target" \
+    "$build_tmp"
+  "$builder" verify "$component" "$wit"
+}
+
+build_component first
+build_component second
+if ! cmp -s -- "$tmp/first.wasm" "$tmp/second.wasm"; then
+  printf '%s\n' \
+    "component rebuilds from distinct checkout/Cargo roots are not byte-identical" >&2
+  exit 1
+fi
+printf '%s\n' "component rebuilds from distinct checkout/Cargo roots are byte-identical"
+
+"$host_check" "$host_command" "$tmp/first.wasm"
+"$builder" manifest-named \
+  "$tmp/first.wasm" \
+  "$wit" \
+  "$profile" \
+  "$component_name" \
+  "$tmp/component.manifest.json"
+
+if [[ "$mode" == "update" ]]; then
+  mkdir -p -- "$(dirname -- "$checked_component")" "$(dirname -- "$checked_manifest")"
+  cp -- "$tmp/first.wasm" "$checked_component"
+  cp -- "$tmp/component.manifest.json" "$checked_manifest"
+  audit_component_paths \
+    "$checked_component" \
+    "${HOME:-}" \
+    "$root" \
+    "$malm_root" \
+    "$cargo_home" \
+    "$rustup_home" \
+    "$sysroot" \
+    "$tmp"
+  printf 'updated %s\n' "$checked_component"
+  printf 'updated %s\n' "$checked_manifest"
+else
+  if [[ ! -f "$checked_component" || ! -f "$checked_manifest" ]]; then
+    printf '%s\n' "checked component or manifest is missing; run update" >&2
+    exit 1
+  fi
+  if ! cmp -s -- "$tmp/first.wasm" "$checked_component"; then
+    printf '%s\n' "checked component is stale; run update" >&2
+    exit 1
+  fi
+  audit_component_paths \
+    "$checked_component" \
+    "${HOME:-}" \
+    "$root" \
+    "$malm_root" \
+    "$cargo_home" \
+    "$rustup_home" \
+    "$sysroot" \
+    "$tmp"
+  if ! cmp -s -- "$tmp/component.manifest.json" "$checked_manifest"; then
+    printf '%s\n' "checked component manifest is stale; run update" >&2
+    exit 1
+  fi
+  printf '%s\n' "$component_label verification passed"
+fi

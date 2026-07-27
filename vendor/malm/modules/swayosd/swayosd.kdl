@@ -1,0 +1,52 @@
+// Daemon behavior and appearance use separate slots, so profiles can replace
+// the stylesheet without changing service settings.
+module "swayosd" {
+    description "On-screen display daemon behavior (volume/brightness OSD)"
+    slot "osd"
+
+    requires {
+        command "swayosd-server"
+        command "swayosd-client"
+        command "playerctl"
+    }
+
+    inputs {
+        input "top_margin" type="float" default=0.85
+        input "show-percentage" type="bool" default=#true
+        input "max-volume" type="int" default=100
+    }
+
+    outputs {
+        file "./gnist/swayosd.css.tpl" to="gnist/themes/templates/swayosd.css.tpl"
+        file "./gnist/swayosd.kdl" to="gnist/bindings.d/swayosd.kdl"
+        render "swayosd/config.toml" format="toml" {
+            "server" {
+                "top_margin" (ref)"top_margin"
+                "show_percentage" (ref)"show-percentage"
+                "max_volume" (ref)"max-volume"
+            }
+        }
+        render "smia/services.d/swayosd" format="line-list" {
+            @comment "Force-restart entry consumed by `smia-menu`."
+            @line "restart swayosd-server"
+        }
+    }
+}
+
+module "swayosd-style" {
+    description "Stylesheet skinning the swayosd OSD"
+    slot "osd-style"
+
+    fragments {
+        // Profiles may replace the module's native CSS as one complete fragment.
+        fragment "style" format="gtk-css" cardinality="one" {
+            default "./styles/default.css"
+        }
+    }
+
+    outputs {
+        render "swayosd/style.css" format="text" {
+            @include-fragment "style"
+        }
+    }
+}

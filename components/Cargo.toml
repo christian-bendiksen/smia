@@ -1,0 +1,34 @@
+[workspace]
+members = [
+  "component-builder",
+  "component-builder/malm-host-check",
+  "render-lua-data",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95.0"
+license = "MIT"
+publish = false
+
+[workspace.dependencies]
+sha2 = "=0.10.9"
+wasmparser = { version = "=0.236.1", default-features = false, features = [
+  "component-model",
+  "features",
+  "simd",
+  "std",
+  "validate",
+] }
+wit-component = { version = "=0.236.1", default-features = false }
+wit-parser = { version = "=0.236.1", default-features = false, features = ["decoding"] }
+
+[profile.release]
+codegen-units = 1
+incremental = false
+lto = "fat"
+opt-level = "z"
+panic = "abort"
+strip = "symbols"

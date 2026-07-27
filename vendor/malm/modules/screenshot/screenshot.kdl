@@ -1,0 +1,45 @@
+// This grim and slurp pipeline serves compositors without native capture
+// actions. Niri retains its built-in bindings. Clipboard support requires
+// wl-copy only when the `copy` input is enabled.
+module "screenshot" {
+    description "Generated gnist-screenshot grim/slurp script with optional clipboard copy and notification"
+
+    requires {
+        command "grim"
+        command "slurp"
+        @if "copy" {
+            command "wl-copy"
+        }
+        @if "notify" {
+            command "notify-send"
+        }
+    }
+
+    inputs {
+        // The script expands `~` at runtime; a path input would bake the
+        // generating user's home directory into the rendered output.
+        input "directory" type="string" default="~/Pictures/Screenshots"
+        input "copy"      type="bool" default=#true
+        input "notify"    type="bool" default=#true
+    }
+
+    outputs {
+        // Conditional tail fragments keep copy and notification dependencies
+        // independent while preserving valid shell output.
+        render "~/.local/bin/gnist-screenshot" format="text" executable=#true {
+            @include-file "./gnist-screenshot.tpl" interpolate=#true
+            @if "copy" {
+                @include-file "./parts/copy.sh"
+            }
+            @if "notify" {
+                @if "copy" {
+                    @include-file "./parts/notify-copied.sh"
+                }
+
+                @else {
+                        @include-file "./parts/notify-saved.sh"
+                    }
+            }
+        }
+    }
+}

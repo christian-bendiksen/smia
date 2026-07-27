@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
+export FORMAT_COMPONENT_TOOL_PATH=tools/render-lua-data-component
+export FORMAT_COMPONENT_PACKAGE=render-lua-data
+export FORMAT_COMPONENT_SOURCE=render-lua-data
+export FORMAT_COMPONENT_CORE=render_lua_data.wasm
+export FORMAT_COMPONENT_NAME=render-lua-data.wasm
+export FORMAT_COMPONENT_LABEL=render-lua-data
+export FORMAT_COMPONENT_HOST_COMMAND=verify-render-lua-data
+export FORMAT_COMPONENT_CHECKED_COMPONENT="$root/vendor/render-lua-data.wasm"
+export FORMAT_COMPONENT_CHECKED_MANIFEST="$root/vendor/render-lua-data.manifest.json"
+exec "$root/tools/smia-format-component" "$@"

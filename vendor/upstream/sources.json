@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "decoder": {
+    "name": "malm.posix-ustar.none",
+    "version": 1
+  },
+  "remote_sources": [
+    {
+      "id": "adw-gtk3-v6.4",
+      "url": "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.4/adw-gtk3v6.4.tar.xz",
+      "vendored_path": "vendor/upstream/adw-gtk3v6.4.tar.xz",
+      "compressed_sha256": "sha256-c396e4f0df3eea081186ae13321345f21b9934691b4b4d75b4956f00cbd033d1",
+      "outputs": [
+        {
+          "id": "adw-gtk3",
+          "source_subpath": "adw-gtk3",
+          "archive_path": "vendor/upstream/adw-gtk3.tar",
+          "destination": ".local/share/themes/adw-gtk3",
+          "executable_paths": []
+        },
+        {
+          "id": "adw-gtk3-dark",
+          "source_subpath": "adw-gtk3-dark",
+          "archive_path": "vendor/upstream/adw-gtk3-dark.tar",
+          "destination": ".local/share/themes/adw-gtk3-dark",
+          "executable_paths": []
+        }
+      ]
+    },
+    {
+      "id": "aerynos-eldritch-icons",
+      "url": "https://codeberg.org/StormRosenaa/AerynOS-Art-icons/raw/branch/main/AerynOS-Eldritch.tar.xz",
+      "vendored_path": "vendor/upstream/AerynOS-Eldritch.tar.xz",
+      "compressed_sha256": "sha256-1552ad7cf77702a18b4bbf859122843aeb1e034b1b45d03e02f9b2bfb2b9bf84",
+      "outputs": [
+        {
+          "id": "aerynos-eldritch-icons",
+          "source_subpath": "AerynOS-Eldritch",
+          "archive_path": "vendor/upstream/aerynos-eldritch-icons.tar",
+          "destination": ".local/share/icons/AerynOS-Eldritch",
+          "executable_paths": []
+        }
+      ]
+    }
+  ],
+  "local_sources": []
+}

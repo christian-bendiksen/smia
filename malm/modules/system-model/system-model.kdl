@@ -1,0 +1,143 @@
+module "system-model" {
+    description "Generate and inspect the AerynOS system model"
+
+    requires {
+        command "moss"
+        command "sudo"
+    }
+
+    types {
+        refine "package-name" base="string" format="identifier"
+        refine "repository-name" base="string" format="identifier"
+        refine "repository-priority" base="int" min=0
+        alias "repository-uri" type="string"
+        alias "repository-channel" type="string"
+
+        record "package" {
+            fields {
+                field "name" type="package-name" required=#true
+            }
+        }
+        record "repository" {
+            fields {
+                field "name" type="repository-name" required=#true
+                field "description" type="string" required=#true
+                field "base-uri" type="repository-uri" required=#true
+                field "version" type="repository-channel" required=#true
+                field "priority" type="repository-priority" required=#true
+            }
+        }
+    }
+
+    inputs {
+        input "repositories" type="collection<repository>" {
+            defaults {
+                item "unstable" name="unstable" description="AerynOS unstable repository" base-uri="https://cdn.aerynos.dev/" version="stream/unstable" priority=10
+                item "volatile" name="volatile" description="AerynOS volatile fallback repository" base-uri="https://cdn.aerynos.dev/" version="stream/volatile" priority=0
+            }
+        }
+        input "packages" type="collection<package>" {
+            defaults {
+                // Profiles replace these two package choices.
+                item "kernel" name="linux-desktop"
+                item "compositor" name="mangowm"
+
+                // Deployment tools must remain in the imported model.
+                item "malm" name="malm"
+                item "gnist" name="gnist"
+                item "moss" name="moss"
+                item "git" name="git"
+                item "sudo" name="sudo-rs"
+
+                // Desktop services and applications.
+                item "awww" name="awww"
+                item "waybar" name="waybar"
+                item "bluetui" name="bluetui"
+                item "brightness" name="brightnessctl"
+                item "btop" name="btop"
+                item "elephant" name="elephant"
+                item "gpu-record" name="gpu-screen-recorder"
+                item "grim" name="grim"
+                item "helix" name="helix"
+                item "hypridle" name="hypridle"
+                item "hyprlock" name="hyprlock"
+                item "impala" name="impala"
+                item "kitty" name="kitty"
+                item "mako" name="mako"
+                item "notify-send" name="libnotify"
+                item "nvim" name="neovim"
+                item "polkit" name="polkit"
+                item "playerctl" name="playerctl"
+                item "sddm" name="sddm"
+                item "slurp" name="slurp"
+                item "swayosd" name="swayosd"
+                item "walker" name="walker"
+                item "wl-clip" name="wl-clipboard-rs"
+                item "wlsunset" name="wlsunset"
+                // Desktop package set and policy agent.
+                item "aeryn-base-desktop" name="pkgset-aeryn-base-desktop"
+                item "polkit-kde-agent" name="polkit-kde-agent"
+                // All portal backends stay installed; the desktop `portals`
+                // module selects the active backend per compositor.
+                item "xdg-desktop-portal" name="xdg-desktop-portal"
+                item "xdg-desktop-portal-gtk" name="xdg-desktop-portal-gtk"
+                item "xdg-desktop-portal-wlr" name="xdg-desktop-portal-wlr"
+                item "xdg-desktop-portal-gnome" name="xdg-desktop-portal-gnome"
+                item "xdg-desktop-portal-hyprland" name="xdg-desktop-portal-hyprland"
+
+                // Desktop integration and visual assets.
+                item "xdg-utils" name="xdg-utils"
+                item "yaru" name="yaru-icon-theme"
+                item "noto" name="font-noto"
+                item "symbols-nerd" name="font-symbols-nerd"
+                item "os-artwork" name="os-artwork"
+
+                // Base runtime and firmware.
+                item "systemd" name="systemd"
+                item "linux-firmware" name="linux-firmware"
+                item "sof-firmware" name="sof-firmware"
+
+                // General desktop utilities and applications.
+                item "aeryn-utilities" name="pkgset-aeryn-utilities"
+                item "procps" name="procps"
+                item "kanshi" name="kanshi"
+                item "nautilus" name="nautilus"
+                item "firefox" name="firefox"
+
+                // Development tools.
+                item "build-essential" name="build-essential"
+                item "curl" name="curl"
+                item "ripgrep" name="ripgrep"
+
+                // Boot, audio, and remaining fonts.
+                item "plymouth" name="plymouth"
+                item "pavucontrol" name="pavucontrol"
+                item "liberation-fonts" name="liberation-fonts-ttf"
+                item "adwaita-fonts" name="adwaita-fonts"
+                item "roboto-mono-nerd" name="font-roboto-mono-nerd"
+            }
+        }
+    }
+
+    outputs {
+        // Direct KDL output has literal node names, so validated dynamic names
+        // are emitted as text while scalar strings retain KDL-compatible quoting.
+        render "~/.local/share/smia-system-models/system-model.kdl" format="text" {
+            @line "repositories {"
+            @for-each "repository" in="repositories" {
+                @line (f)"    {{repository.name}} {"
+                @line (f)"        description {{repository.description:json}}"
+                @line (f)"        base-uri {{repository.base-uri:json}}"
+                @line (f)"        version {{repository.version:json}}"
+                @line (f)"        priority {{repository.priority:int}}"
+                @line "    }"
+            }
+            @line "}"
+            @line "packages {"
+            @for-each "package" in="packages" {
+                @line (f)"    {{package.name}}"
+            }
+            @line "}"
+        }
+    }
+}

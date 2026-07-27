@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: smia-idle [toggle|status [--waybar]]
+
+Inhibits idle locking by suspending hypridle; toggling again resumes it.
+Toggle is the default. Refreshes the Waybar idle indicator on every change.
+`status --waybar` prints the indicator JSON and always exits 0.
+EOF
+}
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send "$@" || printf '%s\n' "$*" >&2
+}
+
+signal_waybar() {
+    pkill -RTMIN+9 waybar >/dev/null 2>&1 || true
+}
+
+daemon_pid() {
+    pgrep -x hypridle 2>/dev/null | head -n1 || true
+}
+
+daemon_state() {
+    ps -o state= -p "$1" 2>/dev/null | tr -d ' ' || true
+}
+
+case "${1:-toggle}" in
+    status)
+        if [[ "${2:-}" == --waybar ]]; then
+            pid="$(daemon_pid)"
+            state=""
+            [[ -n "$pid" ]] && state="$(daemon_state "$pid")"
+            if [[ "$state" == T* ]]; then
+                printf '{"text":"󰒲","tooltip":"Idle Inhibitor: on","class":"active"}\n'
+            else
+                printf '{"text":""}\n'
+            fi
+            exit 0
+        fi
+        pid="$(daemon_pid)"
+        if [[ -z "$pid" ]]; then
+            echo unavailable
+            exit 3
+        fi
+        state="$(daemon_state "$pid")"
+        if [[ -z "$state" ]]; then
+            echo unavailable
+            exit 3
+        fi
+        # Inhibited means hypridle is SIGSTOPped.
+        if [[ "$state" == T* ]]; then
+            echo on
+        else
+            echo off
+            exit 1
+        fi
+        ;;
+    toggle)
+        pid="$(daemon_pid)"
+        if [[ -z "$pid" ]]; then
+            notify "Idle Inhibitor" "hypridle is not running"
+            exit 0
+        fi
+        state="$(daemon_state "$pid")"
+        if [[ -z "$state" ]]; then
+            notify "Idle Inhibitor" "hypridle is not running"
+            exit 0
+        fi
+        if [[ "$state" == T* ]]; then
+            kill -CONT "$pid" 2>/dev/null || true
+        else
+            kill -STOP "$pid" 2>/dev/null || true
+        fi
+        signal_waybar
+        ;;
+    -h|--help)
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

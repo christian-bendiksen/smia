@@ -1,0 +1,42 @@
+// Screen recording through gpu-screen-recorder. A private control-channel
+// supervisor exclusively owns and signals the recorder child, while the wrapper
+// refreshes the Waybar indicator (signal 8) on every state change.
+module "record" {
+    description "Generated smia-record gpu-screen-recorder wrapper with Waybar signal integration"
+
+    requires {
+        command "flock"
+        command "gpu-screen-recorder"
+        command "mkfifo"
+        command "mktemp"
+        command "pkill"
+        command "python3"
+        command "slurp"
+        command "stat"
+        @if "notify" {
+            command "notify-send"
+        }
+    }
+
+    inputs {
+        // The wrapper expands `~` when invoked so generation never captures
+        // the generating user's home directory.
+        input "directory" type="string" default="~/Videos/Recordings"
+        input "fps"       type="int"  default=60
+        // Empty string disables audio capture.
+        input "audio-source" type="string" default="default_output"
+        input "notify"       type="bool"   default=#true
+        // `portal` records through xdg-desktop-portal ScreenCast and needs no
+        // privileges; `screen` uses direct KMS capture, which requires
+        // cap_sys_admin on gsr-kms-server. Region capture always uses KMS.
+        input "screen-target" type="enum" default="portal" {
+            values "portal" "screen"
+        }
+    }
+
+    outputs {
+        render "~/.local/bin/smia-record" format="text" executable=#true {
+            @include-file "./smia-record.tpl" interpolate=#true
+        }
+    }
+}

@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: smia install MODEL_PROFILE [--astral]
+
+MODEL_PROFILE:
+  mango-desktop       mango-gaming
+  niri-desktop        niri-gaming
+  hyprland-desktop    hyprland-gaming
+
+Options:
+  --astral  Prepare the matching Astral profile.
+
+Environment:
+  SMIA_SOURCE_ROOT
+            Absolute path to the Smia source root. Defaults at runtime to
+            $HOME/Dev/smia.
+  SMIA_DESKTOP_NAMESPACE
+            Malm namespace to prepare. Defaults to default.
+
+This command publishes one review plan containing the desktop configuration
+and system model. It never applies Malm state or imports a model through Moss.
+EOF
+}
+
+require_command() {
+    command -v "$1" >/dev/null 2>&1 || {
+        printf 'smia-install: %s not found in PATH\n' "$1" >&2
+        exit 1
+    }
+}
+
+model_profile="${1:-}"
+case "$model_profile" in
+    -h|--help)
+        (($# == 1)) || { usage >&2; exit 2; }
+        usage
+        exit 0
+        ;;
+    mango-desktop) profile="mango" ;;
+    mango-gaming) profile="mango-gaming" ;;
+    niri-desktop) profile="niri" ;;
+    niri-gaming) profile="niri-gaming" ;;
+    hyprland-desktop) profile="hyprland" ;;
+    hyprland-gaming) profile="hyprland-gaming" ;;
+    "") usage >&2; exit 2 ;;
+    *) printf 'smia-install: unknown model profile: %s\n' "$model_profile" >&2; exit 2 ;;
+esac
+shift
+
+astral=0
+while (($#)); do
+    case "$1" in
+        --astral) astral=1 ;;
+        -h|--help) usage; exit 0 ;;
+        *) printf 'smia-install: unknown option: %s\n' "$1" >&2; exit 2 ;;
+    esac
+    shift
+done
+
+if ((astral)); then
+    profile+="-astral"
+fi
+
+source_root="${SMIA_SOURCE_ROOT:-$HOME/Dev/smia}"
+source_root="${source_root%/}"
+[[ "$source_root" == /* ]] || {
+    printf 'smia-install: source root must be absolute: %s\n' "$source_root" >&2
+    exit 2
+}
+[[ -d "$source_root" ]] || {
+    printf 'smia-install: source root not found: %s\n' "$source_root" >&2
+    exit 1
+}
+require_command malm
+namespace="${SMIA_DESKTOP_NAMESPACE:-default}"
+printf '\nRequested model: %s\nCombined profile: %s\nSource: %s\nNamespace: %s\n\n' \
+    "$model_profile" "$profile" "$source_root" "$namespace"
+
+malm plan create --profile "$profile" \
+    --source "$source_root" \
+    --namespace "$namespace"
+
+cat <<'EOF'
+
+No plan was applied. Review it with `malm plan show PLAN_ID`, apply it with its
+exact approval digest when required, then run `smia system-model plan`. Apply
+the Moss transition explicitly before starting the new compositor session.
+EOF

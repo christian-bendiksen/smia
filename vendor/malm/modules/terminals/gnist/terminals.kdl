@@ -1,0 +1,11 @@
+bind "kitty" {
+    reload {
+        signal process="kitty" signal="SIGUSR1"
+    }
+}
+
+bind "ghostty" {
+    reload {
+        signal process="ghostty" signal="SIGUSR2"
+    }
+}
