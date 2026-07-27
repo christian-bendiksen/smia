@@ -85,46 +85,46 @@ Plan preparation reads `malm.lock`. Use `malm source lock create` when the file
 is absent. Update the lock again after editing `malm.kdl`, `malm/`, `gnist/`,
 pack declarations, or captured vendored files.
 
-2. Prepare, review, and apply the small bootstrap profile. It installs the
-   `smia` dispatcher and `smia install` command.
+Prepare, review, and apply the desktop and system-model plan. This example
+selects Niri, the gaming kernel, and Astral.
 
 ```sh
-malm plan create --profile install --source "$repo" --namespace default
+malm plan create --profile niri-gaming-astral --source "$repo" --namespace default
 malm plan show PLAN_ID
 malm plan apply PLAN_ID
 ```
 
-If review prints an approval digest, the non-interactive form is:
+The concrete profile name comes from the second table above. Applying the plan
+deploys the desktop configuration and the generated model file, but does not run
+Moss. If review prints an approval digest, the non-interactive apply form is:
 
 ```sh
 malm plan apply PLAN_ID --approval SHA256_DIGEST
 ```
 
-3. Prepare the full desktop and system-model plan. This example selects Niri,
-   the gaming kernel, and Astral.
+3. Add `~/.local/bin` to `PATH`. The applied plan writes `~/.profile`,
+   `~/.bashrc`, and a systemd `environment.d` drop-in that prepend it. Start a
+   new login shell, or load it into the current shell:
 
 ```sh
-SMIA_SOURCE_ROOT="$repo" smia install niri-gaming --astral
+source ~/.profile
+command -v smia
 ```
 
-`SMIA_SOURCE_ROOT` must be absolute and defaults to `$HOME/Dev/smia`.
-
-4. Review and apply the returned Malm plan. This deploys configuration and the
-   generated model file, but does not run Moss.
+The `smia install` wrapper prepares the same plan for a later profile change:
 
 ```sh
-malm plan show PLAN_ID
-malm plan apply PLAN_ID
+smia install niri-gaming --astral
 ```
 
-5. Review the package transition, then apply it only when it is intended.
+4. Review the package transition, then apply it only when it is intended.
 
 ```sh
 smia system-model plan
 smia system-model apply
 ```
 
-6. Initialize Gnist and start the configured session.
+5. Initialize Gnist and start the configured session.
 
 ```sh
 gnist init
@@ -227,9 +227,10 @@ The `smia` dispatcher finds installed `smia-*` commands in `PATH`.
 | `smia session [--apply-theme\|--reapply-theme]` | Reconciles session services and theme state. |
 | `xdg-terminal-exec [COMMAND]` | Uses the terminal selected in Smia defaults. |
 
-`smia profiles switch` keeps the active desktop or gaming kernel and rejects a
-compositor change. Use `smia install MODEL_PROFILE` when changing compositor or
-kernel so the desktop and package model are reviewed together.
+`smia profiles switch` only changes the appearance, stock or Astral, of the
+current compositor. It keeps the same compositor and kernel and refreshes the
+session. To change the compositor or kernel, run `smia install MODEL_PROFILE`,
+which reviews the desktop and package model together.
 
 Portal screen recording needs no extra privilege. Region recording uses direct
 KMS capture and may need this one-time setup:
