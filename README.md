@@ -85,7 +85,7 @@ Plan preparation reads `malm.lock`. Use `malm source lock create` when the file
 is absent. Update the lock again after editing `malm.kdl`, `malm/`, `gnist/`,
 pack declarations, or captured vendored files.
 
-Prepare, review, and apply the desktop and system-model plan. This example
+2. Prepare, review, and apply the desktop and system-model plan. This example
 selects Niri, the gaming kernel, and Astral.
 
 ```sh
