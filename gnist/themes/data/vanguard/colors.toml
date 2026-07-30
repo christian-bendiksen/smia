@@ -1,0 +1,42 @@
+accent               = "#2DD4BF"
+cursor               = "#2DD4BF"
+foreground           = "#F2F4F6"
+background           = "#0F1114"
+selection_foreground = "#0F1114"
+selection_background = "#2DD4BF"
+
+# Standard terminal colors
+color0  = "#16191D"   # Ink surface black
+color1  = "#E5636C"   # Signal red
+color2  = "#5BC98A"   # Signal green
+color3  = "#E5B567"   # Signal amber
+color4  = "#6EA8FE"   # Info blue
+color5  = "#B39DDB"   # Violet
+color6  = "#4DD0E1"   # Cyan
+color7  = "#F2F4F6"   # Paper foreground
+
+# Bright terminal colors
+color8  = "#3A414B"   # Steel reserved for surfaces and dim UI
+color9  = "#F08A91"   # Bright signal red
+color10 = "#7DDBA6"   # Bright signal green
+color11 = "#F0C988"   # Bright signal amber
+color12 = "#93C1FF"   # Bright info blue
+color13 = "#C9B6E8"   # Bright violet
+color14 = "#86E0EC"   # Bright cyan
+color15 = "#FFFFFF"   # Brightest white
+
+# Layered surfaces above the background
+surface      = "#16191D"   # Level 1 for cards, sidebars, and panels
+surface_high = "#1C2026"   # Level 2 for inputs, active rows, and secondary panels
+overlay      = "#232830"   # Level 3 for modal, popover, and drop-down backgrounds
+
+# Shared semantic state colors for all templates
+success      = "#5BC98A"   # Matches color2
+warning      = "#E5B567"   # Matches color3
+error        = "#E5636C"   # Matches color1
+info         = "#6EA8FE"   # Matches color4
+muted        = "#98A1AB"   # Dim text with 7.2:1 background contrast; color8 is reserved for surfaces
+
+# Named border colors
+border_active   = "#2DD4BF"   # Matches the accent
+border_inactive = "#3A414B"   # Matches color8

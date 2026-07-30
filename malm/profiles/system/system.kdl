@@ -33,3 +33,15 @@ profile "niri-gaming-astral" {
 profile "hyprland-gaming-astral" {
     extends "hyprland-astral" "kernel-gaming"
 }
+
+profile "mango-gaming-studio" {
+    extends "mango-studio" "kernel-gaming"
+}
+
+profile "niri-gaming-studio" {
+    extends "niri-studio" "kernel-gaming"
+}
+
+profile "hyprland-gaming-studio" {
+    extends "hyprland-studio" "kernel-gaming"
+}

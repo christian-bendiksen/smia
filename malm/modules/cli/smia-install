@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
     cat <<'EOF'
-Usage: smia install MODEL_PROFILE [--astral]
+Usage: smia install MODEL_PROFILE [--astral|--studio]
 
 MODEL_PROFILE:
   mango-desktop       mango-gaming
@@ -12,7 +12,8 @@ MODEL_PROFILE:
   hyprland-desktop    hyprland-gaming
 
 Options:
-  --astral  Prepare the matching Astral profile.
+  --astral    Prepare the matching Astral profile.
+  --studio    Prepare the matching Studio profile.
 
 Environment:
   SMIA_SOURCE_ROOT
@@ -51,18 +52,25 @@ case "$model_profile" in
 esac
 shift
 
-astral=0
+appearance=""
 while (($#)); do
     case "$1" in
-        --astral) astral=1 ;;
+        --astral|--studio)
+            [[ -z "$appearance" ]] || {
+                printf 'smia-install: choose only one appearance: %s or %s\n' \
+                    "$appearance" "$1" >&2
+                exit 2
+            }
+            appearance="$1"
+            ;;
         -h|--help) usage; exit 0 ;;
         *) printf 'smia-install: unknown option: %s\n' "$1" >&2; exit 2 ;;
     esac
     shift
 done
 
-if ((astral)); then
-    profile+="-astral"
+if [[ -n "$appearance" ]]; then
+    profile+="-${appearance#--}"
 fi
 
 source_root="${SMIA_SOURCE_ROOT:-$HOME/Dev/smia}"

@@ -1,24 +1,16 @@
 {
   "schema_version": 1,
-  "root_node_id": "sha256-5eef3cec3ab25844619f2c1a7c30f9bbdd0575b70cc9318b4562774db0729da5",
+  "root_node_id": "sha256-8abe6b359fb8a56b9b2e99bd01f327f8937f2c7757470224f2ffcb3c63729559",
   "nodes": [
     {
-      "node_id": "sha256-5eef3cec3ab25844619f2c1a7c30f9bbdd0575b70cc9318b4562774db0729da5",
+      "node_id": "sha256-8abe6b359fb8a56b9b2e99bd01f327f8937f2c7757470224f2ffcb3c63729559",
       "package_id": "dev.aerynos.smia",
       "source": {
         "kind": "root"
       },
-      "content_digest": "sha256-fc0ce0f4eaacc59a1fe5e1e1331cbceb59a3a5a9ec554fecbd74ea20952261a4",
+      "content_digest": "sha256-c71a77828fa31ec4f2bb0c062ead80b72ef6b3a732d88307161e47b225f392ff",
       "dependencies": [],
-      "components": [
-        {
-          "name": "render-lua-data",
-          "path": "vendor/render-lua-data.wasm",
-          "digest": "sha256-5c95310034f813d8e9e6e85041ec80f3cdb7342707ccf8a80510476dc0d1f9e4",
-          "interface": "format-component/v1",
-          "execution_profile": "sha256-04e65236a70c15dd5106430b6848ae5e0ddeb7f9ac5b907b5c6a916a146f7c58"
-        }
-      ]
+      "components": []
     }
   ]
 }

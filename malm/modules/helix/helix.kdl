@@ -125,8 +125,8 @@ module "helix" {
                 }
             }
         }
+    render "helix/themes/.gitkeep" format="text"  final-newline=#false { }
         // Create the parent directory required by the gnist theme link.
-        file "./config/themes/.gitkeep" to="helix/themes/.gitkeep"
         symlink source=(ref)"theme-ref" to="~/.config/helix/themes/gnist.toml" if-missing="allow"
     }
 }

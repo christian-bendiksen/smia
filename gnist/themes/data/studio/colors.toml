@@ -1,0 +1,50 @@
+# Studio is a post-production control room. Grading suites surround the picture
+# with a neutral mid-gray so color judgement is not skewed, so these surfaces are
+# neutral and lifted well off black. The accent is brushed-equipment steel, which
+# leaves record red and meter amber as the only saturated colors in the theme.
+#
+# Every color below clears WCAG 2.1 AA (4.5:1) as text against all four surfaces,
+# foreground clears AAA (7:1), and border_inactive clears the 3:1 non-text floor.
+
+accent               = "#B9C2CC"
+cursor               = "#D5DBE2"
+foreground           = "#EAE7E1"
+background           = "#23262B"
+selection_foreground = "#23262B"
+selection_background = "#B9C2CC"
+
+# Standard terminal colors
+color0  = "#292D33"   # Console gray surface
+color1  = "#EB9DA2"   # Record red
+color2  = "#8FC5A1"   # Calibrated green
+color3  = "#D3AF80"   # VU-meter amber
+color4  = "#96B9E6"   # Talkback blue
+color5  = "#B6AEE3"   # Muted violet
+color6  = "#7DC2D6"   # Desaturated cyan
+color7  = "#EAE7E1"   # Soft paper white
+
+# Bright terminal colors
+color8  = "#828B98"   # Console gray reserved for borders and dim UI
+color9  = "#FEB8BE"   # Bright record red
+color10 = "#ACDBBC"   # Bright green
+color11 = "#E6C99F"   # Bright meter amber
+color12 = "#B3D0F9"   # Bright talkback blue
+color13 = "#CFC6F5"   # Bright violet
+color14 = "#9DD9EA"   # Bright cyan
+color15 = "#F7F4EE"   # Bright paper white
+
+# Layered surfaces above the background
+surface      = "#292D33"   # Console gray for cards, sidebars, and panels
+surface_high = "#31363D"   # Equipment gray for inputs, active rows, secondary panels
+overlay      = "#383D44"   # Lifted gray for modal, popover, and drop-down backgrounds
+
+# Shared semantic state colors for all templates
+success      = "#8FC5A1"   # Matches color2
+warning      = "#D3AF80"   # Matches color3
+error        = "#EB9DA2"   # Matches color1
+info         = "#96B9E6"   # Matches color4
+muted        = "#A5ACB5"   # Secondary text; kept dimmer than the accent
+
+# Named border colors
+border_active   = "#B9C2CC"   # Matches the accent
+border_inactive = "#828B98"   # Matches color8; clears 3:1 on every surface

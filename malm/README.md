@@ -56,6 +56,7 @@ have been declared.
 | Stock desktop composition | `malm/profiles/desktop/desktop.kdl` |
 | Compositor replacement and portal or package choice | `malm/profiles/providers/providers.kdl` |
 | Astral values and fragments | `malm/profiles/astral/` |
+| Studio values and fragments | `malm/profiles/studio/` |
 | Gaming kernel variants | `malm/profiles/system/system.kdl` |
 | Built-in theme data | `gnist/themes/data/<theme>/` |
 | Personal machine values that should not be committed | `~/.config/malm/local.kdl` |
@@ -83,8 +84,8 @@ The active source gives useful examples:
 - `kernel-gaming` changes only the keyed `kernel` package to `linux-gaming`.
 - The `menu` module exposes a keyed `items` collection, so a profile can remove
   one built-in menu entry without copying the whole menu.
-- The `hypr` module keeps bindings as a typed keyed collection and renders the
-  resolved data to `hypr/config.lua`.
+- The `hypr` module keeps bindings as a typed keyed collection and renders them
+  as `hl.bind` calls in `hypr/hyprland.lua`.
 
 Profiles should describe differences. Put defaults in modules, common desktop
 composition in abstract profiles, and compositor-specific changes in provider
@@ -92,8 +93,8 @@ or concrete profiles.
 
 ## Profile Structure
 
-There are 13 concrete profiles. `install` is the minimal bootstrap. The other
-12 combine compositor, appearance, and kernel choices.
+There are 25 concrete profiles. `install` is the minimal bootstrap. The
+other 24 combine compositor, appearance, and kernel choices.
 
 | Family | Desktop kernel | Gaming kernel |
 |---|---|---|
@@ -103,11 +104,15 @@ There are 13 concrete profiles. `install` is the minimal bootstrap. The other
 | Astral Mango | `mango-astral` | `mango-gaming-astral` |
 | Astral Niri | `niri-astral` | `niri-gaming-astral` |
 | Astral Hyprland | `hyprland-astral` | `hyprland-gaming-astral` |
+| Studio Mango | `mango-studio` | `mango-gaming-studio` |
+| Studio Niri | `niri-studio` | `niri-gaming-studio` |
+| Studio Hyprland | `hyprland-studio` | `hyprland-gaming-studio` |
 
 These profiles are abstract and cannot be selected directly:
 
 - `desktop` holds the shared desktop.
 - `astral` holds shared Astral appearance and behavior.
+- `studio` holds shared Studio appearance and behavior.
 - `niri-provider` and `hyprland-provider` replace compositor, portal, and
   compositor package choices.
 - `kernel-gaming` replaces the kernel package.
@@ -193,11 +198,11 @@ Use these rules:
 - Declare every external command in the owning module's `requires` block. Malm
   combines active requirements into `smia/requirements.commands`.
 
-Hyprland profiles have component-backed outputs. `hypr/config.lua` is rendered
-from typed data by the `render-lua-data` component. That component is
-capability-free and locked by exact identity. Malm refuses `source render` for
-profiles that need a component, so use `malm plan create` to inspect those
-profiles. See the [component guide](../components/README.md).
+The `hypr` module renders `hypr/hyprland.lua` as idiomatic Hyprland Lua: a
+`format="lua"` program body includes `hyprland.lua.tpl` for the static structure
+and interpolated scalars, then emits one `hl.bind` call per typed bind. The
+`hypr/binds.list` cheatsheet comes from the same `binds` input, so the two
+cannot drift. No component is involved, so every profile is source-renderable.
 
 ## Local Overrides
 

@@ -41,6 +41,14 @@ assets {
         path "vendor/upstream/aerynos-eldritch-icons.tar"
         installed-check "AerynOS-Eldritch"
     }
+    asset "GreyStone" {
+        url "https://codeberg.org/StormRosenaa/GreyStone/raw/branch/main/GreyStone.tar.gz"
+        dst "~/.local/share/icons"
+        format "tar-gz"
+        sha256 "f3bc5fa77b7bdbe268971bc0cc8827d35f2bdad6a013cd78e243e5b30ef5e65c"
+        path "vendor/upstream/GreyStone.tar.gz"
+        installed-check "GreyStone"
+    }
 }
 
 include "malm/slots.kdl"

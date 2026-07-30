@@ -1,0 +1,155 @@
+{
+  "name": "studio",
+  // No reload_style_on_change: Gnist restarts Waybar through its reload binding,
+  // so watching the stylesheet only makes the bar repaint mid-deploy, showing the
+  // incoming theme before the restart closes it.
+  "layer": "top",
+  "position": "top",
+  "height": 36,
+  "spacing": 0,
+  "margin-top": 6,
+  "margin-left": 14,
+  "margin-right": 14,
+
+  "modules-left": [
+    "custom/studio",
+    "ext/workspaces"
+  ],
+  "modules-center": [
+    "clock",
+    "custom/screenrecording-indicator",
+    "custom/idle-indicator",
+    "custom/notification-silencing-indicator"
+  ],
+  "modules-right": [
+    "custom/mpris",
+    "cpu",
+    "network",
+    "pulseaudio",
+    "battery",
+    "tray",
+    "custom/power"
+  ],
+
+  "custom/studio": {
+    "format": "■",
+    "tooltip-format": "Studio · launcher",
+    "on-click": "xdg-launcher-exec",
+    "on-click-right": "smia-menu"
+  },
+
+  "ext/workspaces": {
+    "on-click": "activate",
+    "format": "{icon}",
+    "format-icons": {
+      "default": "{id}",
+      "1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9"
+    },
+    "persistent-workspaces": {
+      "1": [], "2": [], "3": [], "4": [], "5": []
+    }
+  },
+
+  "clock": {
+    "format": "{:L%A %d %B · %H:%M}",
+    "format-alt": "{:L%d %B W%V %Y}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "format": {
+        "today": "<b>{}</b>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode"
+    }
+  },
+
+  "custom/screenrecording-indicator": {
+    "on-click": "smia-record toggle",
+    "exec": "smia-record status --waybar",
+    "signal": 8, "return-type": "json"
+  },
+  "custom/idle-indicator": {
+    "on-click": "smia-idle toggle",
+    "exec": "smia-idle status --waybar",
+    "signal": 9, "return-type": "json"
+  },
+  "custom/notification-silencing-indicator": {
+    "on-click": "smia-dnd toggle",
+    "exec": "smia-dnd status --waybar",
+    "signal": 10, "return-type": "json"
+  },
+
+  "custom/mpris": {
+    "exec": "playerctl -F metadata --format '{\"text\":\"{{title}} — {{artist}}\",\"tooltip\":\"{{status}}\",\"class\":\"{{status}}\"}' 2>/dev/null",
+    "return-type": "json",
+    "format": "{text}",
+    "max-length": 48,
+    "on-click": "playerctl play-pause",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous"
+  },
+
+  "cpu": {
+    "interval": 5,
+    "format": "󰍛 {usage}%",
+    "tooltip-format": "CPU {usage}%",
+    "on-click": "xdg-terminal-exec btop"
+  },
+
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "{icon}",
+    "format-wifi": "{icon} {essid}",
+    "format-ethernet": "󰈀",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "on-click": "xdg-terminal-exec impala"
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰖁",
+    "tooltip-format": "Volume {volume}%",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "scroll-step": 5,
+    "format-icons": {
+      "headphone": "󰋋",
+      "headset": "󰋎",
+      "default": ["󰕿", "󰖀", "󰕾"]
+    }
+  },
+
+  "battery": {
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-full": "󰂅",
+    "format-icons": [
+      "󰁺", "󰁻", "󰁼", "󰁽", "󰁾",
+      "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"
+    ],
+    "tooltip-format-discharging": "{power:>1.0f}W↓ {capacity}%",
+    "tooltip-format-charging": "{power:>1.0f}W↑ {capacity}%",
+    "interval": 5,
+    "states": {
+      "warning": 20,
+      "critical": 10
+    }
+  },
+
+  "tray": {
+    "icon-size": 14,
+    "spacing": 10
+  },
+
+  "custom/power": {
+    "format": "󰐥",
+    "tooltip-format": "Session",
+    "on-click": "hyprlock",
+    "on-click-right": "smia-menu"
+  }
+}

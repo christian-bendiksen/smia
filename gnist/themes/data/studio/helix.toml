@@ -1,0 +1,136 @@
+# Studio-specific override for helix.toml.tpl.
+# The template uses color8 for popup and cursor-line backgrounds and dim text.
+# This override assigns a separate color to each role.
+
+"ui.background"                    = { bg = "background" }
+"ui.background.separator"          = { fg = "color8" }
+
+"ui.text"                          = { fg = "color7" }
+"ui.text.focus"                    = { fg = "color11", modifiers = ["bold"] }
+
+"ui.linenr"                        = { fg = "muted" }
+"ui.linenr.selected"               = { fg = "color7", modifiers = ["bold"] }
+
+"ui.cursor"                        = { modifiers = ["reversed"] }
+"ui.cursor.primary"                = { modifiers = ["reversed"] }
+"ui.cursor.secondary"              = { modifiers = ["reversed"] }
+"ui.cursor.match"                  = { fg = "color3", underline = { color = "color3", style = "line" } }
+
+"ui.cursorline.primary"            = { bg = "surface_high" }
+"ui.cursorline.secondary"          = { bg = "surface_high" }
+
+"ui.selection"                     = { bg = "selection_dim" }
+"ui.selection.primary"             = { fg = "selection_foreground", bg = "selection_background" }
+
+"ui.statusline"                    = { fg = "color7", bg = "surface" }
+"ui.statusline.inactive"           = { fg = "muted", bg = "surface" }
+"ui.statusline.normal"             = { fg = "color0", bg = "accent" }
+"ui.statusline.insert"             = { fg = "color0", bg = "color2" }
+"ui.statusline.select"             = { fg = "color0", bg = "color4" }
+"ui.statusline.separator"          = { fg = "color8" }
+
+"ui.popup"                         = { fg = "color7", bg = "overlay" }
+"ui.popup.info"                    = { fg = "color7", bg = "overlay" }
+"ui.window"                        = { fg = "color4" }
+"ui.help"                          = { fg = "color7", bg = "overlay" }
+
+"ui.menu"                          = { fg = "color7", bg = "overlay" }
+"ui.menu.selected"                 = { fg = "color0", bg = "accent" }
+"ui.menu.scroll"                   = { fg = "muted", bg = "overlay" }
+
+"ui.gutter"                        = { fg = "color8" }
+"ui.virtual.ruler"                 = { bg = "surface" }
+"ui.virtual.whitespace"            = { fg = "color8" }
+"ui.virtual.indent-guide"          = { fg = "color8" }
+"ui.virtual.wrap"                  = { fg = "color8" }
+
+"ui.virtual.inlay-hint"            = { fg = "muted", bg = "surface_high" }
+"ui.virtual.inlay-hint.parameter"  = { fg = "muted", bg = "surface_high" }
+"ui.virtual.inlay-hint.type"       = { fg = "muted", bg = "surface_high" }
+
+"ui.virtual.jump-label"            = { fg = "color3", modifiers = ["bold", "underlined"] }
+
+"comment"                          = { fg = "color5", modifiers = ["italic"] }
+
+"variable"                         = { fg = "color7" }
+"variable.other.member"            = { fg = "color6" }
+
+"constant"                         = { fg = "color3" }
+"constant.numeric"                 = { fg = "color3" }
+"constant.character.escape"        = { fg = "color14" }
+
+"string"                           = { fg = "color2" }
+
+"type"                             = { fg = "color11" }
+"attribute"                        = { fg = "color4" }
+
+"function"                         = { fg = "color12" }
+"constructor"                      = { fg = "color12" }
+"special"                          = { fg = "color6" }
+
+"keyword"                          = { fg = "color13" }
+"label"                            = { fg = "color13" }
+"namespace"                        = { fg = "color5" }
+
+"operator"                         = { fg = "color5" }
+"punctuation"                      = { fg = "muted" }
+
+"markup.heading"                   = { fg = "color11", modifiers = ["bold"] }
+"markup.list"                      = { fg = "color3" }
+"markup.bold"                      = { fg = "color11", modifiers = ["bold"] }
+"markup.italic"                    = { fg = "color5", modifiers = ["italic"] }
+"markup.strikethrough"             = { modifiers = ["crossed_out"] }
+
+"markup.link.url"                  = { fg = "color3", underline = { color = "color3", style = "line" } }
+"markup.link.text"                 = { fg = "color2" }
+
+"markup.quote"                     = { fg = "color6" }
+"markup.raw"                       = { fg = "color2" }
+
+"diff.plus"                        = { fg = "color2" }
+"diff.minus"                       = { fg = "color1" }
+"diff.delta"                       = { fg = "color6" }
+"diff.delta.moved"                 = { fg = "color4" }
+
+"warning"                          = { fg = "color3" }
+"error"                            = { fg = "color1" }
+"info"                             = { fg = "color6" }
+"hint"                             = { fg = "muted" }
+
+"diagnostic.warning"               = { underline = { color = "color3", style = "curl" } }
+"diagnostic.error"                 = { underline = { color = "color1", style = "curl" } }
+"diagnostic.info"                  = { underline = { color = "color6", style = "dotted" } }
+"diagnostic.hint"                  = { underline = { color = "muted", style = "double_line" } }
+
+[palette]
+background           = "#23262B"
+foreground           = "#EAE7E1"
+accent               = "#B9C2CC"
+selection_foreground = "#23262B"
+selection_background = "#B9C2CC"
+
+surface       = "#292D33"
+surface_high  = "#31363D"
+overlay       = "#383D44"
+muted         = "#A5ACB5"
+# Secondary selections are a background, so this tracks the surface ladder rather
+# than color8. color8 is light enough to clear the 3:1 border floor, which would
+# leave syntax unreadable on top of it.
+selection_dim = "#383D44"
+
+color0  = "#292D33"
+color1  = "#EB9DA2"
+color2  = "#8FC5A1"
+color3  = "#D3AF80"
+color4  = "#96B9E6"
+color5  = "#B6AEE3"
+color6  = "#7DC2D6"
+color7  = "#EAE7E1"
+color8  = "#828B98"
+color9  = "#FEB8BE"
+color10 = "#ACDBBC"
+color11 = "#E6C99F"
+color12 = "#B3D0F9"
+color13 = "#CFC6F5"
+color14 = "#9DD9EA"
+color15 = "#F7F4EE"

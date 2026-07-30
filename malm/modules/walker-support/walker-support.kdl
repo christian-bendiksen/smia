@@ -49,7 +49,14 @@ module "walker-support" {
                 previous "shift ISO_Left_Tab" "Up"
             }
             "columns" {
+                // Prefixed providers stay single-column lists; the launcher
+                // theme owns grid layout through its GtkGridView settings.
                 "symbols" 1
+                "providerlist" 1
+                "files" 1
+                "calc" 1
+                "websearch" 1
+                "clipboard" 1
             }
             "providers" {
                 "max_results" 256

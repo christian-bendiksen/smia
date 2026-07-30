@@ -1,6 +1,8 @@
 {
   "name": "rail",
-  "reload_style_on_change": true,
+  // No reload_style_on_change: Gnist restarts Waybar through its reload binding,
+  // so watching the stylesheet only makes the bar repaint mid-deploy, showing the
+  // incoming theme before the restart closes it.
   "layer": "top",
   "position": "left",
   "width": 48,

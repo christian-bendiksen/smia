@@ -63,6 +63,9 @@ module "base" {
             @line "mango-astral"
             @line "niri-astral"
             @line "hyprland-astral"
+            @line "mango-studio"
+            @line "niri-studio"
+            @line "hyprland-studio"
         }
         render "smia/requirements.commands" format="line-list" {
             @requirements
@@ -76,7 +79,7 @@ module "base" {
         }
 
         // These directories provide parents for appearance's gtk.css links.
-        dir "./gtk-3.0" to="gtk-3.0"
-        dir "./gtk-4.0" to="gtk-4.0"
+        // dir "./gtk-3.0" to="gtk-3.0"
+        // dir "./gtk-4.0" to="gtk-4.0"
     }
 }

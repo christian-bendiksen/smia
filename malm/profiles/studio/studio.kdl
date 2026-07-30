@@ -1,0 +1,155 @@
+// Shared Studio appearance and runtime settings for compositor-specific profiles.
+// Studio is the flat professional variant: opaque surfaces, sharp corners,
+// no blur, no glow, and a single brushed-steel accent.
+
+profile "studio" abstract=#true {
+    extends "desktop"
+
+    use "lock-idle" {
+        with {
+            hide-cursor #true
+            blur-passes 0
+            bg-contrast 0.95
+            bg-brightness 0.45
+            mark "■"
+            show-clock #true
+            input-width 340
+            input-height 48
+            input-y -48
+            input-outer-color "$accent_color"
+            input-outline-thickness 2
+            input-rounding 4
+            input-shadow-passes 0
+            placeholder "<i>■ Enter password…</i>"
+        }
+    }
+
+    use "walker-support" {
+        with {
+            theme "gnist-studio"
+            extra-emergency {
+                text "Reload Studio profile"
+                command "gnist set studio"
+            }
+            placeholder-input " Search…"
+            placeholder-list "No results"
+            // Restart outside the GTK theme so broken CSS cannot block recovery.
+            emergency-restart-command "sh -lc 'pkill -x walker >/dev/null 2>&1 || true; walker --gapplication-service >/tmp/smia-walker.log 2>&1 &'"
+        }
+    }
+
+    use "mako" {
+        with {
+            anchor "top-center"
+            border-radius 4
+            icon-border-radius 2
+        }
+    }
+
+    use "terminals" {
+        with {
+            padding 12
+            opacity 1.0
+            background-blur 0
+        }
+    }
+
+    use "swayosd" {
+        with {
+            top_margin 0.92
+        }
+    }
+
+    use "swayosd-style" {
+        fragments { replace "style" source="./swayosd/style.css" }
+    }
+    use "waybar" {
+        fragments {
+            replace "config" source="./waybar/config.jsonc"
+            replace "style" source="./waybar/style.css"
+        }
+    }
+
+    use "gnist" {
+        with {
+            default-theme "studio"
+            menu-theme "gnist-studio-menu"
+        }
+    }
+}
+
+profile "mango-studio" {
+    extends "studio"
+    use "mango" {
+        with {
+            tag-layout "tile"
+        }
+        patch {
+            // Windows stay fully opaque with blur and shadows off; only
+            // geometry and pacing differ from the stock desktop.
+
+            set "settings.gappih" 6
+            set "settings.gappiv" 6
+            set "settings.gappoh" 12
+            set "settings.gappov" 12
+            set "windows.smartgaps" 0
+            set "settings.enable-floating-snap" 1
+            set "settings.snap-distance" 24
+
+            set "windows.border-radius" 4
+            set "windows.focused-opacity" 1.0
+            set "windows.unfocused-opacity" 1.0
+
+            set "windows.animation-duration-move" 240
+            set "windows.animation-duration-open" 220
+            set "windows.animation-duration-tag" 240
+            set "windows.animation-duration-close" 180
+            set "windows.animation-duration-focus" 120
+            set "windows.animation-curve-open" "0.16,1.0,0.3,1"
+            set "windows.animation-curve-move" "0.25,0.46,0.45,0.94"
+            set "windows.animation-curve-tag" "0.16,1.0,0.3,1"
+            set "windows.animation-curve-close" "0.4,0,0.2,1"
+
+            set "windows.default-mfact" 0.55
+            set "windows.overviewgappi" 6
+            set "windows.overviewgappo" 24
+            collection "window-rules" {
+                append "pavucontrol-float" { windowrule "isfloating:1,appid:pavucontrol" }
+                append "pavucontrol-pw-float" { windowrule "isfloating:1,appid:org.pulseaudio.pavucontrol" }
+                append "blueman-float" { windowrule "isfloating:1,appid:blueman-manager" }
+                append "nm-editor-float" { windowrule "isfloating:1,appid:nm-connection-editor" }
+                append "calculator-float" { windowrule "isfloating:1,appid:org.gnome.Calculator" }
+                append "pip-float" { windowrule "isfloating:1,isnoborder:1,title:^(Picture-in-Picture|Picture in picture)$" }
+            }
+            collection "layer-rules" {
+                append "waybar-noblur" { layerrule "noblur:1,layer_name:waybar" }
+                append "walker-material" { layerrule "noblur:1,noshadow:1,animation_type_open:zoom,animation_type_close:zoom,layer_name:walker" }
+                append "notifications-material" { layerrule "noblur:1,noshadow:1,layer_name:notifications" }
+            }
+        }
+    }
+}
+
+profile "niri-studio" {
+    extends "studio" "niri-provider"
+    use "niri" {
+        fragments {
+            replace "effects" source="./niri/effects.kdl"
+        }
+    }
+}
+
+profile "hyprland-studio" {
+    extends "studio" "hyprland-provider"
+    use "hypr" {
+        with {
+            gaps-in 6
+            gaps-out 12
+            rounding 4
+            active-opacity 1.0
+            inactive-opacity 1.0
+            blur #false
+            shadow-enabled #false
+        }
+    }
+}

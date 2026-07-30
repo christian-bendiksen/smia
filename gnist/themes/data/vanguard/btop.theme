@@ -1,0 +1,83 @@
+# Main background color
+theme[main_bg]="#0F1114"
+
+# Default text color
+theme[main_fg]="#F2F4F6"
+
+# Box title color
+theme[title]="#93C1FF"
+
+# Keyboard shortcut highlight color
+theme[hi_fg]="#2DD4BF"
+
+# Selected process background color
+theme[selected_bg]="#2DD4BF"
+
+# Selected process text color
+theme[selected_fg]="#0F1114"
+
+# Inactive and disabled text color
+theme[inactive_fg]="#98A1AB"
+
+# Graph overlay text color
+theme[graph_text]="#F2F4F6"
+
+# Percentage meter background color
+theme[meter_bg]="#16191D"
+
+# Color for process details, status text, mini CPU graphs, and the details memory graph
+theme[proc_misc]="#98A1AB"
+
+# CPU, memory, network, and process box outline colors
+theme[cpu_box]="#93C1FF"
+theme[mem_box]="#5BC98A"
+theme[net_box]="#86E0EC"
+theme[proc_box]="#2DD4BF"
+
+# Box-divider and small-box line color
+theme[div_line]="#1C2026"
+
+# Temperature graph gradient
+theme[temp_start]="#2DD4BF"
+theme[temp_mid]="#2DD4BF"
+theme[temp_end]="#E5636C"
+
+# CPU graph gradient
+theme[cpu_start]="#3A414B"
+theme[cpu_mid]="#2DD4BF"
+theme[cpu_end]="#93C1FF"
+
+# Free memory and disk meter gradient
+theme[free_start]="#16191D"
+theme[free_mid]="#3A414B"
+theme[free_end]="#2DD4BF"
+
+# Cached memory and disk meter gradient
+theme[cached_start]="#98A1AB"
+theme[cached_mid]="#B39DDB"
+theme[cached_end]="#C9B6E8"
+
+# Available memory and disk meter gradient
+theme[available_start]="#4DD0E1"
+theme[available_mid]="#86E0EC"
+theme[available_end]="#FFFFFF"
+
+# Used memory and disk meter gradient
+theme[used_start]="#98A1AB"
+theme[used_mid]="#2DD4BF"
+theme[used_end]="#E5636C"
+
+# Download graph gradient
+theme[download_start]="#3A414B"
+theme[download_mid]="#2DD4BF"
+theme[download_end]="#86E0EC"
+
+# Upload graph gradient
+theme[upload_start]="#3A414B"
+theme[upload_mid]="#B39DDB"
+theme[upload_end]="#C9B6E8"
+
+# Process-box gradient for thread, memory, and CPU usage
+theme[process_start]="#2DD4BF"
+theme[process_mid]="#2DD4BF"
+theme[process_end]="#E5636C"

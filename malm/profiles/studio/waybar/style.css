@@ -1,0 +1,209 @@
+@import "../gnist/themes/current/waybar.css";
+
+/* Studio floating islands: three opaque cards hovering over the wallpaper. */
+
+* {
+  background: transparent;
+  border: none;
+  min-height: 0;
+  color: @foreground;
+  font-size: 13px;
+}
+
+#custom-studio,
+#custom-mpris,
+#cpu,
+#network,
+#pulseaudio,
+#battery,
+#custom-power {
+  font-family: 'Symbols Nerd Font Mono', 'RobotoMono Nerd Font Mono', monospace;
+}
+
+window#waybar {
+  background: transparent;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+  background: @background;
+  border: 1px solid @color8;
+  border-radius: 6px;
+  padding: 0 6px;
+}
+
+.modules-left {
+  margin-right: 4px;
+}
+
+.modules-center {
+  margin: 0 4px;
+}
+
+.modules-right {
+  margin-left: 4px;
+}
+
+#custom-studio {
+  color: @accent;
+  font-size: 13px;
+  padding: 0 10px 0px 10px;
+  margin: 5px 2px;
+  border-radius: 4px;
+}
+
+#custom-studio:hover {
+  background: @accent;
+  color: @background;
+}
+
+#workspaces {
+  padding: 0 2px;
+}
+
+/* GTK gives every button its own label node, and the `*` rule at the top of this
+   file matches that node directly. A directly matched declaration beats an
+   inherited one, so a colour set only on the button never reaches the digit.
+   Every workspace state therefore names the label as well. */
+#workspaces button {
+  all: initial;
+  font-family: 'RobotoMono Nerd Font Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 26px;
+  padding: 2px 0;
+  margin: 5px 2px;
+  border-radius: 4px;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+#workspaces button,
+#workspaces button label {
+  color: alpha(@foreground, 0.72);
+}
+
+#workspaces button:hover,
+#workspaces button:hover label {
+  color: @foreground;
+}
+
+/* ext/workspaces reports active, urgent, and hidden. It has no empty state, so
+   occupancy is deliberately not styled here. */
+#workspaces button.active {
+  background: @accent;
+  font-weight: 700;
+}
+
+#workspaces button.active,
+#workspaces button.active label {
+  color: @background;
+}
+
+#workspaces button.urgent {
+  background: @color1;
+  font-weight: 700;
+}
+
+#workspaces button.urgent,
+#workspaces button.urgent label {
+  color: @background;
+}
+
+#clock {
+  color: @foreground;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 0 10px;
+}
+
+#custom-screenrecording-indicator,
+#custom-idle-indicator,
+#custom-notification-silencing-indicator {
+  padding: 0 6px;
+  font-size: 13px;
+  color: alpha(@foreground, 0.62);
+}
+
+#custom-screenrecording-indicator.active,
+#custom-idle-indicator.active,
+#custom-notification-silencing-indicator.active {
+  color: @color1;
+}
+
+#custom-mpris {
+  color: alpha(@foreground, 0.55);
+  font-family: 'RobotoMono Nerd Font', monospace;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+#custom-mpris.Playing {
+  color: @foreground;
+}
+
+#custom-mpris.Paused {
+  color: alpha(@foreground, 0.55);
+}
+
+#cpu,
+#network,
+#pulseaudio,
+#battery {
+  font-size: 12px;
+  padding: 0 9px;
+  color: alpha(@foreground, 0.75);
+  transition: color 120ms ease;
+}
+
+#cpu:hover,
+#network:hover,
+#pulseaudio:hover,
+#battery:hover,
+#custom-power:hover {
+  color: @accent;
+}
+
+#battery.warning {
+  color: @color3;
+}
+
+#battery.critical,
+#network.disconnected,
+#pulseaudio.muted {
+  color: @color1;
+}
+
+#tray {
+  padding: 0 8px;
+}
+
+#tray menu {
+  background-color: @overlay;
+  border: 1px solid @color8;
+  border-radius: 6px;
+}
+
+#custom-power {
+  color: alpha(@foreground, 0.55);
+  font-size: 13px;
+  padding: 0 8px 0 4px;
+  border-radius: 4px;
+}
+
+#custom-power:hover {
+  color: @color1;
+}
+
+tooltip {
+  background-color: @background;
+  color: @foreground;
+  border: 1px solid @color8;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+tooltip label {
+  color: @foreground;
+}

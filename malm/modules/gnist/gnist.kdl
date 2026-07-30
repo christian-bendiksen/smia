@@ -35,7 +35,9 @@ module "gnist" {
         dir "gnist/themes/data/osaka-jade" to="gnist/themes/data/osaka-jade"
         dir "gnist/themes/data/ristretto" to="gnist/themes/data/ristretto"
         dir "gnist/themes/data/rose-pine" to="gnist/themes/data/rose-pine"
+        dir "gnist/themes/data/studio" to="gnist/themes/data/studio"
         dir "gnist/themes/data/tokyo-night" to="gnist/themes/data/tokyo-night"
+        dir "gnist/themes/data/vanguard" to="gnist/themes/data/vanguard"
         dir "gnist/themes/data/vantablack" to="gnist/themes/data/vantablack"
         dir "gnist/themes/data/white" to="gnist/themes/data/white"
 

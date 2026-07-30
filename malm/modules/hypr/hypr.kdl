@@ -220,169 +220,85 @@ module "hypr" {
             @include-file "./gnist/hyprland.kdl"
         }
 
-        // Source rendering cannot run component transforms, so Hyprland profiles
-        // must render through a plan. The renderer receives typed data, not KDL.
-        render "hypr/config.lua" format="lua" component-renderer="render-lua-data" {
-            monitor {
-                output (ref)"global.display-internal-name"
-                mode (f)"{{global.display-internal-width}}x{{global.display-internal-height}}@{{global.display-internal-refresh}}"
-                position (f)"{{global.display-internal-x}}x{{global.display-internal-y}}"
-                scale (f)"{{global.display-internal-scale}}"
-            }
+        // Idiomatic Hyprland Lua: the template carries the static structure and
+        // scalar inputs, and each typed bind becomes one `hl.bind` call, so the
+        // config and `binds.list` below cannot drift apart.
+        render "hypr/hyprland.lua" format="lua" {
+            @include-file "./hyprland.lua.tpl" interpolate=#true
 
-            config {
-                general {
-                    gaps_in (ref)"gaps-in"
-                    gaps_out (ref)"gaps-out"
-                    border_size (ref)"border-size"
-                    col {
-                        active_border {
-                            colors "rgba(33ccffee)" "rgba(00ff99ee)"
-                            angle 45
-                        }
-                        inactive_border "rgba(595959aa)"
-                    }
-                    resize_on_border #false
-                    allow_tearing #false
-                    layout "dwindle"
+            @for-each "bind" in="binds" {
+                @line ""
+                @line (f)"-- {{bind.label}}"
+                @line "hl.bind("
+                @if "bind.mod" is=#true {
+                    @line (f)"    \"{{mod-key}} + {{bind.chord}}\","
                 }
-                decoration {
-                    rounding (ref)"rounding"
-                    rounding_power 2
-                    active_opacity (ref)"active-opacity"
-                    inactive_opacity (ref)"inactive-opacity"
-                    shadow {
-                        enabled (ref)"shadow-enabled"
-                        range (ref)"shadow-range"
-                        render_power (ref)"shadow-render-power"
-                        color "rgba(1a1a1aee)"
-                    }
-                    blur {
-                        enabled (ref)"blur"
-                        size (ref)"blur-size"
-                        passes (ref)"blur-passes"
-                        vibrancy (ref)"blur-vibrancy"
+                @else {
+                    @line (f)"    \"{{bind.chord}}\","
+                }
+                @if "bind.argument.kind" is="none" {
+                    @line (f)"    hl.dsp.{{bind.action}}(),"
+                }
+                @if "bind.argument.kind" is="literal" {
+                    @if-present "bind.argument.value" {
+                        @line (f)"    hl.dsp.{{bind.action}}({{bind.argument.value:lua}}),"
                     }
                 }
-                animations { enabled (ref)"animations" }
-                dwindle { preserve_split #true }
-                master { new_status "master" }
-                misc {
-                    force_default_wallpaper 0
-                    disable_hyprland_logo #true
-                }
-                input {
-                    kb_layout (ref)"xkb-layout"
-                    kb_variant (ref)"xkb-variant"
-                    kb_model ""
-                    kb_options ""
-                    kb_rules ""
-                    repeat_rate (ref)"repeat-rate"
-                    repeat_delay (ref)"repeat-delay"
-                    follow_mouse 1
-                    sensitivity 0
-                    numlock_by_default (ref)"numlock"
-                    touchpad {
-                        natural_scroll (ref)"touchpad-natural-scroll"
-                        tap_to_click (ref)"touchpad-tap"
-                        disable_while_typing (ref)"touchpad-disable-while-typing"
+                @if "bind.argument.kind" is="command" {
+                    @if "bind.argument.source" is="terminal" {
+                        @line (f)"    hl.dsp.{{bind.action}}({{terminal-cmd:lua}}),"
+                    }
+                    @if "bind.argument.source" is="file-manager" {
+                        @line (f)"    hl.dsp.{{bind.action}}({{file-manager:lua}}),"
+                    }
+                    @if "bind.argument.source" is="launcher" {
+                        @line (f)"    hl.dsp.{{bind.action}}({{launcher-cmd:lua}}),"
+                    }
+                    @if "bind.argument.source" is="menu" {
+                        @line (f)"    hl.dsp.{{bind.action}}({{menu-cmd:lua}}),"
+                    }
+                    @if "bind.argument.source" is="lock" {
+                        @line (f)"    hl.dsp.{{bind.action}}({{lock-cmd:lua}}),"
+                    }
+                    @if "bind.argument.source" is="wallpaper" {
+                        @line (f)"    hl.dsp.{{bind.action}}({{wallpaper-cmd:lua}}),"
                     }
                 }
-            }
-
-            env {
-                XCURSOR_SIZE (f)"{{cursor-size}}"
-                HYPRCURSOR_SIZE (f)"{{cursor-size}}"
-            }
-            startup_cmd "smia-session"
-
-            curves {
-                - name="easeOutQuint" { points { - { - 0.23; - 1.0 }; - { - 0.32; - 1.0 } } }
-                - name="easeInOutCubic" { points { - { - 0.65; - 0.05 }; - { - 0.36; - 1.0 } } }
-                - name="linear" { points { - { - 0.0; - 0.0 }; - { - 1.0; - 1.0 } } }
-                - name="almostLinear" { points { - { - 0.5; - 0.5 }; - { - 0.75; - 1.0 } } }
-                - name="quick" { points { - { - 0.15; - 0.0 }; - { - 0.1; - 1.0 } } }
-            }
-
-            animations {
-                - leaf="global" enabled=#true speed=10.0 bezier="default"
-                - leaf="border" enabled=#true speed=5.39 bezier="easeOutQuint"
-                - leaf="windows" enabled=#true speed=4.79 bezier="easeOutQuint"
-                - leaf="windowsIn" enabled=#true speed=4.1 bezier="easeOutQuint" style="popin 87%"
-                - leaf="windowsOut" enabled=#true speed=1.49 bezier="linear" style="popin 87%"
-                - leaf="fadeIn" enabled=#true speed=1.73 bezier="almostLinear"
-                - leaf="fadeOut" enabled=#true speed=1.46 bezier="almostLinear"
-                - leaf="fade" enabled=#true speed=3.03 bezier="quick"
-                - leaf="layers" enabled=#true speed=3.81 bezier="easeOutQuint"
-                - leaf="layersIn" enabled=#true speed=4.0 bezier="easeOutQuint" style="fade"
-                - leaf="layersOut" enabled=#true speed=1.5 bezier="linear" style="fade"
-                - leaf="fadeLayersIn" enabled=#true speed=1.79 bezier="almostLinear"
-                - leaf="fadeLayersOut" enabled=#true speed=1.39 bezier="almostLinear"
-                - leaf="workspaces" enabled=#true speed=1.94 bezier="almostLinear" style="fade"
-                - leaf="workspacesIn" enabled=#true speed=1.21 bezier="almostLinear" style="fade"
-                - leaf="workspacesOut" enabled=#true speed=1.94 bezier="almostLinear" style="fade"
-                - leaf="zoomFactor" enabled=#true speed=7.0 bezier="quick"
-            }
-
-            gestures {
-                - fingers=3 direction="horizontal" action="workspace"
-            }
-            window_rules {
-                - name="suppress-maximize-events" suppress_event="maximize" {
-                    match { class ".*" }
-                }
-                - name="fix-xwayland-drags" no_focus=#true {
-                    match {
-                        class "^$"
-                        title "^$"
-                        xwayland #true
-                        float #true
-                        fullscreen #false
-                        pin #false
+                @if "bind.argument.kind" is="record" {
+                    @line (f)"    hl.dsp.{{bind.action}}({"
+                    @if-present "bind.argument.action" {
+                        @line (f)"        action = {{bind.argument.action:lua}},"
                     }
-                }
-                - name="move-hyprland-run" move="20 monitor_h-120" float=#true {
-                    match { class "hyprland-run" }
-                }
-            }
-
-            binds {
-                @for-each "bind" in="binds" {
-                    - action=(ref)"bind.action" {
-                        @if "bind.mod" is=#true { chord (f)"{{mod-key}} + {{bind.chord}}" }
-                        @else { chord (ref)"bind.chord" }
-                        arg {
-                            @if "bind.argument.kind" is="none" { kind "none" }
-                            @if "bind.argument.kind" is="literal" { kind "value"; value (ref?)"bind.argument.value" }
-                            @if "bind.argument.kind" is="command" {
-                                kind "value"
-                                @if "bind.argument.source" is="terminal" { value (ref)"terminal-cmd" }
-                                @if "bind.argument.source" is="file-manager" { value (ref)"file-manager" }
-                                @if "bind.argument.source" is="launcher" { value (ref)"launcher-cmd" }
-                                @if "bind.argument.source" is="menu" { value (ref)"menu-cmd" }
-                                @if "bind.argument.source" is="lock" { value (ref)"lock-cmd" }
-                                @if "bind.argument.source" is="wallpaper" { value (ref)"wallpaper-cmd" }
-                            }
-                            @if "bind.argument.kind" is="record" {
-                                kind "record"
-                                action (ref?)"bind.argument.action"
-                                direction (ref?)"bind.argument.direction"
-                                mode (ref?)"bind.argument.mode"
-                                workspace (ref?)"bind.argument.workspace"
-                            }
-                        }
-                        opts {
-                            mouse (ref?)"bind.options.mouse"
-                            repeating (ref?)"bind.options.repeating"
-                            locked (ref?)"bind.options.locked"
-                        }
+                    @if-present "bind.argument.direction" {
+                        @line (f)"        direction = {{bind.argument.direction:lua}},"
                     }
+                    @if-present "bind.argument.mode" {
+                        @line (f)"        mode = {{bind.argument.mode:lua}},"
+                    }
+                    @if-present "bind.argument.workspace" {
+                        @line (f)"        workspace = {{bind.argument.workspace:lua}},"
+                    }
+                    @line "    }),"
                 }
-            }
-
-            workspaces {
-                mod (ref)"mod-key"
-                count 10
+                // Every bind passes options: all fields are optional, so an empty
+                // table is exactly the no-options call.
+                @if-present "bind.options" {
+                    @line "    {"
+                    @if-present "bind.options.mouse" {
+                        @line (f)"        mouse = {{bind.options.mouse:lua}},"
+                    }
+                    @if-present "bind.options.repeating" {
+                        @line (f)"        repeating = {{bind.options.repeating:lua}},"
+                    }
+                    @if-present "bind.options.locked" {
+                        @line (f)"        locked = {{bind.options.locked:lua}},"
+                    }
+                    @line "    }"
+                }
+                @else {
+                    @line "    {}"
+                }
+                @line ")"
             }
         }
 

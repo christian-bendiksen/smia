@@ -22,7 +22,6 @@ for test_script in \
     malm/modules/base/tests/smia-actions.bash \
     malm/modules/base/tests/smia-keys.bash \
     malm/modules/base/tests/smia-maintenance.bash \
-    tests/authoring-component.bash \
     tests/smia-profiles.bash \
     tests/smia-install.bash \
     tests/smia-runtime.bash \

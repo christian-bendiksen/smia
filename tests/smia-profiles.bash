@@ -80,10 +80,13 @@ cat >"$work/config/smia/profiles" <<'EOF'
 # This deployed manifest is the only profile catalog.
 niri
 niri-astral
+niri-studio
 mango
 mango-astral
+mango-studio
 hyprland
 hyprland-astral
+hyprland-studio
 EOF
 printf 'mango\n' >"$work/config/smia/profile"
 printf 'test-menu\n' >"$work/config/smia/menu-theme"
@@ -99,7 +102,7 @@ common_env=(
 
 capture env "${common_env[@]}" "$profiles" list
 assert_status 0 "smia-profiles list"
-expected_profiles=$'niri\nniri-astral\nmango\nmango-astral\nhyprland\nhyprland-astral'
+expected_profiles=$'niri\nniri-astral\nniri-studio\nmango\nmango-astral\nmango-studio\nhyprland\nhyprland-astral\nhyprland-studio'
 assert_eq "$output" "$expected_profiles" "manifest-driven profile list"
 [[ ! -s "$log" ]] || fail "profile listing consulted an executable catalog: $(<"$log")"
 
@@ -225,7 +228,7 @@ capture env \
     SMIA_TEST_WALKER_CHOICE='Niri (Astral)' \
     "$profiles" select
 assert_status 0 "manifest-driven profile selection"
-assert_eq "$(<"$walker_input")" $'Niri\nNiri (Astral)' \
+assert_eq "$(<"$walker_input")" $'Niri\nNiri (Astral)\nNiri (Studio)' \
     "compositor-filtered manifest choices"
 expected_select="walker [--dmenu] [--placeholder] [Profiles] [--theme] [test-menu]
 $expected_switch"

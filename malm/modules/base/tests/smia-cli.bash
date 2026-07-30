@@ -222,10 +222,13 @@ bash "$repo_root/tests/smia-profiles.bash" >/dev/null \
 cat >"$tmp/config/smia/profiles" <<'EOF'
 hyprland
 hyprland-astral
+hyprland-studio
 mango
 mango-astral
+mango-studio
 niri
 niri-astral
+niri-studio
 EOF
 printf 'mango\n' >"$tmp/config/smia/profile"
 export XDG_CONFIG_HOME="$tmp/config"
@@ -259,6 +262,12 @@ COMP_CWORD=3
 _smia_complete
 [[ " ${COMPREPLY[*]} " == *" --astral "* ]] \
     || fail "completion missed the install --astral option"
+
+COMP_WORDS=(smia install niri-gaming --s)
+COMP_CWORD=3
+_smia_complete
+[[ " ${COMPREPLY[*]} " == *" --studio "* ]] \
+    || fail "completion missed the install --studio option"
 
 COMP_WORDS=(smia install niri-gaming --allow)
 COMP_CWORD=3

@@ -27,7 +27,7 @@ _smia_complete() {
                     "mango-desktop mango-gaming niri-desktop niri-gaming hyprland-desktop hyprland-gaming" \
                     -- "$cur")
             else
-                mapfile -t COMPREPLY < <(compgen -W "--astral" -- "$cur")
+                mapfile -t COMPREPLY < <(compgen -W "--astral --studio" -- "$cur")
             fi
             ;;
         list)

@@ -15,9 +15,9 @@ pack schema-version=1 package-id="dev.aerynos.smia" {
         asset "vendor/upstream/adw-gtk3.tar"
         asset "vendor/upstream/adw-gtk3-dark.tar"
         asset "vendor/upstream/aerynos-eldritch-icons.tar"
+        asset "vendor/upstream/GreyStone.tar.gz"
     }
     components {
-        component "render-lua-data" path="vendor/render-lua-data.wasm" digest="sha256-5c95310034f813d8e9e6e85041ec80f3cdb7342707ccf8a80510476dc0d1f9e4" interface="format-component/v1"
     }
     captures {
         include "malm.kdl"
@@ -26,6 +26,6 @@ pack schema-version=1 package-id="dev.aerynos.smia" {
         include "vendor/upstream/adw-gtk3.tar"
         include "vendor/upstream/adw-gtk3-dark.tar"
         include "vendor/upstream/aerynos-eldritch-icons.tar"
-        include "vendor/render-lua-data.wasm"
+        include "vendor/upstream/GreyStone.tar.gz"
     }
 }

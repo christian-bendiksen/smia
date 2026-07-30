@@ -85,6 +85,21 @@ assert_not_contains "$(<"$log")" '[--profile] [niri-gaming] ' \
     "Astral combined prepare"
 assert_prepare_only_commands "$log" "smia-install Astral"
 
+run_installer niri-gaming --studio
+assert_status 0 "smia-install Studio plan"
+assert_contains "$(<"$log")" \
+    'malm [plan] [create] [--profile] [niri-gaming-studio]' \
+    "Studio combined prepare"
+assert_not_contains "$(<"$log")" '[--profile] [niri-gaming] ' \
+    "Studio combined prepare"
+assert_prepare_only_commands "$log" "smia-install Studio"
+
+run_installer niri-gaming --astral --studio
+assert_status 2 "conflicting installer appearances"
+assert_contains "$output" 'choose only one appearance: --astral or --studio' \
+    "conflicting installer appearances report"
+[[ ! -s "$log" ]] || fail "conflicting installer appearances executed a command"
+
 run_installer niri-gaming --allow-component
 assert_status 2 "removed installer component option"
 assert_contains "$output" 'unknown option: --allow-component' \

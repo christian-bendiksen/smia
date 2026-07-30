@@ -209,10 +209,13 @@ select_profile() {
         case "$profile" in
             hyprland)        label="Hyprland" ;;
             hyprland-astral) label="Hyprland (Astral)" ;;
+            hyprland-studio) label="Hyprland (Studio)" ;;
             mango)           label="Mango (Default)" ;;
             mango-astral)    label="Mango (Astral)" ;;
+            mango-studio)    label="Mango (Studio)" ;;
             niri)            label="Niri" ;;
             niri-astral)     label="Niri (Astral)" ;;
+            niri-studio)     label="Niri (Studio)" ;;
             *)               label="$profile" ;;
         esac
         labels+=("$label")

@@ -40,7 +40,7 @@ profiles require Hyprland 0.55 or newer.
 | `hyprland-desktop` | Hyprland | `linux-desktop` |
 | `hyprland-gaming` | Hyprland | `linux-gaming` |
 
-Add `--astral` for the matching Astral profile.
+Add `--astral` or `--studio` for the matching appearance profile.
 
 The full selectable profiles are:
 
@@ -52,6 +52,9 @@ The full selectable profiles are:
 | Astral Mango | `mango-astral` | `mango-gaming-astral` |
 | Astral Niri | `niri-astral` | `niri-gaming-astral` |
 | Astral Hyprland | `hyprland-astral` | `hyprland-gaming-astral` |
+| Studio Mango | `mango-studio` | `mango-gaming-studio` |
+| Studio Niri | `niri-studio` | `niri-gaming-studio` |
+| Studio Hyprland | `hyprland-studio` | `hyprland-gaming-studio` |
 
 ## Install
 
@@ -74,57 +77,54 @@ malm store init
 malm source lock update --source "$repo"
 ```
 
-`malm store init` needs a private state parent. Create it when it is missing:
-
-```sh
-state_parent=${XDG_STATE_HOME:-"$HOME/.local/state"}
-install -d -m 700 "$state_parent"
-```
+`malm store init` creates a missing state parent (`$XDG_STATE_HOME` or
+`~/.local/state`) itself with private permissions; an existing parent must be
+user-owned and not group- or other-writable.
 
 Plan preparation reads `malm.lock`. Use `malm source lock create` when the file
 is absent. Update the lock again after editing `malm.kdl`, `malm/`, `gnist/`,
 pack declarations, or captured vendored files.
 
-2. Prepare, review, and apply the desktop and system-model plan. This example
-selects Niri, the gaming kernel, and Astral.
+2. Prepare, review, and apply the small bootstrap profile. It installs the
+   `smia` dispatcher and `smia install` command.
 
 ```sh
-malm plan create --profile niri-gaming-astral --source "$repo" --namespace default
+malm plan create --profile install --source "$repo" --namespace default
 malm plan show PLAN_ID
 malm plan apply PLAN_ID
 ```
 
-The concrete profile name comes from the second table above. Applying the plan
-deploys the desktop configuration and the generated model file, but does not run
-Moss. If review prints an approval digest, the non-interactive apply form is:
+If review prints an approval digest, the non-interactive form is:
 
 ```sh
 malm plan apply PLAN_ID --approval SHA256_DIGEST
 ```
 
-3. Add `~/.local/bin` to `PATH`. The applied plan writes `~/.profile`,
-   `~/.bashrc`, and a systemd `environment.d` drop-in that prepend it. Start a
-   new login shell, or load it into the current shell:
+3. Prepare the full desktop and system-model plan. This example selects Niri,
+   the gaming kernel, and Astral.
 
 ```sh
-source ~/.profile
-command -v smia
+SMIA_SOURCE_ROOT="$repo" smia install niri-gaming --astral
 ```
 
-The `smia install` wrapper prepares the same plan for a later profile change:
+`SMIA_SOURCE_ROOT` must be absolute and defaults to `$HOME/Dev/smia`.
+
+4. Review and apply the returned Malm plan. This deploys configuration and the
+   generated model file, but does not run Moss.
 
 ```sh
-smia install niri-gaming --astral
+malm plan show PLAN_ID
+malm plan apply PLAN_ID
 ```
 
-4. Review the package transition, then apply it only when it is intended.
+5. Review the package transition, then apply it only when it is intended.
 
 ```sh
 smia system-model plan
 smia system-model apply
 ```
 
-5. Initialize Gnist and start the configured session.
+6. Initialize Gnist and start the configured session.
 
 ```sh
 gnist init
@@ -138,7 +138,7 @@ into private scratch space and remembers the moving selector for future updates
 with `smia update`.
 
 Tracking resolves the `malm.lock` committed at the tracked revision. That lock
-must match its own commit.
+must match its own commit. The `dev` branch carries a matching lock.
 
 1. Initialize the Malm store and track Smia with the desired profile. This
    example selects Mango with the desktop kernel.
@@ -150,7 +150,7 @@ track_scratch=$(mktemp -d)
 chmod 700 "$track_scratch"
 malm plan track \
     --source-url https://github.com/christian-bendiksen/smia.git \
-    --selector refs/heads/main \
+    --selector refs/heads/dev \
     --git-executable /usr/bin/git \
     --root-scratch "$track_scratch" \
     --profile mango \
@@ -160,8 +160,8 @@ rm -rf "$track_scratch"
 
 This flow takes the profile names from the second table above, not the
 `smia install` model profiles. Replace `mango` with `niri`, `hyprland`, or any
-other concrete profile. Gaming variants append `-gaming`. Astral variants append
-`-astral`.
+other concrete profile. Gaming variants append `-gaming`. Appearance variants
+append `-astral` or `-studio`.
 
 2. Review and apply the returned plan. This deploys the desktop, CLI, and
    generated model file, but does not run Moss.
@@ -198,7 +198,7 @@ The `smia` dispatcher finds installed `smia-*` commands in `PATH`.
 | `smia list [--names\|--verbose]` | Lists installed Smia commands. |
 | `smia status` | Checks Malm drift, services, profile, theme, and required commands. |
 | `smia update` | Prepares a plan from the tracked Git source. It never applies it. |
-| `smia install MODEL_PROFILE [--astral]` | Prepares a local full-install plan. |
+| `smia install MODEL_PROFILE [--astral\|--studio]` | Prepares a local full-install plan. |
 | `smia profiles list [--names]` | Lists appearance profiles. |
 | `smia profiles current` | Prints the active profile. |
 | `smia profiles select` | Opens the Walker profile picker. |
@@ -227,10 +227,9 @@ The `smia` dispatcher finds installed `smia-*` commands in `PATH`.
 | `smia session [--apply-theme\|--reapply-theme]` | Reconciles session services and theme state. |
 | `xdg-terminal-exec [COMMAND]` | Uses the terminal selected in Smia defaults. |
 
-`smia profiles switch` only changes the appearance, stock or Astral, of the
-current compositor. It keeps the same compositor and kernel and refreshes the
-session. To change the compositor or kernel, run `smia install MODEL_PROFILE`,
-which reviews the desktop and package model together.
+`smia profiles switch` keeps the active desktop or gaming kernel and rejects a
+compositor change. Use `smia install MODEL_PROFILE` when changing compositor or
+kernel so the desktop and package model are reviewed together.
 
 Portal screen recording needs no extra privilege. Region recording uses direct
 KMS capture and may need this one-time setup:

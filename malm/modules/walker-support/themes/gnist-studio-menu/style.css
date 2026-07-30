@@ -1,0 +1,101 @@
+@import "../../../gnist/themes/current/walker.css";
+
+* {
+  all: unset;
+}
+
+* {
+  font-family: 'RobotoMono Nerd Font', monospace;
+  font-size: 15px;
+  color: @text;
+}
+
+scrollbar {
+  opacity: 0;
+}
+
+.normal-icons {
+  -gtk-icon-size: 18px;
+}
+
+.large-icons {
+  -gtk-icon-size: 32px;
+}
+
+.box-wrapper {
+  background: alpha(@base, 0.97);
+  padding: 14px;
+  border: 1px solid alpha(@border, 0.50);
+  border-radius: 8px;
+  box-shadow: 0 12px 40px alpha(#000000, 0.55);
+}
+
+.search-container {
+  background: alpha(@text, 0.04);
+  border: 1px solid alpha(@border, 0.30);
+  border-radius: 4px;
+  padding: 9px 12px;
+}
+
+.search-container:focus-within {
+  border-color: @border;
+}
+
+.input placeholder {
+  opacity: 0.42;
+}
+
+.input:focus,
+.input:active {
+  box-shadow: none;
+  outline: none;
+}
+
+.item-box {
+  padding-left: 11px;
+  border-radius: 4px;
+}
+
+child:hover .item-box {
+  background: alpha(@text, 0.05);
+  border-radius: 4px;
+}
+
+child:selected .item-box {
+  background: alpha(@border, 0.14);
+  border-radius: 4px;
+  box-shadow: inset 3px 0 @border;
+}
+
+child:selected .item-box * {
+  color: @selected-text;
+}
+
+.item-text-box {
+  all: unset;
+  padding: 9px 0 4px 0;
+}
+
+.item-subtext {
+  font-size: 11px;
+  color: alpha(@text, 0.45);
+  min-height: 0;
+  margin: 0 0 7px 0;
+  padding: 0;
+}
+
+.item-image {
+  margin-right: 12px;
+  -gtk-icon-transform: scale(0.92);
+}
+
+.current {
+  font-style: italic;
+}
+
+.keybind-hints {
+  background: alpha(@text, 0.04);
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 8px;
+}
